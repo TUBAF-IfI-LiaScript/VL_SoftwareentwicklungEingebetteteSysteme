@@ -148,10 +148,9 @@ Register
 
 ## Welche Einschränkungen ergeben sich aus der Architektur?
 
-Fehlende Breite bei den aritmetischen Operationen
+### 8-Bit Datenbreite
 
-http://www.avr-asm-tutorial.net/avr_en/calc/HARDMULT.html
-
+Die Festlegung auf 8-Bit Operanden und Ausgabe bei den arithmetisch/logischen Operationen erfordert umfangreiche Berechnungen schon bei bescheidenen Größenordnungen.
 
 <div>
   <span id="simulation-time"></span>
@@ -170,13 +169,13 @@ int main (void) {
   asm volatile("ldi  r16, 250" "\n\t"
                "ldi  r17, 100" "\n\t"
                "mul  r16, r17" "\n\t"
-               "movw %A0:%B0, r0:r1" "\n\t"
+               "movw %0, r0" "\n\t"
                "eor r1, r1" "\n\t"
               : "=a" (sample)
               :
-              : "16", "r17");
+              : "r16", "r17");
 
-  Serial.print("Antwort auf alle Fragen ist:");
+  Serial.print("Das Ergebnis ist ");
   Serial.println(sample);
 
   while(1) {
@@ -187,4 +186,115 @@ int main (void) {
 ```
 @AVR8js.sketch
 
-Fehlende Floating Point Unit
+> Warum scheitert das Ganze, wenn `r1` keine 0 enthält?
+
+Mit dem 8-Bit Multiplikator decken wir aber nur Konstellationen hab, für die gilt das die Faktoren beide immer kleiner als 256 sein müssen. Um das Problem mit größeren Binärzahlen zu lösen, betrachten wir zunächst nur diese Kombination aus 16 und 8. Das Verständnis dieses Konzepts hilft, die Methode zu verstehen, so dass Sie später in der Lage sein werden, das 32-mal-64-Bit-Multiplikationsproblem zu lösen.
+
+Die Mathematik dafür ist einfach, ein 16-Bit-Binär sind einfach zwei 8-Bit-Binäre, wobei der höchstwertige dieser beiden mit dezimal 256 oder hex 100 multipliziert wird. Das 16-Bit-Binär $m1$ ist also gleich $256*m1_H$ plus $m1_L$, wobei $m1_H$ das MSB und $m1_L$ das LSB ist. Die Multiplikation von $m1$ mit dem 8-Bit-Binär $m2$ ist also, mathematisch formuliert:
+
+$$
+m1 \cdot m2 = (256 \cdot m1_H + m1_L) \cdot m2 = 256 \cdot m1_H \cdot m2 + m1_L \cdot m2
+$$
+
+Wir brauchen also nur zwei Multiplikationen durchzuführen und beide Ergebnisse zu addieren. Die Multiplikation mit 256 erfordert keine Hardware, da es sich um einen  Sprung zum nächsthöheren Byte handelt. Lediglich der Übertrag bei der Additionsoperation muss beachtet werden.
+
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
+```ascii
+
+    +----------+
+r16 |   0x10   | Faktor 1   low Byte  "$m1_L$"
+    +----------+ 8208
+r17 |   0x20   |            high Byte "$m1_H$"
+    +----------+
+r18 |   0xFF   | Faktor 2             "$m2$"
+    +----------+ ........ -. .........................................                 
+r19 |   0xF0   | Ergebnis  |       
+    +----------+ 2093040   ⎬ "$m1_L\cdot m2$"-.
+r20 |   0xEF   |           |                  |   
+    +----------+          -.                  ⎬ "$m1_H \cdot m2$"
+r21 |   0x1F   |                              |                 carry
+    +----------+                             -.
+r22 |   0x00   |      0
+    +----------+
+```
+
+<div>
+  <span id="simulation-time"></span>
+</div>
+```cpp       avrlibc.cpp
+#define F_CPU 16000000UL
+
+#include <avr/io.h>
+#include <util/delay.h>
+
+int main (void) {
+  Serial.begin(9600);
+
+  volatile int sample;
+
+  asm volatile("ldi  r16, 0x10" "\n\t"
+               "ldi  r17, 0x20" "\n\t"
+               "ldi  r18, 0xFF" "\n\t"
+               "mul  r16, r18" "\n\t"
+               "mov  r19, r0" "\n\t"
+               "mov  r20, r1" "\n\t"
+               "mul  r17, r18" "\n\t"
+               "add  r20, r0" "\n\t"
+               "mov  r21, r1" "\n\t"
+               "brcc NoInc" "\n\t"
+               "inc  r21" "n\t"
+               "NoInc:" "\n\t"
+               "movw %0, r20" "\n\t"
+               "eor r1, r1" "\n\t"
+              : "=a" (sample)
+              :
+              : "r16", "r17", "r18", );
+
+  Serial.print("Das Ergebnis ist ");
+  Serial.println(sample);
+
+  while(1) {
+       _delay_ms(1000);
+  }
+  return 0;
+}
+```
+@AVR8js.sketch
+
+Für die Muliplikation von größeren Werten wird die Berechnung entsprechend aufwändiger.
+
+### Fehlende Floating Point Unit
+
+
+
+
+Alternative Fixed Point Implementierung
+
+
+```cpp      
+#include <avr/io.h>
+#include <stdfix.h>
+
+int main (void) {
+  Serial.begin(9600);
+
+  volatile accum fx1, fx2 = 2.33K, fx3 = 0.66K;
+  volatile float fl1, flt2 = 2.33, fl3 = 0.66;
+
+  fx1 = fx2 + fx3;
+  fl1 = fl2 + fl3;
+
+  fx1 = fx2 - fx3;
+  fl1 = fl2 - fl3;
+
+  fx1 = fx2 * fx3;
+  fl1 = fl2 * fl3;
+
+  fx3 = fx2 / fx3;
+  fl3 = fl2 / fl3;
+
+  return 0;
+}
+```
