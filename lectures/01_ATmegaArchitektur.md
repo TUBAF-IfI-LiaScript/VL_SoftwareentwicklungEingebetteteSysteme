@@ -245,7 +245,7 @@ int main (void) {
                "add  %B0, r0" "\n\t"
                "mov  %C0, r1" "\n\t"
                "brcc NoInc" "\n\t"
-               "inc  %D0" "\n\t"
+               "inc  %C0" "\n\t"
                "NoInc:" "\n\t"
                "eor r1, r1" "\n\t"
                 ""
