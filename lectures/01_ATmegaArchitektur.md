@@ -232,25 +232,27 @@ r22 |   0x00   |      0
 int main (void) {
   Serial.begin(9600);
 
-  volatile int sample;
+  volatile long sample;
 
   asm volatile("ldi  r16, 0x10" "\n\t"
                "ldi  r17, 0x20" "\n\t"
                "ldi  r18, 0xFF" "\n\t"
+               "eor  %D0, %D0" "\n\t"
                "mul  r16, r18" "\n\t"
-               "mov  r19, r0" "\n\t"
-               "mov  r20, r1" "\n\t"
+               "mov  %A0, r0" "\n\t"
+               "mov  %B0, r1" "\n\t"
                "mul  r17, r18" "\n\t"
-               "add  r20, r0" "\n\t"
-               "mov  r21, r1" "\n\t"
+               "add  %B0, r0" "\n\t"
+               "mov  %C0, r1" "\n\t"
                "brcc NoInc" "\n\t"
-               "inc  r21" "n\t"
+               "inc  %D0" "\n\t"
                "NoInc:" "\n\t"
-               "movw %0, r20" "\n\t"
                "eor r1, r1" "\n\t"
-              : "=a" (sample)
+                ""
+              : "=r" (sample)
               :
-              : "r16", "r17", "r18", );
+              : "r16", "r17", "r18" );
+
 
   Serial.print("Das Ergebnis ist ");
   Serial.println(sample);
