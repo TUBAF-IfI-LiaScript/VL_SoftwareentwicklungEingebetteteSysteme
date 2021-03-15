@@ -256,35 +256,51 @@ Wie ist das Ganze implementiert? Seit der Version 4.8 integriert der [avr-gcc](h
 Lassen Sie uns einen genaueren Blick auf die Implementierung werfen. Im Codebeispiel, dass Sie im Projektordner XXX finden, addieren wir zwei Variablen unterschiedlichen Formates.
 
 ```c    FixedPoint.c
+#define F_CPU 16000000UL
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdfix.h>
 
 int main (void) {
 
-  unsigned short _Accum variableA = 0.75K;   
-  short _Accum variableB = -1.875K;
+  DDRB |= (1<<DDB7);
+
+  unsigned short _Accum variableA = 1.5K;
+  short _Accum variableB =  -1.5K;
 
   long _Accum result = variableA * variableB;
 
-  while(1);
+  while(1){
+    if (result<0) PORTB |= (1<<7);
+  }
   return 0;
 }
 ```
 
 Für die `variableA` ergibt sich dabei folgender Auszug des Programmspeichers, sofern das Beispielprogramm ohne Optimierung übersetzt wird.
+
 ```
-short _Accum variableB = -1.875K;
-11c:	80 e1       	ldi	r24, 0x10	; 16
-11e:	9f ef       	ldi	r25, 0xFF	; 255
-120:	9c 83       	std	Y+4, r25	; 0x04
-122:	8b 83       	std	Y+3, r24	; 0x03
+short _Accum variableA = -1.5K;
+136:	80 e4       	ldi	r24, 0x40	; 64
+138:	9f ef       	ldi	r25, 0xFF	; 255
+13a:	9a 83       	std	Y+2, r25	; 0x02
+13c:	89 83       	std	Y+1, r24	; 0x01
 
      +--------+
-r24  |00010000|
-     +--------+
-r25  |11111111|
-     +--------+
+r24  |01000000|     r25
+     +--------+   --------
+r25  |11111111| = 111111110.1000000
+     +--------+           ---------
+                             r24
+
+ 1.5 = (3 >> 1)
+
+  0011 = 3
+  1100 invertiert  
+  0001 +1
+  ----
+  1101 = -3   --> 110.1 == -1.5                           
 ```
 
 ### Vergleich der Softwarelösungen auf dem AVR

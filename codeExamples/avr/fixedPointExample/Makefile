@@ -8,7 +8,7 @@ CLOCK      = 8000000
 CC      = avr-gcc
 OC      = avr-objcopy
 LDFLAGS = -j .text -j .data
-CCFLAGS = -g -Wall -Os -Wunused-variable
+CCFLAGS = -g -Wall -O0 -Wunused-variable
 
 ######################################################################
 ######################################################################

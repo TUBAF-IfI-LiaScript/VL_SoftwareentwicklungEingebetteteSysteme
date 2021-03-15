@@ -8,8 +8,8 @@ int main (void) {
 
   DDRB |= (1<<DDB7);
 
-  unsigned short _Accum variableA = 0.75K;
-  short _Accum variableB = -1.875K;
+  unsigned short _Accum variableA = 1.5K;
+  short _Accum variableB =  -1.5K;
 
   long _Accum result = variableA * variableB;
 
