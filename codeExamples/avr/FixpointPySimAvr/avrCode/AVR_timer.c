@@ -1,58 +1,64 @@
 #include "AVR_timer.h"
 
+volatile counter_t timer0_overflow_count    = 0;
+volatile counter_t timer0_overflow_count_oc = 0;
+
 ISR(TIMER0_OVF_vect)
 {
-  // copy these to local variables so they can be stored in registers
-  // (volatile variables must be read from memory on every access)
-  unsigned long m = timer0_millis;
-  unsigned char f = timer0_fract;
-
-  m += MILLIS_INC;
-  f += FRACT_INC;
-  if (f >= FRACT_MAX) {
-    f -= FRACT_MAX;
-    m += 1;
-  }
-
-  timer0_fract = f;
-  timer0_millis = m;
-  timer0_overflow_count++;
+  counter_t ov = timer0_overflow_count;
+  ov++;
+  timer0_overflow_count = ov;
+  if ( (sizeof(ticks_t) > (sizeof(ov)+1)) &&
+        ov == 0 ) // ov overflow
+        timer0_overflow_count_oc++;
 }
+
+//PRESCALER defined in header
+#if PRESCALER == 1
+#define TCCR0B_CS (1 << CS00)
+#elif  PRESCALER == 8
+#define TCCR0B_CS (1 << CS01)
+#elif PRESCALER == 64
+#define TCCR0B_CS (1 << CS01) | (1 << CS00)
+#elif PRESCALER == 256
+#define TCCR0B_CS (1 << CS02)
+#elif PRESCALER == 1024
+#define TCCR0B_CS (1 << CS02) | (1 << CS00)
+#else
+#error help me to find CS
+#endif
 
 void init_timer(){
   // fast pwm
   TCCR0A |= (1 << WGM01) | (1 << WGM00);
-  // this combination is for the standard 168/328/1280/2560
-  // prescaler 64
-  TCCR0B |= (1 << CS01) | (1 << CS00);
+  // defined by PRESCALER
+  TCCR0B |= TCCR0B_CS ;
   // timer interrupt on
   TIMSK0 |= (1 << TOIE0);
 }
 
-unsigned long millis()
-{
-  unsigned long m;
-  uint8_t oldSREG = SREG;
-  // disable interrupts while we read timer0_millis or we might get an
-  // inconsistent value (e.g. in the middle of a write to timer0_millis)
-  cli();
-  m = timer0_millis;
-  SREG = oldSREG;
-  return m;
+ticks_t now(void){
+    uint8_t oldSREG = SREG;
+    cli();
+    uint8_t tim = TCNT0;
+    counter_t ov = timer0_overflow_count;
+    ov += ((TIFR0 & _BV(TOV0)) && (tim < 255));
+    counter_t oc = 0;
+    //this if is staticaly evaluated and removed if not need
+    if( sizeof(ticks_t) > (sizeof(ov)+1) ){
+        oc = timer0_overflow_count_oc;
+    }
+    SREG = oldSREG;
+
+    return ((uint32_t)oc << (8 * (sizeof(ov)+1))) + ((ticks_t)ov << 8) + tim;
 }
 
-unsigned long micros()
+unsigned long millis(ticks_t ticks)
 {
-  unsigned long m;
-  uint8_t oldSREG = SREG, t;
+  return (ticks * PRESCALER)/(F_CPU/1000);
+}
 
-  cli();
-  m = timer0_overflow_count;
-  t = TCNT0;
-
-  if ((TIFR0 & _BV(TOV0)) && (t < 255)) {
-    m++;
-  }
-  SREG = oldSREG;
-  return ((m << 8) + t) * (64 / clockCyclesPerMicrosecond());
+unsigned long micros(ticks_t ticks)
+{
+  return (ticks * PRESCALER)/(F_CPU/1000/1000);
 }

@@ -65,7 +65,13 @@ main.hex: main.elf
 
 # Targets for code debugging and analysis:
 disasm:	main.elf
-	avr-objdump -d main.elf
+	avr-objdump -d $<
+
+dis:	main.elf
+	avr-objdump -dS $< > $<.s
+
+nm:	main.elf
+	avr-nm -f sysv -CS $<.elf
 
 cpp:
 	$(COMPILE) -E main.c

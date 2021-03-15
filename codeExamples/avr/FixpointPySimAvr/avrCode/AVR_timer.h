@@ -6,26 +6,47 @@
 
 #ifndef AVR_TIMER_H
 #define AVR_TIMER_H
- 
-#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
-#define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
-// the prescaler is set so that timer0 ticks every 64 clock cycles, and the
-// the overflow handler is called every 256 ticks.
-#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
-// the whole number of milliseconds per timer0 overflow
-#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
-// the fractional number of milliseconds per timer0 overflow. we shift right
-// by three to fit these numbers into a byte. (for the clock speeds we care
-// about - 8 and 16 MHz - this doesn't lose precision.)
-#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
-#define FRACT_MAX (1000 >> 3)
 
-volatile unsigned long timer0_overflow_count = 0;
-volatile unsigned long timer0_millis = 0;
-static unsigned char timer0_fract = 0;
+//not used
+#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
+//not used
+#define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
+
+//higher prescaler less overflow and less resolution 1, 8, 64, 256, 1024
+//Prescaler         1,     8,      64,      256,      1024
+//overflow       16µs, 128µs, 1.024ms,  4.096ms, 16.384 ms
+//resolution   1/16µs, 1/2µs,     4µs,     16µs,      64µs
+//expect a jitter of +-1
+#define PRESCALER    (256UL)
+// #define PRESCALER    (1024UL)
+
+
+// these typedef define the performance of the counter
+// 8/32 has 24 bits usable (8+8+8) (HW_Timer + overflow (ov) + overflow overflow (oc))
+// 16/32 has (8+16+16) (40 bits) (32 shown)
+
+//isrsize tick_t|  16 |  32 |   size of ISR in hex
+//counter_t     |     |     |   width in bits
+//           8  |  22 |  30 |
+//          16  |  2e |  44 |
+//          32  |  -  |  4a | 32/64  78
+//
+// 8/32 PRE 256 F_CPU 16MHz has 16µs Resolution and ~268 sec max diff time
+
+typedef uint8_t counter_t;
+
+#ifndef PRIu64
+#define PRIu64 "ll"
+#endif
+typedef uint32_t ticks_t;
+#define PRI_ticks_t PRIu32
 
 void init_timer();
-unsigned long micros();
-unsigned long millis();
+ticks_t now(void);
+
+//millis and micros conversion is not checked
+//for high ticks they may need casts
+unsigned long millis(ticks_t ticks);
+unsigned long micros(ticks_t ticks);
 
 #endif
