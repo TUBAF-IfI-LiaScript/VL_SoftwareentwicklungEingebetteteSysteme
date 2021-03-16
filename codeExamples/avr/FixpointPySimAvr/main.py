@@ -28,8 +28,7 @@ folder = "./avrCode/"
 cc = AvrGcc(mcu = mcu)
 cc.f_cpu = f_cpu
 # the additional libraries are necessary for a complete printf support
-# take a view on
-# http://www.nongnu.org/avr-libc/user-manual/
+# take a view on http://www.nongnu.org/avr-libc/user-manual/
 cc.options_extra = ['-uvfprintf', '-lprintf_flt', '-lm']
 cc.optimize_for_size()
 
@@ -56,15 +55,14 @@ try:
     print('Temporary output file \n' + '   ' + cc.output)
     size = cc.size()
     print('-------------------------------------------------------------------')
-    print('Program size \n  program =' , str(size.program_bytes).rjust(8) , '\n  data    =', str(size.data_bytes).rjust(7))
+    print('Program size \n  program =' , str(size.program_bytes).rjust(8) ,
+          '\n  data    =', str(size.data_bytes).rjust(8))
     print('-------------------------------------------------------------------')
 
-    #cc.std='c99'
     avr=Avr(mcu=mcu,f_cpu=f_cpu)
     firmware = Firmware(cc.output)
     avr.load_firmware(firmware)
 
-    ## This part I did not really understand!!!
     fps=20
     speed=1
     timespan=5
