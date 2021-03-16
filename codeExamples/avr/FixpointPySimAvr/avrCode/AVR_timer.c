@@ -8,8 +8,8 @@ ISR(TIMER0_OVF_vect)
   counter_t ov = timer0_overflow_count;
   ov++;
   timer0_overflow_count = ov;
-  if ( (sizeof(ticks_t) > (sizeof(ov)+1)) &&
-        ov == 0 ) // ov overflow
+  if ( sizeof(ticks_t) > (sizeof(ov)+1) )  //static evaluated
+      if( ov == 0 ) // ov overflow
         timer0_overflow_count_oc++;
 }
 
@@ -44,7 +44,7 @@ ticks_t now(void){
     counter_t ov = timer0_overflow_count;
     ov += ((TIFR0 & _BV(TOV0)) && (tim < 255));
     counter_t oc = 0;
-    //this if is staticaly evaluated and removed if not need
+    //this is staticaly evaluated and removed if not need
     if( sizeof(ticks_t) > (sizeof(ov)+1) ){
         oc = timer0_overflow_count_oc;
     }
