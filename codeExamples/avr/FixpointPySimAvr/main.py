@@ -27,11 +27,12 @@ folder = "./avrCode/"
 
 cc = AvrGcc(mcu = mcu)
 cc.f_cpu = f_cpu
-# the additional libraries are necessary for a complete printf support 
-# take a view on 
+# the additional libraries are necessary for a complete printf support
+# take a view on
 # http://www.nongnu.org/avr-libc/user-manual/
 cc.options_extra = ['-uvfprintf', '-lprintf_flt', '-lm']
-cc.optimize_no()
+cc.optimize_for_size()
+
 print(cc.options_generated())
 
 print('-------------------------------------------------------------------')
@@ -45,13 +46,13 @@ for headerfile in headerfiles:
 print('-------------------------------------------------------------------')
 
 try:
-    cc.build(sources = sources, 
+    cc.build(sources = sources,
              headers = prepareHeaderFiles (headerfiles, folder=folder))
-    
+
     print("Command list")
     print(cc.command_list(sources = sources))
-    
-    cc.build(sources = sources)    
+
+    cc.build(sources = sources)
     print('Temporary output file \n' + '   ' + cc.output)
     size = cc.size()
     print('-------------------------------------------------------------------')
@@ -62,27 +63,27 @@ try:
     avr=Avr(mcu=mcu,f_cpu=f_cpu)
     firmware = Firmware(cc.output)
     avr.load_firmware(firmware)
-    
+
     ## This part I did not really understand!!!
     fps=20
     speed=1
     timespan=5
-    if fps:
-      dt_real = 1. / fps
-      dt_mcu = dt_real * speed
-      count = int(timespan * fps / speed)
-      for _ in range(count):
-        time.sleep(dt_real)
-        avr.move_time_marker(dt_mcu)
+
+    dt_real = 1. / fps
+    dt_mcu = dt_real * speed
+    count = int(timespan * fps / speed)
+    for _ in range(count):
+      time.sleep(dt_real)
+      avr.move_time_marker(dt_mcu)
 
     avr.goto_time(timespan)
     while avr.time_passed() < timespan * 0.99:
        time.sleep(0.05)
-    
+
     print('Outputs' + ''.join(avr.uart.buffer))
     print('-------------------------------------------------------------------')
     avr.terminate()
-    
+
 except AvrGccCompileError as e:
     print(cc.error_text)
     print( 'compile error')
