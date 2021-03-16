@@ -35,11 +35,11 @@
 
 typedef uint8_t counter_t;
 
-#ifndef PRIu64
-#define PRIu64 "ll"
+#ifndef PRIx64
+#define PRIx64 "llx"
 #endif
 typedef uint32_t ticks_t;
-#define PRI_ticks_t PRIu32
+#define PRIx_ticks_t PRIx32
 
 void init_timer();
 ticks_t now(void);

@@ -27,7 +27,7 @@ int main()
 
     printf("\nduration = %ld [us]\n",micros(stop - start));
 
-    printf("ticks = 0x%"PRI_ticks_t"x\n",stop - start);
+    printf("ticks = 0x%"PRIx_ticks_t"\n",stop - start);
 
     printf("result = %d\n",result);
 //     float myfloat = 3.14;
