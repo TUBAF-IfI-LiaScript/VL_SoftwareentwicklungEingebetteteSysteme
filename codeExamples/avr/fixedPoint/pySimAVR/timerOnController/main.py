@@ -62,9 +62,22 @@ try:
     avr=Avr(mcu=mcu,f_cpu=f_cpu)
     firmware = Firmware(cc.output)
     avr.load_firmware(firmware)
-    timespan=5.0
+
+    fps=20
+    speed=1
+    timespan=5
+
+    dt_real = 1. / fps
+    dt_mcu = dt_real * speed
+    count = int(timespan * fps / speed)
+    for _ in range(count):
+      time.sleep(dt_real)
+      avr.move_time_marker(dt_mcu)
+
+    avr.goto_time(timespan)
+
     while avr.time_passed() < timespan * 0.99:
-        time.sleep(0.05)
+       time.sleep(0.05)
 
     print('Outputs' + ''.join(avr.uart.buffer))
     print('-------------------------------------------------------------------')
