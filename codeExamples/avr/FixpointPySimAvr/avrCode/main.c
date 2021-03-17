@@ -7,6 +7,11 @@ FILE usart0_str = FDEV_SETUP_STREAM(USART0SendByte, USART0ReceiveByte, _FDEV_SET
 
 volatile extern unsigned long timer0_overflow_count;
 
+void printDuration(ticks_t start, ticks_t stop){
+  printf("\nduration = %ld [us]\n",micros(stop - start));
+  printf("ticks    = 0x%"PRIx_ticks_t"\n",stop - start);
+}
+
 int main()
 {
     stdin=stdout=&usart0_str;
@@ -17,41 +22,58 @@ int main()
 
     //just for testing purposes
     ticks_t start = now();
-     _delay_ms (100);
+    _delay_ms (100);
     ticks_t stop = now();
     printf("\n100ms delay");
     printf("\nduration = %ld [us]\n",micros(stop - start));
     printf("ticks    = 0x%"PRIx_ticks_t"\n",stop - start);
 
-    int meas[] = {340, 370, 360, 400, 420};
+    int meas[] = {140, 170, 160, 200, 220};
+    int count = 101;
+
+    //// unsigned short _Accum
+
     unsigned short _Accum weight_sfix = 0.9K;
     unsigned short _Accum result_sfix = 0.0K;
 
     start = now();
-    for (int i=0; i<100; i++){
+    for (int i=0; i<count; i++){
        result_sfix = meas[i%5] * weight_sfix + result_sfix * (1-weight_sfix);
     }
     stop = now();
     printf("\nshort _Accum");
-    printf("\nduration = %ld [us]\n",micros(stop - start));
-    printf("ticks    = 0x%"PRIx_ticks_t"\n",stop - start);
-    fprintf(stdout,"result = %08.3f\n", (float)result_sfix);
+    printDuration(start, stop);
+    fprintf(stdout,"result = %8.3f\n", (float)result_sfix);
 
-    unsigned long _Accum weight_lfix =  0.9K;
-    unsigned long _Accum result_lfix = 0.0K;
+    //// unsigned long _Accum
+
+    unsigned long _Accum weight_ulfix =  0.9K;
+    unsigned long _Accum result_ulfix = 0.0K;
 
     start = now();
-    for (int i=0; i<100; i++){
+    for (int i=0; i<count; i++){
+       result_ulfix = meas[i%5] * weight_ulfix + result_ulfix * (1-weight_ulfix);
+    }
+    stop = now();
+    printf("\nunsigned long _Accum");
+    printDuration(start, stop);
+    fprintf(stdout,"result = %8.3f\n", (float)result_ulfix);
+
+    //// long _Accum
+
+    long _Accum weight_lfix =  0.9K;
+    long _Accum result_lfix = 0.0K;
+
+    start = now();
+    for (int i=0; i<count; i++){
        result_lfix = meas[i%5] * weight_lfix + result_lfix * (1-weight_lfix);
     }
     stop = now();
     printf("\nlong _Accum");
-    printf("\nduration = %ld [us]\n",micros(stop - start));
-    printf("ticks    = 0x%"PRIx_ticks_t"\n",stop - start);
-    fprintf(stdout,"result = %08.3f", (float)result_lfix);
+    printDuration(start, stop);
+    fprintf(stdout,"result = %8.3f", (float)result_lfix);
 
-//     float myfloat = 3.14;
-//
-//     fprintf(stdout,"\nfloat = %08.3f", myfloat);
+//  Integrieren Sie eine float Implementierung und bewerten Sie die Resultate!
+
     return 0;
 }
