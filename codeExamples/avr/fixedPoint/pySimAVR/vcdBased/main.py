@@ -24,7 +24,7 @@ def prepareHeaderFiles (names, folder):
 
 def evaluateVCDfile(file_name, channels):
     # Extract start and end time from vcd file and assign information to
-    # channel names 
+    # channel names
     vcd = open(vcd_file)
     timeseries_started= False
     signals=[]
