@@ -8,12 +8,6 @@ narrator: Deutsch Female
 
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
          https://github.com/LiaTemplates/AVR8js/main/README.md#10
-
-comment:  Try to write a short comment about
-          your course, multiline is also okay.
-
-translation: Deutsch  translations/German.md
-translation: Français translations/French.md
 -->
 
 # Einführung und Motivation
@@ -148,7 +142,7 @@ Die Veranstaltung wird sowohl für die Vorlesung als auch die Übung in Präsenz
 
 | Veranstaltungen | Tag | Zeitslot | Ort | Bemerkung |
 | --------------- | --- | -------- | --- | --------- |
-| Vorlesung I     | ??  | ??       | ??  |           |
+| Vorlesung       | ??  | ??       | ??  |           |
 | Übungen         | ??  | ??       | ??  |           |
 
 Gegenwärtig wird davon ausgegangen, dass die Veranstaltung vollständig als Online-Kurs umgesetzt wird.
@@ -159,7 +153,6 @@ Gegenwärtig wird davon ausgegangen, dass die Veranstaltung vollständig als Onl
 
 
 > *Arbeitsaufwand:* Der Zeitaufwand beträgt 180h und setzt sich zusammen aus 60h Präsenzzeit und 120h Selbststudium. Letzteres umfasst die Vor- undNachbereitung der Lehrveranstaltung, die eigenständige Lösung von Übungsaufgaben sowie die Prüfungsvorbereitung.
-
 
 > *Prüfungsform:* Die Veranstaltung wird mit einer mündlichen Prüfung abgeschlossen.
 
@@ -330,7 +323,7 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 
 * Organisieren Sie sich in Arbeitsgruppen!
 
-> Hinweis auf Repl.it
+> Bearbeiten Sie Aufgaben gemeinsam online.
 
 * Bringen Sie sich mit Implementierungen in die Veranstaltung ein.
 
@@ -342,6 +335,10 @@ Dann wartet das TUFbots-Team auf Sie ...
 style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
 
 Quelle: _Team RobOTTO_, OVGU Magdeburg
+
+## Und jetzt sind Sie an der Reihe
+
+> Mit welchen Systemen haben Sie bereits gearbeitet und welche Projekte haben Sie damit verwirklicht?
 
 ## Hausaufgabe
 

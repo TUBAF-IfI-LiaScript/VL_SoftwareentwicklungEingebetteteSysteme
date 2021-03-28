@@ -11,9 +11,6 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 comment:  Try to write a short comment about
           your course, multiline is also okay.
-
-translation: Deutsch  translations/German.md
-translation: Français translations/French.md
 -->
 
 # ATmega Controller
@@ -29,6 +26,44 @@ Die interaktive Version des Kurses ist unter diesem [Link](https://liascript.git
 
 *
 
+
+## Mikrocontroller vs. Mikroprozessor
+
+Typischerweise fehlen beim  Mikroprozessor im Chip viele Dinge, die einen Rechner ausmachen, wie zum Beispiel der Arbeitsspeicher (RAM), Programmspeicher usw.. Entsprechend sind dann der Daten- und Adress-Bus zur Ansteuerung von externem Speicher sowie Leitungen für Interrupts aus dem Chip herausgeführt. Beim Mikrocontroller sind die Komponenten wie der Programmspeicher im Chip
+integriert:
+
++ Timerbausteine
++ Analoge Eingänge
++ Digitale Eingänge
++ Interruptsystem
+
+Ziel ist es, möglichst alle benötigten Elemente in einem Chip zu
+vereinen.
+
+```text @plantUML.png
+@startuml
+ditaa
+
++---------------------------------------------------------------------+
+| Mikrocontroller                                                     |
+| +-------------------+  +-------------------+  +-------------------+
+| | Interrupt         |  | Floating Point    |  | Debug Interface   | |
+| | Controller        |  | Unit (FPU)        |  |                   | |
+| +-------------------+  +-------------------+  +-------------------+ |
+|                                                                     |
+| +-------------------+  +-------------------+  +-------------------+ |
+| | Analog-Digital    |  | Mikroprozessor    |  | Timer und Zähler  | |
+| | Wandler           |  |             c8F8  |  |                   | |
+| +-------------------+  +-------------------+  +-------------------+ |
+|                                                                     |
+| +-------------------+  +-------------------+  +-------------------+ |
+| | Takterzeugung     |  | Speicher          |  | Schnittstellen    | |
+| |                   |  |                   |  | z.B. Seriell      | |
+| +-------------------+  +-------------------+  +-------------------+ |
++---------------------------------------------------------------------+
+@enduml
+```
+> **Merke:** Der Übergang zwischen Mikrocontrollern und Mikroprozessoren ist fließend!
 
 ## ATmega Überblick
 

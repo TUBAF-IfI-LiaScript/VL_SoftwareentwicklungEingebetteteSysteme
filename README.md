@@ -3,10 +3,7 @@
 Dieses Repository umfasst die Materialien für die Veranstaltung "Digitale
 Systeme" an der TU BAF des Sommersemester 2021. Dabei liegt der Schwerpunkt
 auf einer detaillierten Einführung der ARM Cortex Prozessoren, deren Komponenten
-und Programmierkonzepten.
-
-Ausgangspunkt ist dabei ein knapper Überblick zur 8-Bit ATmega Prozessorfamilie.
-Ausgehend davon werden dann
+und Programmierkonzepten im Vergleich zur Prozessorfamilie der 8-Bit ATmega.
 
 | VL  | Tag | Inhalt der Vorlesung                  | Studentischer Beitrag |
 | --- | --- |:------------------------------------- | --------------------- |
