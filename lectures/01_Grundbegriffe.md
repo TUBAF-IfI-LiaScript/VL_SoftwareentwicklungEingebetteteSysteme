@@ -12,7 +12,7 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 # Grundbegriffe des Rechneraufbaus
 
-Die interaktive Version des Kurses ist unter diesem [Link](https://liascript.github.io/course/?https://raw.githubusercontent.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/master/01_Grundbegriffe.md#1) zu finden.
+Die interaktive Version des Kurses ist unter diesem [Link](https://liascript.github.io/course/?https://raw.githubusercontent.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/01_Grundbegriffe.md#1) zu finden.
 
 **Lernziele**
 
@@ -70,7 +70,7 @@ ditaa
 ```
 
 
-**1. Das Steuerwerk**
+### Das Steuerwerk
 
 Das Steuerwerk ist für die Ausführung der Befehlsfolgen, die aus dem Speicher gelanden werden verantwortlich.
 
@@ -94,7 +94,7 @@ Die Umsetzung der Befehle im Steuerwerke kann _hart verdrahtet_ oder auf der Bas
 
 Zur Wiederholung sei ggf. auf die Vorlesung eingebettete Systeme verwiesen [Model CPU](https://liascript.github.io/course/?https://raw.githubusercontent.com/TUBAF-IfI-LiaScript/VL_EingebetteteSysteme/master/11_Modell_CPU.md#1).
 
-**2. Das Rechenwerk (ALU)**
+### Das Rechenwerk (ALU)
 
 Der Begriff Rechenwerk wird häufig synonym mit arithmetisch-logische Einheit (ALU) gebraucht, genau genommen stellt eine ALU jedoch lediglich eine (von oft vielen) Funktionseinheiten eines Rechenwerks dar, das zusätzlich aus einer Reihe von Hilfs- und Statusregistern besteht.
 
@@ -112,7 +112,7 @@ Folgende Klassen von Verknüpfungen sind in der ALU integriert:
 
 Wie lässt sich ein solches System praktisch realsieren? Schauen wir uns eine 4-Bit PIPO Schieberegister genauer an.
 
-![](../images/01_Grundbegriffe/ShiftRegister.png)<!-- style="width: 70%; max-width: 800px;" -->[^1]
+![](../images/01_Grundbegriffe/ShiftRegister.png)[^1]
 
 [^1]: Ali Alnoaman, Foreneintrag Electrical Engineering, [Link](https://electronics.stackexchange.com/questions/443939/need-a-simple-explanation-of-a-left-right-shift-register)
 
@@ -120,13 +120,12 @@ Wie lässt sich ein solches System praktisch realsieren? Schauen wir uns eine 4-
 
 Die spezifische ALUs integriert neben üblichen Hardware-Addierern/Multiplizieren auch spezielle Einheiten Multiply-Accumulate-Einheiten (MAC) oder [Barrel-Shifter](https://de.wikipedia.org/wiki/Barrel-Shifter).
 
-> **Merke** Bei der Darstellung der Zahlenwerte wird nach Little-Endian und Big-Endian Formaten unterschieden.
-
-**3. Speicherwerk**
+### Speicherwerk
 
 Das Speicherwerk umfasst das Programm und den Arbeitsspeicher. Im kommenden Abschnitt wird auf die Kombination beider Inhalte in ein und demselben Speicherbereich diskutiert.
 
 Grundlegende Designvorgaben:
+
 + Hinter jeder Adresse verbirgt sich nur ein Speicherbereich / Bauteil
 + Der Adressraum wird maximal ausgenutzt, jedes Bauteil sollte nur unter einer Adresse zu erreichen sein.
 + Der Speicher sollte kontinuierlich besetzt sein und keine Lücken aufweisen.
@@ -150,8 +149,8 @@ Wie verzahnen wir die Speicherkomponenten, wenn wir einen größeren Speicher in
 
 Versuchen wir also einen zusammenhängenden Speicher von 16MByte zu entwerfen, der aus 4MByte Speicherelementen besteht. Daraus ergeben sich folgende Grundüberlegungen:
 
-+ Für die Abbildung von 4MByte benötigen wir 4.000.000 Adressen. Diese können wir mit 22 Adressleitungen $2^{22} = 4194304$ referenzieren.
-+ Wir benötigen 4 4MByte Chips, die neben den eigentlichen Adressleitungen individuell angesprochen werden müssen
++ 1 MegaByte entspricht $2^{10} KB$ ($1024 KB$). Für die Adressierung von 4MByte benötigen wir also $2^{20} \cdot 4$ Adressen $2^{22} = 4194304$ referenzieren.
++ Wir benötigen 4 der 4MByte Chips, die neben den eigentlichen Adressleitungen individuell angesprochen werden müssen
 + Die Implmentierung soll erweiterbar sein, so dass wir als Chiphersteller unterschiedliche Speicherdimensionen anbieten können.
 
 <!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
@@ -190,22 +189,22 @@ Modul n          |                  |
                  ~                  ~
                  | Frei für weitere |
                  | Module           |
-..............   +------------------+ "$0x1$ $0060$ $0000 = 2^{25}"
+..............   +------------------+ "$0x1000$ $0000 = 2^{25}$"
                  | Chip 3           |
-                 +------------------+ "$0xC000$ $0000 = 2^{23} + 2^{24}$"
+                 +------------------+ "$0x0C00$ $0000 = 2^{23} + 2^{24}$"
 Modul 0          | Chip 2           |
 "$A_{31-24}= 0$" +------------------+ "$0x0800$ $0000 = 2^{23}$"
                  | Chip 1           |
                  +------------------+ "$0x0400$ $0000 = 2^{22}$"
                  | Chip 0           |
-                 +------------------+ "$0x0000$ $0000$"
+                 +------------------+ "$0x0000$ $0000$"                        .
 
 ```
 
 <!-- style="background-color: lightgray;"-->
-> **Frage:** Was bedeutet das sogenannte Alignement innerhalb des Speichers?
+> **Frage:** Was bedeutet das sogenannte Alignment innerhalb des Speichers?
 
-**4. Ein- & Ausgabe**
+### Ein- & Ausgabe
 
 Diese Komponente übernimmt die unmittelbare Erfassung von externen Informationen bzw. deren Bereitstellung. Im einfachsten Fall können dies einzelne Anzeigeelemente / Schalter sein, darüber hinaus dient es als Interface für weitere technische Bausteine. Alternative Bezeichnungen sind _I/O Ports_ oder _I/O Kanäle_.
 
@@ -255,7 +254,7 @@ baustein         |       |   |                        |  z.B. SN54HC688
 <!-- style="background-color: lightgray;"-->
 > **Frage:** Was verbirgt sich hinter dem Begriff Memory-Mapped-IO?
 
-**5. Bus**
+### Bus
 
 Busse bilden für Daten- oder Adressen ein gemeinsames physikalischen Verbindungsnetzes aus mehreren Leitungen, an dem die relevanten Komponenten angeschlossen sind.  
 
@@ -266,6 +265,7 @@ Vorteile:
 
 Nachteile:
 
++ Mehrfachnutzung durch verschiedene Geräte bremst die Bandbreite aus
 + Kommunikationsflaschenhals (Maximale Bus-Datenrate kann Systemdurchsatz begrenzen)  
 + Größtes Anforderungsprofil bestimmt die Konfiguration / Kompromisslösung
 
@@ -282,24 +282,26 @@ Unterschied  Harvard und die von Neumann-Architektur?**
 
 Und wie sieht das Ganze in einem realen System aus? Der Intel 4004 ist ein 4-Bit-Mikroprozessor des Mikrochipherstellers Intel, der am 15. November 1971 auf den Markt kam. Er gilt als der erste Ein-Chip-Mikroprozessor, der in Serie produziert und am freien Markt vertrieben wurde. Der "Rechner" an sich setzte sich aus zunächst vier einzelne Bausteinen zusammen:
 
-+ 4001: ein 2048-Bit-ROM (adressiert in 256 8-Bit-Befehle) mit einem 4-Bit-Ausgabeport
++ 4001: ein 2048-Bit-ROM (adressiert in 256 8-Bit-Adressen) mit einem 4-Bit-Ausgabeport
 + 4002: 80×4-Bit-RAM-Datenspeicher mit einem 4-Bit-I/O-Port
 + 4003: I/O-Erweiterungs-Chip, bestehend aus einem statischen Schieberegister
 + 4004: die eigentliche CPU
 
-![intel](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png)<!-- style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->[^1]
+![intel](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png)[^1]
 
 [^1]: [Intel 4004 (Autor Appaloosa)](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png)
 
+<!--data-type="none"-->
 | Element         | Bestandteile                                                                          |
 | --------------- | ------------------------------------------------------------------------------------- |
 | Steuerwerk      | _Instruction Register_, _Instruction Decoder_,  _Timing and Controll_                 |
 | Rechenwerk      | _ALU_, _Flag Flip-Flops_, _Decimal Adjust_, _Temp Register_, _Accumulator[-register]_ |
 | Eingabe-Ausgabe | nicht dargestellt                                                                     |
-| Speicherwerk                 | _Data Base Buffer_                                                                                      |
+| Speicherwerk    | _Data Base Buffer_                                                                                      |
 
 Speicherauszug den Intel 4004:
 
+<!--data-type="none"-->
 | Adresse | Speicherinhalt | OpCode     | Mnemonik  |
 |:--------|:---------------|:-----------|:----------|
 | 0010    | 1101 0101      | 1101 DDDD  | LD $5     |
@@ -307,7 +309,7 @@ Speicherauszug den Intel 4004:
 
 Unterstützung für die Interpretation aus dem Nutzerhandbuch, dass das Instruction-Set beschreibt:
 
-![instruction-set](../images/01_Grundbegriffe/4004_Instruction_set.png)<!-- width="100%" -->[^2]
+![instruction-set](../images/01_Grundbegriffe/4004_Instruction_set.png)[^2]
 
 [^2]: [Intel 4004 Assembler](http://e4004.szyc.org/asm.html)
 
@@ -347,13 +349,14 @@ Instruktionen durch den Compiler einfach und überschaubar ist.
 
 ## Umsetzung in verschiedenen Controllern
 
+<!--data-type="none"-->
 | Aspekt          | Intel 4004 | Microchip Atmega | Texas Instruments MSP 430 | STM 32  |
 | --------------- | ---------- | ---------------- | ------------------------- | ------- |
-| Architektur     |            | Harvard          | von-Neumann               | Harvard |
-| Busbreite       |            | 8/32             | 16                        | 32      |
-| Registeranzahl  |            |                  |                           |         |
-| Befehlssatz     |            |                  |                           |         |
-| Geschwindigkeit |            |                  |                           |         |
+| Architektur     | Harvard    | Harvard          | von-Neumann               | Harvard |
+| Busbreite       | 4          | 8                | 16                        | 32      |
+| Registeranzahl  | 16         | 32               | 16                        | 16      |
+| Befehlssatz     | 45         | 131              | 51                        |         |
+| Geschwindigkeit | 740 kHz    | 16 MHz           | 25 MHz                    | 480 MHz |
 
 
 ## Vom C Programm zum ausführbaren Code
@@ -420,4 +423,4 @@ ditaa
 
 ## Hausaufgaben
 
-Machen Sie sich mit der Tool-Chain für die Arbeit mit dem avr-gcc vertraut.
+Sofern Sie noch keine Erfahrung in der Entwicklung mit AVR-Controllern haben, sollten Sie sich mit den [avr-gcc Tutorials](https://www.mikrocontroller.net/articles/AVR-GCC-Tutorial) auseinander setzen.
