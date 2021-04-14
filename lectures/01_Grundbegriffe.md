@@ -1,5 +1,5 @@
 <!--
-author:   Sebastian Zug
+author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
 version:  0.0.1
@@ -7,8 +7,27 @@ language: de
 narrator: Deutsch Female
 
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
-         https://github.com/LiaTemplates/AVR8js/main/README.md#10
+         https://github.com/LiaTemplates/AVR8js/main/README.md
+
+icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 -->
+
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/01_Grundbegriffe.md#1)
+
+# Einführung und Motivation
+
+| Parameter                | Kursinformationen                                                                                                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
+| **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
+| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
+| **Inhalte:**             | `Wiederholung Grundbegriffe`                                                                                            |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/01_Grundbegriffe.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/01_Grundbegriffe.md) |
+| **Autoren**              | @author                                                                                                                                                                              |
+
+![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
+
+---
 
 # Grundbegriffe des Rechneraufbaus
 

@@ -1,0 +1,35 @@
+$timescale 1ns $end
+$scope module logic $end
+$var wire 1 ! avr.B0 $end
+$var wire 1 " avr.B1 $end
+$var wire 1 # avr.B2 $end
+$var wire 1 $ avr.B3 $end
+$upscope $end
+$enddefinitions $end
+$dumpvars
+x!
+x"
+x#
+x$
+$end
+#65875
+0!
+0"
+0#
+0$
+#68312
+1!
+#100068437
+0!
+#100073250
+1"
+#102844937
+0"
+#139485000
+1#
+#185245375
+0#
+#231040812
+1$
+#281504062
+0$
