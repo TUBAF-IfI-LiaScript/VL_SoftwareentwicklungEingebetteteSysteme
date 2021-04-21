@@ -238,6 +238,8 @@ abgestimmt werden.
 
 ************************************************************
 
+[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
+
 ### Taktgenerator
 
 ![Bild](../images/02_ATmegaFamilie/Taktgenerierung.png "[^AtMega328] Seite 36")
@@ -262,6 +264,8 @@ style = "width: 720px; height: 420px;"
   - mindestens 3 externe Bauteile (2 Lastkondensatoren + Quarz)
 
 + Externes Taktsignal
+
+[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
 ### Speicher
 
@@ -308,6 +312,8 @@ Der EEPROM ist beim AVR nicht Bestandteil des _Mapped Memory IO_ Konzepts! Vielm
 
 ![Bild](../images/02_ATmegaFamilie/EEPROM.png)<!-- style="width: 75%; max-width: 700px" -->
 
+[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
+
 ### Reset-System
 
 ![Bild](../images/02_ATmegaFamilie/ResetSystem.png "[^AtMega328] Seite 57")
@@ -328,6 +334,8 @@ Quellen für Reset
 + Prozessorstart  an der Adresse 0000. An dieser Adresse MUSS ein Sprungbefehl an die Adresse des Hauptprogrammes stehen (RJMP, JMP)
 + Initialisieren des Stacks
 + Beginn der Programmabarbeitung
+
+[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
 ### Digitale Ein/Ausgaben
 
@@ -350,6 +358,8 @@ https://www.youtube.com/watch?v=bDPdrWS-YUc&feature=emb_logo
 Das Latch entkoppelt die Eingangsspannung und deren Erfassung, bewirkt aber eine Verzögerung. Im schlimmsten Fall beträgt diese 1.5 Clockzyklen im besten 1 Clockzyklus.
 
 ![Bild](../images/02_ATmegaFamilie/ZeitverhaltenIO.png "[^AtMega328] Seite 86")
+
+[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
 ## Integration in Schaltung
 
@@ -380,9 +390,16 @@ Ziel: Einfache Entwicklung für Mikrocontroller für studentische (& professione
 
 [^Arduino]: Arduino Webseite [Link](https://content.arduino.cc/assets/UNO-TH_Rev3e_sch.pdf)
 
-## Programmierung des Hello-World Beispiels
+## Umsetzung eines Hello-World Beispiels
 
-![](https://media.giphy.com/media/QpVUMRUJGokfqXyfa1/giphy-downsized.gif)
+Für das Verständnis der Abläufe sind folgende Dokumente elementar:
+
+| Dokument                 | Link                                                                                                              | Bedeutung                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| AtMega328 Handbuch       | [microchip](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf) | Beschreibung der Architektur und der Features des Controllers |
+| AtMega Assemblerhandbuch | [microchip](http://ww1.microchip.com/downloads/en/devicedoc/atmel-0856-avr-instruction-set-manual.pdf)            |                                                               |
+| Arduino Uno Schaltplan   | [arduino](https://content.arduino.cc/assets/UNO-TH_Rev3e_sch.pdf)                                                 |                                                               |
+| Arduino Uno Pinbelegung  | [arduino](https://content.arduino.cc/assets/Pinout-UNOrev3_latest.png)                                            |                                                               |
 
 ### Assembler
 
@@ -401,7 +418,8 @@ L1:    dec  r20       ; 128
        brne L1        ;        255  * (1 + 2)
        dec  r18       ;                41 * (1 + 2)
        brne L1        ;
-       ; next assembly does not work with tiny avr controlers!          
+       ; next assembly does not work with tiny avr controlers!  
+       ; see data sheet I/O         
        sbi  _SFR_IO_ADDR(PINB),5
        rjmp loop
 ```
@@ -411,6 +429,23 @@ avr-gcc -mmcu=atmega328p -nostdlib as_code.S -o as_code.elf
 ```
 
 Die Generierung der Warteschleife von 1s ist dem Delay-Generator http://darcy.rsgc.on.ca/ACES/TEI4M/AVRdelay.html entnommen.
+
+![Bild](../images/02_ATmegaFamilie/IO_ATmega.png "[^AtMega328] Seite 85")
+
+Warum funktioniert der "Trick" mit dem Pin?
+
+[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
+
+Ohne diese Möglichkeit müsste das exklusive Oder für ein Toggeln genutzt werden.
+
+```
+in     R24, PORTB   ; Daten lesen
+ldi    R25, 0x20    ; Bitmaske laden, hier Bit #5 = 0b0010000
+eor    R24, R25     ; Exklusiv ODER
+out    PORTE, R24   ; Daten zurückschreiben
+```
+
+[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
 ### C++ / C
 
@@ -429,6 +464,7 @@ int main (void) {
    DDRB |= (1 << PB5);
    while(1) {
        // PINB = (1 << PB5);   // Dieses Feature ist im Simulator
+                               // nicht implementiert
        PORTB ^= ( 1 << PB5 );
        _delay_ms(1000);
    }
@@ -461,12 +497,12 @@ void loop() {
 ### Simulink
 
 
-![Bild](./images/13_AVR_CPU/Simulink_ueberblick.png)<!-- style="width: 85%; max-width: 1000px" -->[^16]
+![Bild](../images/02_ATmegaFamilie/Simulink_ueberblick.png)<!-- style="width: 85%; max-width: 1000px" -->[^16]
 
 [^16]: Mathworks Simulink, Simulink Support Package for Arduino Hardware, [Link](https://de.mathworks.com/help/supportpkg/arduino/examples/getting-started-with-arduino-hardware.html#d122e134)
 
 
-![Bild](./images/13_AVR_CPU/Simulink_beispiel.png)<!-- style="width: 85%; max-width: 1000px" -->
+![Bild](../images/02_ATmegaFamilie/Simulink_beispiel.png)<!-- style="width: 85%; max-width: 1000px" -->
 
 ### Vergleich
 
@@ -536,6 +572,7 @@ Wie können wir die Inhalte interpretieren?
 
 Die erste Zeile wird im Speicher wie folgt dargestellt:
 
+<!-- data-type="none" -->
 | Adresse | Inhalt |
 | ------- | ------ |
 | 0x0000  | 0C     |
@@ -554,9 +591,8 @@ Die 16 Bit breiten Befehle sind im Little Endian Muster im Speicher abgelegt.
 Das erste Befehlswort entspricht somit  $94 0c$ = $1001.0100.0000.1100$. Wir übernehmen nun die Rolle des Instruktion-Dekoders und durchlaufen alle Befehle,
 die im Befehlssatz vorhanden sind.
 
-![Bild](./images/13_AVR_CPU/JumpInstruction.png)<!-- style="width: 85%; max-width: 1000px" -->[^17]
 
-[^17]: Firma Microchip, Atmel AVR Instruction Set Manual, Seite 103
+![Bild](../images/02_ATmegaFamilie/JumpInstruction.png "Auszug Intruction Set [^InstManual] Seite 103")
 
 Offenbar handelt es sich um einen `Jump` Befehl. Dieser besteht aus 2 Worten, wir müssen also ein weiteres mal auf dem Speicher zugreifen. Im Anschluss steht die Binärrepräsentation unseres Befehls komplett bereit. Die `-` markieren jeweils die Opcode-Bits.
 
@@ -590,115 +626,9 @@ Nun greift aber eine Besonderheit des AVR Controllers. Dieser adressiert seine S
 
 Im Programmspeicher steht auf den ersten 8 Byte `jmp 0xe4`
 
+[^InstManual]: Firma Microchip, Atmel AVR Instruction Set Manual, Seite 103
+
 ## Aufgaben
 
-**Bitoperationen in C**
-
-| Operation | Bedeutung               |
-| --------- | ----------------------- |
-| `>>`      | Rechts schieben         |
-| `<<`      | Links schieben          |
-| `|`       | binäres, bitweises ODER |
-| `&`       | binäres, bitweises UND  |
-| `^`       | binäres, bitweises XOR  |
-
-```cpp                     Bitshifting.cpp
-#include <iostream>
-#include <bitset>
-
-int main()
-{
-  char v = 0x1;
-  for (int i = 0; i <=7; i++){
-    std::cout << std::bitset<8>((v<<i)) << std::endl;
-  }
-  return 0;
-}
-```
-@LIA.eval(`["main.c"]`, `g++ -Wall main.c -o a.out`, `./a.out`)
-
-Mit diesen Operationen werden sogenannte Masken gebildet und diese dann auf die
-Register übertragen.
-
-### Setzen eines Bits
-
-```cpp                     BitSetting.cpp
-#include <iostream>
-#include <bitset>
-
-/* übersichtlicher mittels Bit-Definitionen */
-#define PB0 0
-#define PB1 1
-#define PB2 2
-
-int main()
-{
-  char PORTB;  // Wir "simulieren" die Portbezeichnung
-  PORTB = 0;
-  std::cout << std::bitset<8>(PORTB) << std::endl;
-
-  // Langschreibweise
-  PORTB = PORTB | 1;
-  std::cout << std::bitset<8>(PORTB) << std::endl;
-  // Kurzschreibweise
-  PORTB |= 0xF0;   
-  std::cout << std::bitset<8>(PORTB) << std::endl;
-
-  // Kurzschreibweise mit mehrteiliger Maske (setzt Bit 0 und 2 in PORTB auf "1")
-  PORTB |= ((1 << PB0) | (1 << PB2));
-  std::cout << std::bitset<8>(PORTB) << std::endl;
-}
-```
-@LIA.eval(`["main.c"]`, `g++ -Wall main.c -o a.out`, `./a.out`)
-
-### Löschen eines Bits
-
-Das Löschen basiert auf der Idee, dass wir eine Maske auf der Basis der invertierten
-Bits generieren und diese dann mit dem bestehenden Set mittels `&` abbilden.
-
-```cpp                     BitSetting.cpp
-#include <iostream>
-#include <bitset>
-
-/* übersichtlicher mittels Bit-Definitionen */
-#define PB0 0
-#define PB1 1
-#define PB2 2
-
-int main()
-{
-  char PORTB = ((1 << PB0) | (1 << PB2));
-  std::cout << std::bitset<8>(PORTB) << std::endl;
-
-  PORTB &= ~(1 << PB0);
-  std::cout << std::bitset<8>(PORTB) << std::endl;
-}
-```
-@LIA.eval(`["main.c"]`, `g++ -Wall main.c -o a.out`, `./a.out`)
-
-### Prüfen eines Bits
-
-```cpp                     BitSetting.cpp
-#include <iostream>
-#include <bitset>
-
-/* übersichtlicher mittels Bit-Definitionen */
-#define PB0 0
-#define PB1 1
-#define PB2 2
-
-int main()
-{
-  char PORTB = ((1 << PB0) | (1 << PB2));
-  std::cout << std::bitset<8>(PORTB) << std::endl;
-
-  if (PORTB & (1 << PB0))
-       std::cout << "Bit 2 gesetzt" << std::endl;
-  if (!(PORTB & (1 << PB0)))
-       std::cout << "Bit 2 nicht gesetzt" << std::endl;
-  // Ist PB0 ODER PB2 gesetzt?
-  if (PORTB & ((1 << PB0) | (1 << PB2)))
-     std::cout << "Bit 0 oder 2 gesetzt" << std::endl;
-}
-```
-@LIA.eval(`["main.c"]`, `g++ -Wall main.c -o a.out`, `./a.out`)
+- [ ] Machen Sie sich mit den Struktur des Handbuches des Controllers vertraut.
+- [ ] Ermitteln Sie die Abläufe bei der Generierung von Arduino Code.

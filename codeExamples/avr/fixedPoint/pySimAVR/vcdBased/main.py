@@ -6,7 +6,6 @@ from pysimavr.firmware import Firmware
 from pysimavr.button import Button
 from pysimavr.swig.simavr import avr_gdb_init, cpu_Done, cpu_Crashed, cpu_Stopped
 from pysimavr.vcdfile import VcdFile
-from pyDigitalWaveTools.vcd.parser import VcdParser
 import pandas as pd
 import re
 
@@ -55,8 +54,8 @@ mcu = 'atmega2560'
 f_cpu = 16000000
 vcdfile = 'output'
 
-sources = ['./avrCode/main.c', './avrCode/AVR_writeSerial.c']
-headerfiles = ['AVR_writeSerial.h']
+sources = ['./avrCode/main.c']
+headerfiles = []
 folder = "./avrCode/"
 
 cc = AvrGcc(mcu = mcu)
