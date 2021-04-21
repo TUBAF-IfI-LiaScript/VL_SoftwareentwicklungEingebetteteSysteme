@@ -31,30 +31,16 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ---
 
-
-
-
-## ATmega Überblick
-
-Schema
-
-Register
-
-+ General purpose registers (32)
-
-   `R0 - R31`, dabei sind die Register `X` (26+27), `Y` (28+29) und `Z` (30+31) 16-Bit breit und werden für die indirekte Adressierung verwendet.
-
-+ I/O Register
-
-  CPU Status Register `SREG`, Stack Pointer `SP` und andere Konfigurationsregister für die Perepherie `TCCRx` oder `ADMUX`
-
-+ nicht direkt zugreifbare Register
-
-  Programmcounter `PC`, Transmit Shift Register `USART`
-
 ## Welche Einschränkungen ergeben sich aus der Architektur?
 
+> Warum sprechen wir im Zusammenhang mit den Controllern von fehlender Performance verglichen mit anderen Systemen?
+
 ### 8-Bit Datenbreite
+
+                            {{0-1}}
+*******************************************************************
+
+![Bild](../images/02_ATmegaFamilie/AtTiny.png "ATtiny Architektur [^AtTinyArchitecture]")
 
 Die Festlegung auf 8-Bit Operanden und Ausgabe bei den arithmetisch/logischen Operationen erfordert umfangreiche Berechnungen schon bei bescheidenen Größenordnungen.
 
@@ -92,15 +78,46 @@ int main (void) {
 ```
 @AVR8js.sketch
 
+> Wie lange dauert die Berechnung für die in Zeile 11 - 13 genannten Befehle?
+
 > Warum scheitert das Ganze, wenn `r1` keine 0 enthält?
+
+*******************************************************************
+
+                            {{1-2}}
+*******************************************************************
 
 Mit dem 8-Bit Multiplikator decken wir aber nur Konstellationen hab, für die gilt das die Faktoren beide immer kleiner als 256 sein müssen. Um das Problem mit größeren Binärzahlen zu lösen, betrachten wir zunächst nur diese Kombination aus 16 und 8. Das Verständnis dieses Konzepts hilft, die Methode zu verstehen, so dass Sie später in der Lage sein werden, das 32-mal-64-Bit-Multiplikationsproblem zu lösen.
 
+     --{{2}}--
 Die Mathematik dafür ist einfach, ein 16-Bit-Binär sind einfach zwei 8-Bit-Binäre, wobei der höchstwertige dieser beiden mit dezimal 256 oder hex 100 multipliziert wird. Das 16-Bit-Binär $m1$ ist also gleich $256*m1_H$ plus $m1_L$, wobei $m1_H$ das MSB und $m1_L$ das LSB ist. Die Multiplikation von $m1$ mit dem 8-Bit-Binär $m2$ ist also, mathematisch formuliert:
 
 $$
 m1 \cdot m2 = (256 \cdot m1_H + m1_L) \cdot m2 = 256 \cdot m1_H \cdot m2 + m1_L \cdot m2
 $$
+
+Welche Abschnitte sind in der Brechnung notwendig?
+
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
+```ascii
+    +--------+          +--------+--------+
+    | "$m2$" | "$\cdot$"|"$m1_H$"|"$m1_L$"|
+    +--------+          +--------+--------+
+    ---------------------------------------
+                        +-----------------+
+                        |"$m2 \cdot m1_L$"|     
+                        +-----------------+
+               +-----------------+
+               |"$m2 \cdot m1_H$"|     
+    +          +-----------------+
+    ---------------------------------------
+               +--------------------------+  
+               |      "$m2 \cdot m1$"     |   <- 24 Bit Ergebnis
+               +--------------------------+                                    .
+```
+
 
 Wir brauchen also nur zwei Multiplikationen durchzuführen und beide Ergebnisse zu addieren. Die Multiplikation mit 256 erfordert keine Hardware, da es sich um einen  Sprung zum nächsthöheren Byte handelt. Lediglich der Übertrag bei der Additionsoperation muss beachtet werden.
 
@@ -123,7 +140,7 @@ r20 |   0xEF   |           |                  |
 r21 |   0x1F   |                              |                 carry
     +----------+                             -.
 r22 |   0x00   |      0
-    +----------+
+    +----------+                                                               .
 ```
 
 <div>
@@ -173,17 +190,33 @@ int main (void) {
 
 Für die Muliplikation von größeren Werten wird die Berechnung entsprechend aufwändiger.
 
+*******************************************************************
 
-
-
+[^AtTinyArchitecture]: Firma Microchip, Handbuch AtTiny Family, https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-2586-AVR-8-bit-Microcontroller-ATtiny25-ATtiny45-ATtiny85_Datasheet.pdf
 
 ### Fehlende Fließkommaeinheit
 
+Die Gleitkommadarstellung besteht dann aus dem Vorzeichen, der Mantisse und dem Exponenten. Für binäre Zahlen ist diese Darstellung in der [IEEE 754](https://de.wikipedia.org/wiki/IEEE_754) genormt.
 
+<!--
+style="width: 100%; max-width: 560px; display: block; margin-left: auto; margin-right: auto;"
+-->
+```ascii
+  +-+---- ~ -----+----- ~ ----+
+  |V|  Mantisse  |  Exponent  |   V=Vorzeichenbit
+  +-+---- ~ -----+----- ~ ----+
 
+   1      23           8          = 32 Bit (float)
+   1      52          11          = 64 Bit (double)                            .
+```
+
+> **Merke:** Die Verrechnung von Gleitkommazahlen ist entsprechend aufwändig:
+>
+> 1. Homogenisierung der Exponenten und Mantissen
+> 2. Berechnung des Ergebnisses
+> 3. Normierung des Resultats
 
 ###  Fehlende Festkommaeinheit
-https://www.embedded-software-engineering.de/festkomma-arithmetik-einsatz-in-eigenen-algorithmen-und-bibliotheken-a-859213/
 
 Neben den Fließkommadarstellungen lassen sich auch Festkommakonzepte für die Darstellung gebrochener Zahlen in Hardware/Software umsetzen. Dabei wird die Speicherbreite in den Anteil vor und nach einer spezifischen und unveränderlichen Kommaposition eingeteilt.
 
@@ -191,18 +224,18 @@ Ein Beschreibungsformat dafür ist die Q-Notation bei der die Anzahl der Nachkom
 
 > **Achtung:** Für vorzeichenbehaftete Festkommazahlen gibt es zwei widersprüchliche Verwendungen des Q-Formats. Bei der einen Verwendung wird das Vorzeichenbit als Ganzzahlbit gezählt, in der anderen Variante jedoch nicht. Zum Beispiel könnte eine vorzeichenbehaftete 16-Bit-Ganzzahl als Q16.0 oder Q15.0 bezeichnet werden. Um diese Unklarheit zu beseitigen wird teilweise ein U für `unsigned` eingefügt.
 
-
+<!-- data-type="none" -->
 | Konfiguration | Bit 7 | Bit 6 | Bit 5 | Bit 4 | Bit 3 | Bit 2 | Bit 1 | Bit 0 | Wert  |
 | ------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
 | UQ0.8         | 1     | 1     | 1     | 0     | 0     | 0     | 0     | 0     | 0.875 |
 | UQ1.7         | 1     | 1     | 1     | 0     | 0     | 0     | 0     | 0     | 1.75  |
 | UQ2.6         | 1     | 1     | 1     | 0     | 0     | 0     | 0     | 0     | 3.5   |
 
-
-| Konfiguration | Auflösung | größte Zahl | kleinste Zahl |
-| ------------- | --------- | ----------- | ------------- |
-| `Qm.n`          | $2^{-n}$  | $2^{m-1}-2^{-n}$            | $-2^{m-1}$              |
-| `UQm.n`          | $2^{-n}$  | $2^{m}-2^{-n}$            | $0$              |
+<!-- data-type="none" -->
+| Konfiguration | Auflösung | größte Zahl      | kleinste Zahl |
+| ------------- | --------- | ---------------- | ------------- |
+| `Qm.n`        | $2^{-n}$  | $2^{m-1}-2^{-n}$ | $-2^{m-1}$    |
+| `UQm.n`       | $2^{-n}$  | $2^{m}-2^{-n}$   | $0$           |
 
 Eine 16 Bit breite, vorzeichenbehaftete Festkommazahl `Q15.1` kann also Zahlenwerte im Bereich $[-16384.0, +16383.5]$ abbilden. Die Auflösung der Darstellung ist $2^{-n} = 0.5$
 
@@ -246,6 +279,7 @@ Der Dynamikbereich von Festkommawerten ist zwar wesentlich geringer als der von 
 
 Wie ist das Ganze implementiert? Seit der Version 4.8 integriert der [avr-gcc](https://gcc.gnu.org/wiki/avr-gcc) eine entsprechende Bibliothek `stdfix.h`, die vordefinierte Typen integriert:
 
+<!-- data-type="none" -->
 | Typname | Typ       | Größe in Byte | QU    | Q          |
 | ------- | --------- | ------------- | ----- | ---------- |
 | _Fract  | short     | 1             | 0.8   | $\pm$0.7   |
@@ -263,21 +297,15 @@ Lassen Sie uns einen genaueren Blick auf die Implementierung werfen. Im Codebeis
 #define F_CPU 16000000UL
 
 #include <avr/io.h>
-#include <util/delay.h>
 #include <stdfix.h>
 
 int main (void) {
 
-  DDRB |= (1<<DDB7);
+  unsigned short _Accum fixVarA = 1.5K;
+  short _Accum fixVarB =  -1.5K;
+  long _Accum fixResult = fixVarA * fixVarB;
 
-  unsigned short _Accum variableA = 1.5K;
-  short _Accum variableB =  -1.5K;
-
-  long _Accum result = variableA * variableB;
-
-  while(1){
-    if (result<0) PORTB |= (1<<7);
-  }
+  while(1);
   return 0;
 }
 ```
@@ -285,11 +313,9 @@ int main (void) {
 Für die `variableA` ergibt sich dabei folgender Auszug des Programmspeichers, sofern das Beispielprogramm ohne Optimierung übersetzt wird.
 
 ```
-short _Accum variableA = -1.5K;
-136:	80 e4       	ldi	r24, 0x40	; 64
-138:	9f ef       	ldi	r25, 0xFF	; 255
-13a:	9a 83       	std	Y+2, r25	; 0x02
-13c:	89 83       	std	Y+1, r24	; 0x01
+short _Accum fixVarB =  -1.5K;
+11c:	80 e4       	ldi	r24, 0x40	; 64
+11e:	9f ef       	ldi	r25, 0xFF	; 255
 
      +--------+
 r24  |01000000|     r25
@@ -309,6 +335,25 @@ r25  |11111111| = 111111110.1000000
 
 ### Vergleich der Softwarelösungen auf dem AVR
 
-```cpp      
+Um eine Evaluation durchzuführen wurde der Python Wrapper `pysimavr` für die AVR Core Simulation genutzt.
 
-```
+https://github.com/buserror/simavr
+
+Im Projektordern finden Sie unter `../codeExamples/avr/fixedPoint/pySimAVR` das Miniprojekt. Dabei sind zwei Beispiele vorgesehen:
+
++ Evaluation der Laufzeit mittels UART Ausgaben
++ Evaluation der Laufzeit über togglende Pins
+
+Im Ergebnis zeigt sich folgendes Bild:
+
+<!-- data-type="none" -->
+| Variable                | Dauer           |
+| ----------------------- | --------------- |
+| `_delay_ms (100);`      | 100000.12500 us |
+| `unsigned short _Accum` | 2771.68700 us   |
+| `unsigned long _Accum`  | 45760.37500 us  |
+| `long _Accum`           | 50463.25000 us  |
+
+## Aufgaben
+
+- [ ] Integrieren Sie die Berechung im Beispiel vcdBased auf Basis von `float` und `double` Werten
