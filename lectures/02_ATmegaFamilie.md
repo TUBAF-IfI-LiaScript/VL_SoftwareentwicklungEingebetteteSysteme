@@ -397,7 +397,7 @@ Für das Verständnis der Abläufe sind folgende Dokumente elementar:
 | Dokument                 | Link                                                                                                              | Bedeutung                                                     |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | AtMega328 Handbuch       | [microchip](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf) | Beschreibung der Architektur und der Features des Controllers |
-| AtMega Assemblerhandbuch | [microchip](http://ww1.microchip.com/downloads/en/devicedoc/atmel-0856-avr-instruction-set-manual.pdf)            |                                                               |
+| AtMega Assemblerhandbuch | [microchip](http://ww1.microchip.com/downloads/en/devicedoc/atmel-0856-avr-instruction-set-manual.pdf)            |  Präsentation des Assembler Instruktionssets der ATmega Familie                                                             |
 | Arduino Uno Schaltplan   | [arduino](https://content.arduino.cc/assets/UNO-TH_Rev3e_sch.pdf)                                                 |                                                               |
 | Arduino Uno Pinbelegung  | [arduino](https://content.arduino.cc/assets/Pinout-UNOrev3_latest.png)                                            |                                                               |
 
@@ -449,6 +449,8 @@ out    PORTE, R24   ; Daten zurückschreiben
 
 ### C++ / C
 
+Variante mittels C und der avrlibc
+
 <div>
   <wokwi-led color="red" pin="13" port="B" label="13"></wokwi-led>
   <span id="simulation-time"></span>
@@ -473,9 +475,10 @@ int main (void) {
 ```
 @AVR8js.sketch
 
+Das gleiche Programm auf der Basis des Arduino Frameworks.
 
 <div>
-  <wokwi-led color="red" pin="13" port="B" label="13"></wokwi-led>
+  <wokwi-led color="green" pin="13" port="B" label="13"></wokwi-led>
   <span id="simulation-time"></span>
 </div>
 ```cpp       arduino.cpp
