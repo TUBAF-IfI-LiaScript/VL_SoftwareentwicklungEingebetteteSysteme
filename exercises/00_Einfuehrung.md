@@ -23,7 +23,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Einarbeitung und digitale Input/Output Operationen`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md) |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/3gttGAxMSSofe/giphy-downsized.gif)
