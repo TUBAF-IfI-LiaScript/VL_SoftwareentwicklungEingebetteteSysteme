@@ -25,7 +25,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Beschreibung des Aufbaus des Analog-Digital-Wandlers und der Implementierung in der Atmega Familie`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/03_Limitations.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/04_AnalogDigitalWandler.md) |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/04_AnalogDigitalWandler.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/04_AnalogDigitalWandler.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
