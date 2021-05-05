@@ -1,3 +1,9 @@
+*.o
+*.hex
+Pipfile.lock
+*.elf
+*.asm
+
 .pio/
 .vscode/
 
