@@ -542,9 +542,7 @@ Für die Umsetzung eines einfachen Timers, der wie im nachfolgenden Beispiel jed
 Sekunde aktiv wird, genügt es einen entsprechenden Vergleichswert zu bestimmen,
 den der Zähler erreicht haben muss.
 
-![Bild](../images/05_Timer/AVRSimpleCounter.png)<!-- style="width: 75%; max-width: 1000px" -->[^2]
-
-[^2]: Firma Microchip, megaAVR® Data Sheet, Seite 126, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+![Bild](../images/05_Timer/AVRSimpleCounter.png "FastPWM Modus des AVR [^AVR328] Seite 126")
 
 <div>
   <wokwi-led color="red" pin="13" port="B" label="13"></wokwi-led>
@@ -584,13 +582,13 @@ int main(void)
 
 Wir lassen den Controller den Vergleichswert kontinuierlich auslesen. Damit haben wir noch nichts gewonnen, weil der Einsatz der Hardware unser eigentliches System nicht entlastet. Günstiger wäre es, wenn wir ausgehend von unseren Zählerzuständen gleich eine Schaltung des Ausganges vornehmen würden.
 
+[^AVR328]: Firma Microchip, megaAVR® Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+
 #### Compare Mode
 
 Wir verknüpfen unseren Timer im Comparemodus mit einem entsprechenden Ausgang und stellen damit sicher, dass wir die Ausgabe ohne entsprechende Ansteuerung im Hauptprogramm aktivieren.
 
-![Bild](../images/05_Timer/AVR_CompareOutput.png)<!-- style="width: 75%; max-width: 1000px" -->[^2]
-
-[^2]: Firma Microchip, megaAVR® Data Sheet, Seite 126, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+![Bild](../images/05_Timer/AVR_CompareOutput.png "Compare Modus des AVR [^AVR328] Seite 126")
 
 > **Frage:** Welchen physischen Pin des Controllers können wir mit unserem Timer 1 ansteuern?
 
@@ -673,11 +671,11 @@ int main(void){
 }
 ```
 
+[^AVR328]: Firma Microchip, megaAVR® Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+
 #### Capture Mode
 
-![Bild](../images/05_Timer/AVR_Capture_Unit.png)<!-- style="width: 75%; max-width: 1000px" -->[^2]
-
-[^2]: Firma Microchip, megaAVR® Data Sheet, Seite 126, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+![Bild](../images/05_Timer/AVR_Capture_Unit.png "Capture Unit des AVR [^AVR328] Seite 126")
 
 ```cpp       avrlibc.cpp
 #include <avr/io.h>
@@ -691,8 +689,8 @@ int main(void)
 
   TCCR1A = 0; // Normal Mode
   TCCR1B = 0;
-  //         1024 als Prescale-Wert     Rising edge
-  TCCR1B  = (1 << CS12) | (1 <<CS10) | (1 << ICES1);  
+  //         1024 als Prescale-Wert     Rising edge    Filter
+  TCCR1B  = (1 << CS12) | (1 <<CS10) | (1 << ICES1) | (1 << ICNC1);  
   TIFR1 = (1<<ICF1);  // Löschen des Zählerwertes
 
   while (1)
@@ -730,13 +728,17 @@ Zähler |    +       +
 
 > **Frage:** Sie wollen die Ausgabe in Ticks in eine Darstellung in ms überführen. Welche Kalkulation ist dafür notwendig?
 
-> **Problem:** Wie große ist das maximal Darstellbare Zahlenintervall?
+> **Problem:** Wie große ist das maximal darstellbare Zahlenintervall?
+
+[^AVR328]: Firma Microchip, megaAVR® Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
 
 ### Anwendungen
 
-![Bild](../images/05_Timer/16BitTimerAVR.png)<!-- style="width: 75%; max-width: 1000px" -->[^1]
+![alt-text](https://media.giphy.com/media/99aniB2u9OztK/giphy-downsized.gif)
 
-[^1]: Firma Microchip, megaAVR® Data Sheet, Seite 250, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+####  Zähler von Aktivitäten
+
+![Bild](../images/05_Timer/16BitTimerAVR.png "Capture Unit des AVR [^AVR328] Seite 250")
 
 Wir wollen einen Eingangszähler entwerfen, der die Ereignisse als Zählerimpulse betrachtet und zusätzlich mit einem Schwellwert vergleicht.
 
@@ -769,6 +771,77 @@ int main(void)
   return  0;
 }
 ```
+
+[^AVR328]: Firma Microchip, megaAVR® Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+
+#### Servomotoren
+
+Als Servomotor werden Elektromotoren bezeichnet, die die Kontrolle der Winkelposition ihrer Motorwelle sowie der Drehgeschwindigkeit und Beschleunigung erlauben. Sie integrieren neben dem eigentlichen Elektromotor, eine Sensorik zur Positionsbestimmung und eine Regelelektronik. Damit kann die Bewegung des Motors entsprechend einem oder mehreren einstellbaren Sollwerten – wie etwa Soll-Winkelposition der Welle oder Solldrehzahl – bestimmt werden.
+
+![ServoMotor](https://upload.wikimedia.org/wikipedia/commons/9/9e/Rc-receiver-servo-battery_b.jpg "Servomotor [^wikimediaServo]")
+
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
+```ascii
+
+
+           Nulllage (1500ms)
+    Minima(1ms)  |  Maxima (2ms)
+              |  v  |
+High   |      v     v                
+       |  +------+...                        +---                            
+       |  |   :  |  :                        |     
+       |  |   :  |  :                        |               
+       |  |   :  |  :                        |               
+       |  |   :  |  :                        |               
+       |  |   :  |  :                        |                             
+       |  |   :  |  :                        |   
+       |--+      +---------------------------+
+       |
+       +-------------------------------------|---->                           .
+           0                                20ms
+```
+
+Diese Funktionalität lässt sich mit einem Timer entsprechend umsetzen.
+
+$$
+20ms = 2500 x 0.008ms
+$$
+
+
+```
+#define F_CPU 1000000UL
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+ISR( TIMER1_COMPA_vect ){
+  OCR1A = 2500-OCR1A;	     }
+
+int main (void){
+  TCCR1A = (1<<COM1A0);    // Togglen bei Compare Match
+  TCCR1B = (1<<WGM12) |
+           (1<<CS11);      // CTC-Mode; Prescaler 8
+  TIMSK  = (1<<OCIE1A);    // Timer-Compare Interrupt an
+  OCR1A = 2312;            // Neutralposition
+  sei();                   // Interrupts global an
+  while( 1 ) {
+    ...
+    OCR1A = OCR1A + 3;
+    _delay_ms(40);
+    ...
+  return 0;
+}
+```
+
+[^wikimediaServo]: Wikipedia, Autor Bernd vdB, Servo and receiver connections, [Link](https://commons.wikimedia.org/wiki/File:Rc-receiver-servo-battery_b.jpg)
+
+#### Gleichstrommotor
+
+![Gleichstrom](../images/05_Timer/Beispiel.png)<!-- style="width: 75%; max-width: 750px" -->
+
+https://www.tinkercad.com/things/lu1Gt48hNsL-gleichstrommotor-mit-encoder/editel
+
 
 ## Aufgaben
 
