@@ -21,4 +21,4 @@ und Programmierkonzepten im Vergleich zur Prozessorfamilie der 8-Bit ATmega und 
 | 11  | 23.06. | Cortex M Komponenten                      |
 | 12  | 30.06. | Cortex M Komponenten                      |
 | 13  | 07.07. | DSP Implementierung im STM32F4            |
-| 14  | 14.07. | mbedOS vs Arduino                         |
+| 14  | 14.07. | mbedOS                                    |
