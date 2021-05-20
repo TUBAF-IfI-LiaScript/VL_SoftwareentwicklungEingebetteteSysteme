@@ -7,7 +7,7 @@ void setup() {
   Serial.println("Los gehts");
   // Define the LED pin as Output
   pinMode (LED_BUILTIN, OUTPUT);
-  // Start the I2C Bus as Slave on address 9
+  // Start the I2C Bus as Slave on address 8
   Wire.begin(8); 
   Wire.setClock(100000L);
   // Attach a function to trigger when something is received.
