@@ -338,7 +338,7 @@ Diese Metriken sind auf Nicht-Echtzeitscheduling ausgerichtet und können nicht 
 - Kurze Reaktionszeiten genügen nicht, Zeiten müssen garantiert sein
 - keine weiteren Parameter wie Periodizität oder Abhängigkeiten abgebildet werden
 
-> **Merke:** Echtzeit braucht die Evaluation der Deadlines. Entsprechend muss für die Latency gelten $L_max = 0$
+> **Merke:** Echtzeit braucht die Evaluation der Deadlines. Entsprechend muss für die Latency gelten $L_{max} = 0$
 
 Für weiche Echtzeitkriterien lassen eine Abweichung zu dieser Vorgabe zu:
 
