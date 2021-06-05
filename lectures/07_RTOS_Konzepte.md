@@ -393,7 +393,7 @@ $L_{max} = L_1 = 13$, $N_{late} = 1$
 
 Überlegung: Die Deadline muss hinreichend weit von der Startzeit entfernt sein
 
-$e_i \leq (d_i - r_i) \leq p_i$
+$\Delta e_i \leq (d_i - r_i) \leq p_i$
 
 <!--
 style="width: 80%; min-width: 420px; max-width: 720px;"
@@ -433,7 +433,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 
 Überlegung: Die letztmögliche Ausführungszeit zweier Tasks überlappt nicht.
 
-$d_i \leq d_j - e_j$
+$d_i \leq d_j - \Delta e_j$
 
 <!--
 style="width: 80%; min-width: 420px; max-width: 720px;"
@@ -456,9 +456,9 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 style="width: 80%; min-width: 420px; max-width: 720px;"
 -->
 ```ascii
-"$e_1=4, r_1=0, d_1= 6$"                                                      |-------|
-"$e_1=6, r_1=4, d_1=10$"                  |-----------------------|  
-"$e_1=2, r_1=13, d_1=15$" |---------------|
+"$e_1=4, r_1=0, d_1= 6$"                                                      |-------|   
+"$e_2=6, r_2=4, d_2=10$"                  |-----------------------|  
+"$e_3=2, r_3=13, d_3=15$" |---------------|  
 
                           |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|-->      
                           0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15      
@@ -470,8 +470,8 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 -->
 ```ascii
 "$e_1=5, r_1=0, d_1= 6$"                                                      |-------|
-"$e_1=6, r_1=4, d_1=10$"                  |-----------------------|  
-"$e_1=2, r_1=13, d_1=15$" |-------------------|
+"$e_2=6, r_2=4, d_2=10$"                  |-----------------------|  
+"$e_3=2, r_3=13, d_3=15$" |-------------------|
 
                           |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|-->      
                           0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15      
@@ -503,7 +503,7 @@ suspended --> [*]  : deleted
 
 ### Klassifikation Scheduling Verfahren
 
-1. Statische Verfahren (offline-scheduling):
+Statische Verfahren (offline-scheduling):
 
 - Analyse der Durchführbarkeit zur Entwicklungszeit
 - Fester Plan, wann welche Task beginnt (Task-Beschreibungs-Liste, TDL)
@@ -521,12 +521,12 @@ suspended --> [*]  : deleted
 | 33   | starte T2 | 37   |
 | ...  |           |      |
 
-2. Nicht adaptive Verfahren
+Nicht adaptive Verfahren
 
 - Offline Analyse der Task-Laufzeit
 - Online Berechnung von Scheduling-Plänen mit festen Prioritäten
 
-3. Adaptive Verfahren
+Adaptive Verfahren
 
 -  Online Analyse der Task-Laufzeit; Schätzung der Ausführungszeit
 -  Online Erstellung des Plans unter variabler Priorisierung
