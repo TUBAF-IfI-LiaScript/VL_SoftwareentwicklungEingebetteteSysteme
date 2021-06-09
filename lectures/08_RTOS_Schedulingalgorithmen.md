@@ -68,6 +68,8 @@ entsprechend den Anforderungen systematisch einplanen?
 
 ## Aperiodisches Scheduling  
 
+![alt-text](https://media.giphy.com/media/USgYEZKM6NqIZlW8vE/giphy.gif)
+
 ### Durchsuchen des Lösungsraumes
 
 Gegeben sei eine Menge ${T_i}$ nicht unterbrechbarer Tasks mit einer
@@ -81,6 +83,10 @@ Ein statisches Planungsverfahren soll untersuchen, ob ein Plan existiert. Das Ve
 Das Durchsuchen lässt sich anhand einer Baumstruktur darstellen
 
 ![alt-text](../images/08_Algorithms/TreeSearch.png "Darstellung der Plangenerierung für 4 Tasks")
+
+Beispiel: Gegeben sei unten stehend folge von 3 Tasks mit unterschiedlichen Ausführungsdauern, Bereitzeiten und Deadlines.
+
+![alt-text](../images/08_Algorithms/TreeSearchExample.png "Beispielhafter Auszug des Suchbaums mit einem Ergebnis-Tupel")
 
 ### Earliest Due Date
 
@@ -145,8 +151,7 @@ Hier gilt $L'_{max(a,b)} = L'_b = c'_b - d_b$. Unter Berücksichtigung von $c'_b
 
 In beiden Fällen ist $L'_{max(a,b)}\leq L_{max(a,b)}$. Jeder Schedule kann mit endlich vielen Vertauschungen in einen EDD Schedule verwandelt werden, der die maximale Verspätung verkleinert.
 
-EDD generiert bei nicht unterbrechbaren Tasks einen Schedule der optimal im Hinblick auf maximale Verspätung ist. Für die Brauchbarkeit eines Plans gilt: falls EDD keinen gültigen Plan
-liefert, gibt es keinen !
+> EDD generiert bei nicht unterbrechbaren Tasks einen Schedule der optimal im Hinblick auf maximale Verspätung ist. Für die Brauchbarkeit eines Plans gilt: falls EDD keinen gültigen Plan liefert, gibt es keinen !
 
 ### Earliest Deadline First
 
@@ -172,7 +177,7 @@ ausgeführt, dass heißt an den Punkten ${r_0, r_1, r_2}$ erfolgt die Prüfung d
 Beispiel:
 
 <!-- data-type="none" -->
-| Task  | Bereitzeit $r_i$ | Ausführungsdauer $\Delta e$ | Deadline $d$ |
+| Task  | Bereitzeit $r_i$ | Ausführungsdauer $\Delta e_i$ | Deadline $d_i$ |
 | ----- | ---------------- | --------------------------- | ------------ |
 | $T_1$ | 0                | 10                          | 33           |
 | $T_2$ | 4                | 3                           | 28           |
@@ -195,6 +200,8 @@ Bereite Tasks   T1        T1 T1   T1                       T1
 Kürz. Deadline  T1        T2 T2   T3                       T1         
 ```
 
+Argumente für EDF:
+
 + EDF ist dabei sehr flexibel, denn es kann sowohl für präemptives, wie auch für kooperatives Multitasking verwendet werden.
 + Es können Pläne für aperiodischen sowie periodischen Task entwickelt werden.
 + EDF kann den Prozessor bis zur maximalen Prozessorauslastung einplanen.
@@ -213,7 +220,7 @@ Verspätung.
 Beispiel:
 
 <!-- data-type="none" -->
-| Task  | Bereitzeit $r_i$ | Ausführungsdauer $\Delta e$ | Deadline $d$ |
+| Task  | Bereitzeit $r_i$ | Ausführungsdauer $\Delta e_i$ | Deadline $d_i$ |
 | ----- | ---------------- | --------------------------- | ------------ |
 | $T_1$ | 0                | 10                          | 33           |
 | $T_2$ | 4                | 3                           | 28           |
@@ -261,12 +268,398 @@ Beispiel
 
 ![alt-text](../images/08_Algorithms/LDF_schema.png "Ablauf des Planungsprozesses mit LDF")
 
+### EDF\*
+
+EDF\* bezeichnet einen angepassten EDF Algorithmus unter Berücksichtigung der Vorrangrelation. Die Idee besteht darin, dass die Menge abhängiger Tasks in eine Menge unabhängiger Tasks durch Modifikation der Bereitzeiten und der Deadlines umgewandelt wird.
+
+Entsprechen implementiert der EDF\* folgende drei Schritte:
+
+1. Modifikation der Bereitzeiten
+2. Modifikation der Deadlines
+3. Schedule nach EDF erstellen
+
+Bedingungen:
+
++ Eine Task kann nicht vor ihrer Bereitzeit ausgeführt werden.
++ Eine abhängige Task kann keine Bereitzeit besitzen die kleiner ist als die Bereitzeit der Task von der sie abhängt.
++ Eine Task $T_b$, die von einer anderen Task $T_a$ abhängt, kann keine Deadline $d_b \leq d_a$ besitzen.
+
+**Schritt 1: Modifikation der Bereitzeiten**
+
+![alt-text](../images/08_Algorithms/EDF_star_I.png "Verschiebung der Bereitzeiten für zwei abhängige Tasks")
+
+1. Für einen beliebige Anfangsknoten des Vorrang-Graphen setze $r^*_i = r_i$.
+2. Wähle eine Task $T_i$, deren Bereitzeit (noch) nicht modifiziert wurde, aber deren Vorgänger $T_v$ alle modifizierte Bereitzeiten besitzen. Wenn es keine solche Task gibt: EXIT.
+3. Setze $r^*_i = max [r_i  , max(r^*_v  + \Delta e_v ): T_v]$. Damit wird die maximale _Completion-Time_ der Vorgänger bestimmt $max(r^*_v  + \Delta e_v :  T_v)$
+4. Gehe nach Schritt 2.
+
+**Schritt 2: Modifikation der Deadlines**
+
+![alt-text](../images/08_Algorithms/EDF_star_II.png "Verschiebung der Deadlines für zwei abhängige Tasks")
+
+1. Für einen beliebige Endknoten des Vorrang-Graphen setze $d^*_i = d_i$ .
+2. Wähle eine Task $T_i$ , deren Deadline (noch) nicht modifiziert wurde, aber deren unmittelbare Nachfolger alle modifizierte Deadlines besitzen.  Wenn es keine solche Task gibt: EXIT.
+3. Setze $d^*_i = min [d_i, min(d^*_n - \Delta e_n : T_n )]$.
+4. Gehe nach Schritt 2
+
+**Beispiel**
+
+![alt-text](../images/08_Algorithms/EDF_star_example.png "Anwendung des EDF\* Ansatzes")
+
 ### Zusammenfassung
 
 ![alt-text](../images/08_Algorithms/scheduling_overview.png "Source: Hard Real-Time Computing Systems Predictable Scheduling Algorithms and Applications, Buttazzo, Giorgio")
 
-
-
 ## Periodisches Scheduling  
 
-// ToDo
+Annahmen:
+
+1. Alle Tasks mit harter Deadline sind periodisch.
+2. Die Tasks sind unterbrechbar.
+3. Die Deadlines entsprechend den Perioden.
+4. Alle Tasks sind voneinander unabhängig.
+5. Die Zeit für einen Kontextwechsel ist vernachlässigbar.
+6. Für einen Prozessor und n Tasks gilt die folgende Gleichung bzgl. der durchschnittlichen Auslastung :
+$$
+U = \sum_{(i=1,...,n)} (\Delta e_i / \Delta p_i )
+$$
+
+Idee des Rate Monotonic Scheduling - Es wird kein expliziter Plan aufgestellt, der (zeitbasiert) auf Fristen oder Spielräumen beruht, sondern es existiert ein impliziter Plan, der durch eine Prioritätszuordnung zu allen Tasks repräsentiert wird.
+
+Planungswerkzeug ist damit die Rate einer periodischen Task - die Anzahl der Perioden im Beobachtungszeitraum. Die Prioritätszuordnung erfolgt dann gemäß:
+
+$rms(i) < rms(j)$ für $\frac{1}{\Delta p_i} < \frac{1} {\Delta p_j}$
+
+Anwendung:
+
+![alt-text](../images/08_Algorithms/RateMonotonic_I.png "Anwendung des RMS auf 3 beispielhafte Tasks mit den Periodendauern 2, 6 und 10")
+
+Grenzen des Verfahrens:
+
+![alt-text](../images/08_Algorithms/RateMonotonic_II.png "Grenzen des Verfahrens")
+
+Frage: Gibt es eine obere Schranke $U_{lub}$  der Prozessorauslastung, für die immer ein Plan nach RMS garantiert werden kann (d.h. ein hinreichendes Kriterium für die Einplanbarkeit) ?
+
+ $U_{lub}$  ist die Auslastung, für die RMS optimal ist, d.h. einen Plan findet, wenn überhaupt einer existiert.  Es kann natürlich Verfahren geben, die eine bessere Auslastung realisieren.
+
+Nach (Liu, Layland, 1973) gilt für $n$ Tasks:     $U_{lub} =  n  (2^{1/n} - 1 )$.
+
+| n                    | Obere Schranke           |
+| -------------------- | ------------------------ |
+| $1$                  | $U_{lub} = 1$            |
+| $2$                  | $U_{lub} = 0.82$         |
+| $n\rightarrow\infty$ | $U_{lub} =ln(2) = 0.693$ |
+
+> **Achtung:** EDF ist sehr wohl in der Lage eine Auslastung von 100 Prozent zu realsieren.
+
+![alt-text](../images/08_Algorithms/RateMonotonic_III.png "Scheduling periodischer Tasks mit EDF")
+
+![alt-text](../images/08_Algorithms/RateMonotonic_IV.png "Darstellung der oberen Schranken eines RMS Schedules in Abhängigkeit von den Verhältnissen der Perioden")
+
+**Zusammenfassung RMS**
+
+Für alle Ausführungszeiten und Periodenverhältnisse von n Tasks wird unter RMS ein gültiger Plan gefunden, wenn die Auslastung die Schranke von  nicht übersteigt.
+
+RMS ist einfacher zu realisieren als EDF, die Prioritäten anhand der Perioden werden einmal zu Beginn festlegen.
+
+Aber RMS ist nicht immer in der Lage eine Lösung zu finden, obwohl eine existiert. Entsprechend ist RMS kein optimaler Scheduler!
+
+## Verwendung von Echtzeitbetriebssystemen
+
+Ein Echtzeitbetriebssystem (RTOS) ist ein Betriebssystem (OS), das für Echtzeitanwendungen vorgesehen ist.  Ereignisgesteuerte Systeme schalten zwischen Tasks auf der Grundlage ihrer Prioritäten um, während Time-Sharing-Systeme die Tasks auf der Grundlage von Taktinterrupts umschalten. Die meisten RTOSs verwenden einen präemptiven Scheduling-Algorithmus.
+
+
+Vorteile des RTOS vs. Super Loop Design
+
+- Trennung von Funktionalität und Timing - RTOS entlastet den Nutzer und behandelte Timing, Signale und Kommunikation
+- explizite Definition von Prioritäten - deutliche bessere Skalierbarkeit als im SLD
+- Mischung von Hard- und Softrealtime Komponenten
+- Verbesserte Wiederverwendbarkeit des Codes insbesondere bei Hardwarewechseln
+
+![alt-text](../images/08_Algorithms/RTOS_Vergleich.png "Einordnung von RTOS Umsetzungen - Motivierte nach Präsentation von Richard Berry (Gründer FreeRTOS)")
+
+FreeRTOS ist für leistungsschwache eingebettete Systeme konzipiert. Der Kernel selbst besteht aus nur drei C-Dateien. Um den Code lesbar, einfach zu portieren und wartbar zu machen, ist er größtenteils in C geschrieben, aber es sind einige Assembler-Funktionen (meist in architekturspezifischen Scheduler-Routinen) enthalten.
+
+Es gibt keine der erweiterten Funktionen, die typischerweise in Betriebssystemen wie Linux oder Microsoft Windows zu finden sind, wie z. B. Gerätetreiber, erweiterte Speicherverwaltung, Benutzerkonten und Netzwerke. Der Schwerpunkt liegt auf Kompaktheit und Geschwindigkeit der Ausführung. FreeRTOS kann eher als "Thread-Bibliothek" denn als "Betriebssystem" betrachtet werden, obwohl eine Kommandozeilenschnittstelle und POSIX-ähnliche E/A-Abstraktionserweiterungen verfügbar sind.
+
+FreeRTOS implementiert mehrere Threads, indem es das Host-Programm in regelmäßigen kurzen Abständen eine Thread-Tick-Methode aufrufen lässt. Die Thread-Tick-Methode schaltet Tasks abhängig von der Priorität und einem Round-Robin-Schema um. Das übliche Intervall beträgt 1 bis 10 Millisekunden (1/1000 bis 1/100 einer Sekunde), über einen Interrupt von einem Hardware-Timer, aber dieses Intervall wird oft geändert, um einer bestimmten Anwendung zu entsprechen.
+
+### FreeRTOS Grundlagen
+
+Das Task Modell unterscheidet 4 Zustände: Running, Blocked, Suspended, Ready, die mit entsprechenden API Funktionen manipuliert werden können, bzw. durch den Scheduler gesetzt werden. FreeRTOS implmentiert dafür einen preemptiven und einen kooperativen Multitasking Mode.
+
+<!--
+style="width: 80%;"
+-->
+```ascii
+                        preemptiv                              kooperativ
+Höchste         ^                                        ^                                 
+Priorität   T1  |          XXXXXXXXXX                T1  |                    XXXXXXXXXX            
+            T2  |XXXXXXXXXX         XXXXXXXXXX       T2  |XXXXXXXXXXXXXXXXXXXX     
+                +----|----|----|----|----|----|->        +----|----|----|----|----|----|->
+                0    2    4    6    8   10   12          0    2    4    6    8   10   12   
+```
+
+Der FreeRTOS-Echtzeit-Kernel misst die Zeit mit einer Tick-Count-Variable. Ein Timer-Interrupt (der RTOS-Tick-Interrupt) inkrementiert den Tick-Count - so kann der Echtzeit-Kernel die Zeit mit einer Auflösung der gewählten Timer-Interrupt-Frequenz messen.
+
+Jedes Mal, wenn der Tick-Count inkrementiert wird, muss der Echtzeit-Kernel prüfen, ob es nun an der Zeit ist, eine Task zu entsperren oder aufzuwecken. Es ist möglich, dass eine Task, die während des Tick-ISRs geweckt oder entsperrt wird, eine höhere Priorität hat als die unterbrochene Task. Wenn dies der Fall ist, sollte der Tick-ISR zu der neu geweckten/entblockten Task zurückkehren - effektiv unterbricht er eine Task, kehrt aber zu einer anderen zurück.
+
+> **Merke:** Das preemptive Scheduling erfordert sowohl auf de Planungsebene, als auch auf der Verwaltungsebene einen größeren Overhead.
+
+FreeRTOS unterstützt 2 Strategien für die Speicherbereitstellung, eine statische und eine dynamische Allokation. Während die erste Variante es der Anwendung überlässt die notwendigen Speicherareale zu aquirieren, über nimmt das RTOS diese Aufgabe im zweiten Modus. Der angeforderte Speicher wird auf dem Heap abgelegt. Mit dem Aufruf von `xTaskCreate()` wird ein Speicherblock alloziert, so dass der Stack und der _task control block_ (TCB) dort abgelegt werden können. Queues, Mutexe und Semaphoren werden ebenfalls dort eingebunden.  
+
+<!--
+style="width: 80%;"
+-->
+```ascii
+        Arbeitsspeicher AVR
+Ende    +------------------+
+        | Stack für main   |
+        | und IRQs         |
+        |                  |
+        |                  |
+        +------------------+
+        | freier Speicher  |
+        |                  |      +---------------+
+        |                  |   /  | TCB Tasks A   |
+        +------------------+  /   +---------------+
+        | HEAP             |      | Stack Tasks A |
+        | verwaltet von    |      +---------------+
+        | FreeRTOS         |      | Queue X       |        
+        +------------------+  \   +---------------+
+        | HEAP für main    |   \  |               | free Space
+        |                  |      +---------------+                  
+Start   +------------------+                                                   .
+
+```
+
+Beim Kontextwechsel sind auf dem AVR folgende Elemente auf dem Taskzugehörigen Stack zu speichern:
+
++ 32 general purpose processor Register
++ Status register
++ Program counter
++ 2 stack pointer registers.
+
+Die Register werden auf dem zugehörigen Stack des Tasks gespeichert.
+
+```asm
+#define portSAVE_CONTEXT()           
+asm volatile (	                     
+  "push  r0                    nt"
+  ; Das Prozessorregister R0 wird zuerst gespeichert, da es beim Speichern des
+  ; Statusregisters verwendet wird und mit seinem ursprünglichen Wert gespeichert
+  ; werden muss.
+  "in    r0, __SREG__          nt"
+  "cli                         nt"
+  "push  r0                    nt"
+  ; Das Statusregister wird in R0 verschoben, damit es auf dem Stack gespeichert
+  ; werden kann.
+  "push  r1                    nt"
+  "clr   r1                    nt"
+  ; Der vom Compiler aus dem ISR-C-Quellcode generierte Code geht davon aus, dass
+  ; R1 auf Null gesetzt ist. Der ursprüngliche Wert von R1 wird gespeichert,
+  ; bevor R1 gelöscht wird.
+  "push  r2                    nt"
+  ...
+  "push  r31                   nt"
+  ; Sichern aller verbliebenen Register auf dem Stack
+  "lds   r26, pxCurrentTCB     nt"
+  "lds   r27, pxCurrentTCB + 1 nt"
+  "in    r0, __SP_L__          nt"
+  "st    x+, r0                nt"
+  "in    r0, __SP_H__          nt"
+  "st    x+, r0                nt"
+  ; Sichern des Stackpointers auf dem Stack
+);
+```
+
+Die TCB enthält unter anderem:
+
++ die Informationen zur Speicherverwaltung - Adresse der Stack-Startadresse in `pxStack` und den aktuellen Stackanfang in `pxTopOfStack`. FreeRTOS speichert auch einen Zeiger auf das Ende des Stacks in `pxEndOfStack`.
++ die anfängliche Priorität und die aktuelle Priorität der Task in `uxPriority` und `uxBasePriority`
++ den Namen des Tasks
+
+Man könnte erwarten, dass jede Task eine Variable hat, die FreeRTOS mitteilt, in welchem Zustand sie sich befindet, aber das tut sie nicht. Stattdessen verfolgt FreeRTOS den Zustand der Task implizit, indem es die Tasks in die entsprechende Liste einträgt: ready list, suspended list, etc. Das Vorhandensein einer Aufgabe in einer bestimmten Liste zeigt den Zustand der Aufgabe an. Wenn eine Task von einem Zustand in einen anderen wechselt, verschiebt FreeRTOS sie einfach von einer Liste in eine andere.
+
+```c
+typedef struct tskTaskControlBlock
+{
+  volatile portSTACK_TYPE *pxTopOfStack;                  /* Points to the location of
+                                                             the last item placed on
+                                                             the tasks stack.  THIS
+                                                             MUST BE THE FIRST MEMBER
+                                                             OF THE STRUCT. */
+  unsigned portBASE_TYPE uxPriority;                      /* The priority of the task
+                                                             where 0 is the lowest
+                                                             priority. */
+  portSTACK_TYPE *pxStack;                                /* Points to the start of
+                                                             the stack. */
+  signed char pcTaskName[ configMAX_TASK_NAME_LEN ];      /* Descriptive name given
+                                                             to the task when created.
+                                                             Facilitates debugging
+                                                             only. */
+  // ...
+
+} tskTCB;
+```
+
+### Implementierung Grundlagen
+
+Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei
+
+| FreeRTOS Parameter         | Bedeutung                                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `configTOTAL_HEAP_SIZE`    | Größe des maximal verwendeten Gesamtspeichers aller Tasks usw.                                                                        |
+| `configMINIMAL_STACK_SIZE` | Angabe der Minimalen Stackgröße                                                                                                       |
+| `configMAX_PRIORITIES`     | Definition der Zahl der Prioritäten. Daraus folgt die Zahl der notwendigerweise zu etablierenden Listen für die Verwaltung der Tasks. |
+| `configCPU_CLOCK_HZ`       | Taktfrequenz des Prozessors                                                                                                           |
+| `configTICK_RATE_HZ`       |                                                                                                                                       |
+
+> **Achtung!** Die verwendete Implementierung für den AVR lässt einzelne Einstellungsmöglichkeiten außer acht und realisiert diese mit fest im Code oder implementiert eigene Konfigurationsmethoden.
+
+```c   TaskBasicStructure.c
+xTaskCreate( TaskBlink
+ ,  "Blink"   // A name just for humans
+ ,  128       // This stack size can be checked & adjusted by reading the Stack Highwater
+ ,  NULL      //Parameters passed to the task function
+ ,  2         // Priority, with 2 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+ ,  &TaskBlink_Handler ); //Task handle
+
+
+static void TaskBlinkRedLED(void *pvParameters) // Main LED Flash
+{
+   while(1)
+   {
+       PINB = ( 1 << PB5 );
+       vTaskDelay(1000/portTick_PERIOD_MS); // wait for one second
+   }
+}
+
+vTaskStartScheduler();
+```
+
+> **Merke:** Die bisherigen Zeitfunktionen `_delay_ms()` und `_delay_us()` werden durch RTOS spezifische Funktionen ersetzt. Damit wird die Kontrolle an den Scheduler zurückgegeben.
+
+Eine Vorgehen, um auch die Laufzeit der eigentlichen Anwendung zu berücksichtigen, ist die Überwachung anhand von `vTaskDelayUntil()`:
+
+
+```c   TaskBasicStructure.c
+// Perform an action every 10 ticks.
+void vTaskFunction( void * pvParameters )
+{
+TickType_t xLastWakeTime;
+const TickType_t xFrequency = 10;
+
+    // Initialise the xLastWakeTime variable with the current time.
+    xLastWakeTime = xTaskGetTickCount();
+
+    for( ;; )
+    {
+        // Wait for the next cycle.
+        vTaskDelayUntil( &xLastWakeTime, xFrequency );
+
+        // Perform action here.
+    }
+}
+```
+
+### Schedulingvarianten
+
+```c cooperativeScheduling.c
+static void TaskBlinkRedLED(void *pvParameters) // Main LED Flash
+{
+    TickType_t xLastWakeTime;
+    xLastWakeTime = xTaskGetTickCount();
+    while(1)
+    {
+        PORTB |= ( 1 << PB5 );
+        vTaskDelayUntil( &xLastWakeTime, ( 100 / portTICK_PERIOD_MS ) );
+        PORTB &= ~( 1 << PB5 );
+        vTaskDelayUntil( &xLastWakeTime, ( 400 / portTICK_PERIOD_MS ) );
+    }
+}
+```
+
+```c preemtiveScheduling.c
+static void WorkerTask(void *pvParameters)
+{
+  static uint32_t idelay;
+  static uint32_t Delay;
+  Delay = 10000000;
+  /* Worker task Loop. */
+  for(;;)
+  {
+    // Simulating some work here
+	  for (idelay = 0; idelay < Delay; ++idelay);
+  }
+  /* Should never go there */
+  vTaskDelete(worker_id);
+}
+```
+
+### Kommunikation / Synchronisation zwischen Tasks
+
+Bisher haben wir allein über isolierte Tasks gesprochen, die ohne Relation zu einander bestehen. FreeRTOS bietet fünf primäre Mechanismen für die Kommunikation zwischen Tasks: _queues_, _semaphores_, _mutexes_, _stream buffers_ und _message buffers_. Allen gemeinsam ist, dass sie dazu führen können, dass Tasks blockieren, wenn die Ressource oder die Daten eines anderen Tasks nicht verfügbar sind.
+
+Beispiele:
+
++ Ein Semaphore sperrt bzw. gibt den Zugriff auf ein Display frei.
++ Ein Task wartet auf das eintreffen des Ergebnisses eines anderen Tasks, das über eine Queue übermittelt wirde.
+
+**Queues**
+
+Queues bieten eine Inter-Task-Kommunikation mit einer vom Benutzer definierbaren festen Länge. Der Entwickler gibt die Nachrichtenlänge bei der Erstellung der Warteschlange an. Dies geschieht durch den Aufruf
+
+```c
+QueueHandle_t queueName =xQueueCreate(queueLength, elementSize)
+```
+
+Der Eingabeparameter `queueLength` gibt die Anzahl der Elemente an, die die Warteschlange aufnehmen kann. `elementSize` gibt die Größe der einzelnen Elemente in Bytes an. Alle Elemente in der Warteschlange müssen die gleiche Größe haben. Die Warteschlange hat eine FIFO-Struktur (first in/first out), so dass der Empfänger immer das Element erhält, das als erstes eingefügt wurde
+
+**Semaphoren**
+
+Semaphore werden zur Synchronisation und zur Steuerung des Zugriffs auf gemeinsame Ressourcen zwischen Tasks verwendet. Ein Semaphor kann entweder binär oder zählend sein und ist im Wesentlichen nur ein nicht-negativer Integer-Zähler.
+
+Ein binäres Semaphor wird auf 1 initialisiert und kann verwendet werden, um eine Ressource zu bewachen, die nur von einer Task zu einem Zeitpunkt gehandhabt werden kann. Wenn eine Task die Ressource übernimmt, wird der Semaphor auf 0 dekrementiert. Wenn eine andere Task die Ressource verwenden möchte und sieht, dass der Semaphor 0 ist, blockiert sie. Wenn der erste Task mit der Nutzung der Ressource fertig ist, wird das Semaphor inkrementiert und steht damit anderen Tasks zur Verfügung.
+
+Ein binärer Semaphor kann mit
+
+```
+SemaphoreHandle_t semaphoreName = xSemaphoreCreateBinary(void)
+```
+
+erstellt werden. Ein zählender Semaphor funktioniert auf die gleiche Weise, jedoch für Ressourcen, die von mehreren Tasks gleichzeitig verwendet werden können. Ein Zählsemaphor sollte auf die Anzahl der Tasks initialisiert werden, die gleichzeitig Zugriff auf die Ressource haben können, und wird mit
+
+```
+SemaphoreHandle_t semaphoreName =xSemaphoreCreateCounting(maxCount, initialCount)
+```
+
+erstellt. Wenn eine Task eine durch einen Semaphor geschützte Ressource wünscht, ruft sie die Funktion `xSemaphoreTake(semaphoreName,ticksToWait)` auf. Wenn der Semaphor zu 0 ausgewertet wird, blockiert die Task für die in ticksToWait angegebene Zeit. Wenn die Task mit der Verwendung des Semaphors fertig ist, wird die Funktion `xSemaphoreGive(semaphoreName)` aufgerufen.
+
+**Mutex**
+
+Ein Mutex ist einem binären Semaphor sehr ähnlich, bietet aber zusätzlich einen Mechanismus zur Prioritätsvererbung. Wenn eine hochpriore Task beim Zugriff auf eine Ressource blockiert wird, die bereits von einer niederprioren Task belegt ist, erbt die niederpriore Task die Priorität der hochprioren Task, bis sie den Mutex freigegeben hat.
+
+Dies stellt sicher, dass die Blockierzeit der hochprioren Task minimiert wird, da die niedrigpriore Task nun nicht mehr von anderen Tasks mit mittlerer Priorität preemptiert werden kann.
+
+Eine Mutex wird mit der Funktion
+
+```
+semaphoreHandle_t mutexName = xSemaphoreCreateMutex(void)
+```
+
+erstellt. Mutexe sollten nicht von einem Interrupt aus verwendet werden, da der Mechanismus der Prioritätsvererbung nur für einen Task sinnvoll ist, nicht aber für ein Interrupt.
+
+**Beispiel**
+
+Im Beispiel wird auf die Ressource Serielle Schnittstelle durch zwei Tasks zugegriffen. Um ein Überschreiben der Inhalte zu verhindern ist eine Synchronisation erforderlich.
+
+### Denken wie ein RTOS Entwickler
+
+![alt-text](../images/08_Algorithms/tracealyzer-for-freertos.png "Darstellung der Analyse-Tools der Firma [perceio](https://percepio.com/tz/freertostrace/)")
+
+!?[alt-text](https://www.youtube.com/watch?v=9UqIZW1PDUI)
+
+## Warum das Ganze?
+
+vgl. "What really happened to the software on the Mars Pathfinder spacecraft?" 
