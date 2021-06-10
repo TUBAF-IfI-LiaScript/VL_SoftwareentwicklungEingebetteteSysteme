@@ -14,9 +14,9 @@ und Programmierkonzepten im Vergleich zur Prozessorfamilie der 8-Bit ATmega und 
 | 4   | 05.04. | Analog Digitalwandler                     |
 | 5   | 12.05. | Timer und Interrupts                      |
 | 6   | 19.05. | Kommunikationsprotokolle                  |
-| 7   | 26.05. | Echtzeitanwendungen und Scheduling        |
-| 8   | 02.06. | FreeRTOS                                  |
-| 9   | 09.06. | xMega Controller                          |
+| 7   | 26.05. | Echtzeitanwendungen                       |
+| 8   | 02.06. | Scheduling Algorithmen                    |
+| 9   | 09.06. | FreeRTOS                                  |
 | 10  | 16.06. | xMega Controller                          |
 | 11  | 23.06. | Cortex M Komponenten                      |
 | 12  | 30.06. | Cortex M Komponenten                      |
