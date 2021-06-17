@@ -178,7 +178,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 
 Für die Aufgabe ergibt sich folgender Graph:
 
-```text @plantUML
+```text @plantUML.png
 @startuml
 digraph finite_state_machine {
     rankdir=LR;
@@ -199,7 +199,7 @@ digraph finite_state_machine {
 }
 @enduml
 ```
-@plantUML
+
 
 Im Beispiel liegt ein Medwedew-Automat vor. Die Zustände werden direkt auf den Ausgang abgebildet.
 
