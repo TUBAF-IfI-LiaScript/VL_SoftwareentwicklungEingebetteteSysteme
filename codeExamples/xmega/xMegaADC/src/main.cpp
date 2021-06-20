@@ -1,5 +1,6 @@
 #define F_CPU 2666666
 #define USART3_BAUD_RATE(BAUD_RATE) ((float)(F_CPU * 64 / (16 * (float)BAUD_RATE)) + 0.5)
+#define ADC_SHIFT_DIV64    (6)
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -58,28 +59,27 @@ void ADC0_init()
                | ADC_REFSEL_VDDREF_gc;  /* Internal reference */
     
     ADC0.CTRLA = ADC_ENABLE_bm          /* ADC Enable: enabled */
-               | ADC_RESSEL_8BIT_gc;    /* 8-bit mode */
-    
+               | ADC_RESSEL_10BIT_gc;    /* 10-bit mode */
 }
 
-int ADC_read(uint8_t channel, bool accum)
+uint16_t ADC_read(uint8_t channel, bool accum)
 {
     /* Select ADC channel */
     //ADC0.MUXPOS  = ADC_MUXPOS_AIN0_gc;
     ADC0.MUXPOS = channel;
+
+    // Define accumulation mode
     if (accum == true) ADC0.CTRLB = ADC_SAMPNUM_ACC64_gc;
+    else ADC0.CTRLB = 0;
 
     // Trigger an ADC conversion
     ADC0_COMMAND |= ADC_STCONV_bm;
 
-    // Wait for it to finish. Alternatively, use the interrupt flag RESRDY in ADC0_INTFLAGS.
+    // Wait for it to finish.
     while (ADC0_COMMAND & ADC_STCONV_bm);
-
+ 
     // Read result
-    char result = 0;
-    result = ADC0_RESL;
-
-    return result;
+    return ADC0_RESL;
 }
 
 int main(void)
@@ -87,11 +87,13 @@ int main(void)
     PIN_init();
     ADC0_init();
     USART3_init();
-    uint8_t result_A0, result_A1;
+    uint16_t result_A0, result_A1_accum, result_A1;
     while (1)
     {
         result_A0 = ADC_read(0, false);
-        result_A1 = ADC_read(0, true);
+        result_A1_accum = ADC_read(0, true);
+        result_A1 = result_A1_accum >> ADC_SHIFT_DIV64;
+
         char buffer[10];
         itoa(result_A0, buffer, 10);
         USART3_sendString(buffer);
