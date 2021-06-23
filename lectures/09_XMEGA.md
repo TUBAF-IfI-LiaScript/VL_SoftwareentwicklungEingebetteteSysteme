@@ -207,13 +207,13 @@ Im Beispiel liegt ein Medwedew-Automat vor. Die Zustände werden direkt auf den 
 
 Hier wäre eine Zustandstabelle denkbar, die alle Eingangskombinationen mit allen Zuständen zeilenweise verknüpft.
 
-<!-- data-type="none" -->
-| aktueller Zustand | A   | B   | Folgezustand |
-| ----------------- | --- | --- | ------------ |
-| E                 | 0   | 0   | E            |
-| E                 | 0   | 1   | L            |
-| E                 | 1   | 0   | G            |
-| ...               |     |     |              |
+<!-- data-type="none" style="width: 200px"-->
+| Zustand | A   | B   | Folgezustand |
+| ------- | --- | --- | ------------ |
+| E       | 0   | 0   | E            |
+| E       | 0   | 1   | L            |
+| E       | 1   | 0   | G            |
+| ...     |     |     |              |
 
 Eine kompaktere Darstellung fasst die Kombinationen der Eingänge zusammen und ordnet sie den Folgezuständen zu.
 

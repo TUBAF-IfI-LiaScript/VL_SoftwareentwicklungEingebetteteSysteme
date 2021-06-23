@@ -12,16 +12,6 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 
-mark: <span style="background-color: @0;
-                                  display: flex;
-                                  width: calc(100% + 32px);
-                                  margin: -16px;
-                                  padding: 6px 16px 6px 16px;
-                                  ">@1</span>
-red:  @mark(#FF888888,@0)
-blue: @mark(lightblue,@0)
-gray: @mark(gray,@0)
-
 -->
 
 
@@ -88,6 +78,37 @@ In der Umsetzung für den 4809 geht man einen anderen Weg. Hier definieren wir
 ein Set von `structs`, die auf den Speicher gemapt werden.  
 
 ![alt-text](../images/10_megaAVR_0/Structs_Register_avr.png "Darstellung der Strukturen über dem Speicherraum [^AR1000] Seite 5")
+
+```c  sfr_defs.h
+typedef struct ADC_struct {    
+   unsigned char CH0MUXCTRL;     // Channel 0 MUX Control     
+   unsigned char CH1MUXCTRL;     // Channel 1 MUX Control     
+   unsigned char CH2MUXCTRL;     // Channel 2 MUX Control     
+   unsigned char CH3MUXCTRL;     // Channel 3 MUX Control     
+   unsigned char CTRLA;          // Control Register A     
+   unsigned char CTRLB;          // Control Register B     
+   unsigned char REFCTRL;        // Reference Control     
+   unsigned char EVCTRL;         // Event Control     
+   WORDREGISTER(CH0RES);         // Channel 0 Result
+   ....
+} ADC_t;
+
+#define WORDREGISTER(regname)  \     
+  union { \     
+    unsigned short regname; \            
+    struct { \                   
+      unsigned char regname ## L; \
+      unsigned char regname ## H; \            
+    };    \
+}
+```
+
+| Postfix | Meaning               | Example           |
+| ------- | --------------------- | ----------------- |
+| `_gm`   | Group - Mask          | TC_CLKSEL_gm      |
+| `_gc`   | Group - Configuration | TC_CLKSEL_DIV1_gc |
+| `_bm`   | Bit   - Mask          | TC_CCAEN_bm       |
+| `_bp`   | Bit   - Position      | TC_CCAEN_bp       |
 
 [^AR1000]: Firma Microchip, AVR1000: Getting Started Writing C-code for XMEGA, [Link](http://ww1.microchip.com/downloads/en/AppNotes/doc8075.pdf)
 
