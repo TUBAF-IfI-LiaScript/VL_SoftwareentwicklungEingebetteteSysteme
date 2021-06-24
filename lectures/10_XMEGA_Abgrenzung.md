@@ -35,7 +35,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ## Zugriff auf die Register und Speicherelemente
 
-Die Adressierungen der Register und Konfigurationsbits für den ATmega erfolgte bisher anhand individuell.
+Die Adressierungen der Register und Konfigurationsbits für den ATmega erfolgte bisher individuell durch Nutzung der einzelnen Adressen und Positionen.
 
 ```c
 #include <avr/io.h>
@@ -44,10 +44,10 @@ int main()
 {
     /* Setzt das Richtungsregister des Ports A auf 0xff
        (alle Pins als Ausgang, vgl. Abschnitt Zugriff auf Ports): */
-    DDRA = 0xff;    
+    DDRA = 0xff;
 
     /* Setzt PortA auf 0x03, Bit 0 und 1 "high", restliche "low": */
-    PORTA = 0x03;   
+    PORTA = 0x03;
 
     // Setzen der Bits 0,1,2,3 und 4
     // Binär 00011111 = Hexadezimal 1F
@@ -75,30 +75,30 @@ Dahinter stehen folgende Macros der `avrlibc`.
 ```
 
 In der Umsetzung für den 4809 geht man einen anderen Weg. Hier definieren wir
-ein Set von `structs`, die auf den Speicher gemapt werden.  
+ein Set von `structs`, die auf den Speicher gemapt werden.
 
 ![alt-text](../images/10_megaAVR_0/Structs_Register_avr.png "Darstellung der Strukturen über dem Speicherraum [^AR1000] Seite 5")
 
 ```c  sfr_defs.h
-typedef struct ADC_struct {    
-   unsigned char CH0MUXCTRL;     // Channel 0 MUX Control     
-   unsigned char CH1MUXCTRL;     // Channel 1 MUX Control     
-   unsigned char CH2MUXCTRL;     // Channel 2 MUX Control     
-   unsigned char CH3MUXCTRL;     // Channel 3 MUX Control     
-   unsigned char CTRLA;          // Control Register A     
-   unsigned char CTRLB;          // Control Register B     
-   unsigned char REFCTRL;        // Reference Control     
-   unsigned char EVCTRL;         // Event Control     
+typedef struct ADC_struct {
+   unsigned char CH0MUXCTRL;     // Channel 0 MUX Control
+   unsigned char CH1MUXCTRL;     // Channel 1 MUX Control
+   unsigned char CH2MUXCTRL;     // Channel 2 MUX Control
+   unsigned char CH3MUXCTRL;     // Channel 3 MUX Control
+   unsigned char CTRLA;          // Control Register A
+   unsigned char CTRLB;          // Control Register B
+   unsigned char REFCTRL;        // Reference Control
+   unsigned char EVCTRL;         // Event Control
    WORDREGISTER(CH0RES);         // Channel 0 Result
    ....
 } ADC_t;
 
-#define WORDREGISTER(regname)  \     
-  union { \     
-    unsigned short regname; \            
-    struct { \                   
+#define WORDREGISTER(regname)  \
+  union { \
+    unsigned short regname; \
+    struct { \
       unsigned char regname ## L; \
-      unsigned char regname ## H; \            
+      unsigned char regname ## H; \
     };    \
 }
 ```
@@ -122,13 +122,15 @@ typedef struct ADC_struct {
 
 **Erweiterung gegenüber dem ATmega328**
 
-1. Erweiterte Konfigurierbarkeit der Vergleichsspannung  
+1. Erweiterte Konfigurierbarkeit der Vergleichsspannung.
+
+    mehrere wählbare Eingänge unabhängig vom ADC, einstellbare interne Referenz
 
 ![alt-text](../images/10_megaAVR_0/DAC_Configuration_AC.png "Struktur des ACs im 4809 [^Microchip4809] Seite 386")
 
 2. Integration in das Eventsystem
 
-    Der digitale Ausgang der AC  steht als Quelle für das Ereignissystem zur Verfügung. Die Ereignisse von der AC sind asynchron zu allen Takten im Gerät.
+    Der digitale Ausgang der AC steht als Quelle für das Ereignissystem zur Verfügung. Die Ereignisse von der AC sind unabhängig vom allen Takten im Gerät.
 
 3. Definition eines Hysterese-Fensters
 
@@ -138,28 +140,28 @@ typedef struct ADC_struct {
 <!-- data-type="none" -->
 | lowpower mode | disabled           | enabled            |
 | ------------- | ------------------ | ------------------ |
-| off           | 0 - *0* - 10 mV    | 0 - *0* - 10 mV    |
-| small         | 0 - *10* - 30 mV   | 0 - *10* - 30 mV   |
-| medium        | 10 - *30* - 90 mV  | 5 - *25* - 50 mV   |
-| large         | 20 - *60* - 150 mV | 12 - *50* - 190 mV |
+| off           | 0 - **0** - 10 mV    | 0 - **0** - 10 mV    |
+| small         | 0 - **10** - 30 mV   | 0 - **10** - 30 mV   |
+| medium        | 10 - **30** - 90 mV  | 5 - **25** - 50 mV   |
+| large         | 20 - **60** - 150 mV | 12 - **50** - 190 mV |
 
-    Die Festlegung des Ausgabepegels kann durch das `INVERT` Bit.
+    Die Festlegung des Ausgabesignal kann durch das `INVERT` Bit invertiert werden.
 
 ```ascii
               ^
-              |            
-              ┤                  ╭─╮                                         
-              ┤~~~~~~~~~~~~~~~~~~│~│~~~~~~~~~~~~~~~~~~╭─╮~~~~       
-              ┤                  │ │  ╭╮ ╭╮ ╭╮   ╭╮  ╭╯ ╰─╮                  
-              ┤  ╭╮          ╭─╮ │ │ ╭╯╰╮│╰─╯╰╮╭╮│╰──╯    │╭                  
-Vergleichs-  v┼╭╮││╭╮ ╭╮╭╮   │ ╰─╯ ╰─╯  ││    ││││        ╰╯   Analoges Eingangs-               
+              |
+              ┤                  ╭─╮
+              ┤~~~~~~~~~~~~~~~~~~│~│~~~~~~~~~~~~~~~~~~╭─╮~~~~
+              ┤                  │ │  ╭╮ ╭╮ ╭╮   ╭╮  ╭╯ ╰─╮
+              ┤  ╭╮          ╭─╮ │ │ ╭╯╰╮│╰─╯╰╮╭╮│╰──╯    │╭
+Vergleichs-  v┼╭╮││╭╮ ╭╮╭╮   │ ╰─╯ ╰─╯  ││    ││││        ╰╯   Analoges Eingangs-
 wert          ┤│││││╰╮│╰╯│   │          ╰╯    ╰╯╰╯             signal
-              ┤╯╰╯╰╯ ╰╯  ╰─╮ │                                          
-              ┤~~~~~~~~~~~~│~│~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                            
-              ┤            ╰─╯                          
+              ┤╯╰╯╰╯ ╰╯  ╰─╮ │
+              ┤~~~~~~~~~~~~│~│~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ┤            ╰─╯
               ┤------------+ +---+ +------------------+ +---
-              ┤            | |   | |                  | |   
-              ┤            +-+   +-+                  +-+    
+              ┤            | |   | |                  | |
+              ┤            +-+   +-+                  +-+
               ┼───┴──────────┴──────────┴───────────┴────> t
 
 ```
@@ -168,20 +170,17 @@ wert          ┤│││││╰╮│╰╯│   │          ╰╯    ╰�
 
 ### Analog Converter
 
-Die Analog-Digital-Wandler (ADC)-Peripherie des 4809 liefert 10-Bit-Ergebnisse. Dabei "vergleicht" der ADC entweder analoge Eingangspins, eine interne Spannungsreferenz oder die Ausgabe eines Temperatursensors mit entsprechenden Referenzspannungen `AVDD`, `VREFA` oder einer intern erzeugten Spannung. Der ADC ist mit einem analogen Multiplexer verbunden, der der die Auswahl von mehreren unsymmetrischen Spannungseingängen ermöglicht. Der ADC unterstützt die Abtastung in Bursts, wobei eine konfigurierbare Anzahl von Wandlungsergebnissen zu einem einzigen ADC-Ergebnis akkumuliert wird (Sample Accumulation). einzelnen ADC-Ergebnis kumuliert werden (Sample Accumulation).
+Die Analog-Digital-Wandler (ADC)-Peripherie des 4809 liefert 10-Bit-Ergebnisse. Dabei "vergleicht" der ADC entweder analoge Eingangspins, eine interne Spannungsreferenz oder die Ausgabe eines Temperatursensors mit entsprechenden Referenzspannungen `AVDD`, `VREFA` oder einer intern erzeugten Spannung. Der ADC ist mit einem analogen Multiplexer verbunden, der die Auswahl von mehreren unsymmetrischen Spannungseingängen ermöglicht. Der ADC unterstützt die Abtastung in Bursts, wobei eine konfigurierbare Anzahl von Wandlungsergebnissen zu einem einzigen ADC-Ergebnis akkumuliert wird (Sample Accumulation).
 
 Das ADC-Eingangssignal wird durch eine Sample-and-Hold-Schaltung geführt, die sicherstellt, dass die Eingangsspannung zum ADC während der Abtastung auf einem konstanten Pegel gehalten wird.
-während der Abtastung auf einem konstanten Pegel gehalten wird.
 
-Zur Überwachung des Eingangssignals steht eine Fenstervergleichsfunktion zur Verfügung, die so konfiguriert werden kann, dass nur bei benutzerdefinierten Schwellenwerten für
-Interrupt nur bei benutzerdefinierten Schwellenwerten für unter, über, innerhalb oder außerhalb eines Fensters auslöst, wobei ein minimaler Software-Eingriff
-erforderlich.
+Zur Überwachung des Eingangssignals steht eine Fenstervergleichsfunktion mit benutzerdefinierten Schwellenwerten zur Verfügung, die so konfiguriert werden kann, dass sie Interrupts für Messwerte unter, über, innerhalb oder außerhalb des Fensters auslöst, wobei nur minimaler Software-Eingriff erforderlich ist.
 
 ![alt-text](../images/10_megaAVR_0/ADC_blockDiagram.png "Basic structure of ADC [^Microchip4809] Seite 396")
 
-Der ADC kann zwei Interrupttypen auslösen `WCOMP`  Window Comparator Interrupt Enable und `RESRDY` Result Ready Interrupt Enable. Letztgenannter steht als Quelle im Event-System verwendet werden.
+Der ADC kann zwei Interrupttypen auslösen `WCOMP`  Window Comparator Interrupt und `RESRDY` Result Ready Interrupt. Letztgenannter steht als Quelle im Event-System zur Verfühgung.
 
-Der ADC benötigt für eine maximale Auflösung eine Eingangstaktfrequenz zwischen 50 kHz und 1,5 MHz. Wenn eine niedrigere Auflösung als 10 Bit gewählt wird, kann die Eingangstaktfrequenz zum ADC höher als 1,5 MHz sein, um eine höhere Abtastrate zu erhalten.
+Der ADC benötigt für eine maximale Auflösung eine Eingangstaktfrequenz zwischen 50 kHz und 1,5 MHz. Wenn eine niedrigere Auflösung als 10 Bit genutzt wird (z.B durch kürzen des Ergebnisses auf 8 Bit), kann die Eingangstaktfrequenz zum ADC höher als 1,5 MHz sein, um eine höhere Abtastrate zu erhalten.
 
 Die Initialisierung erfolgt in folgenden Schritten:
 
@@ -198,9 +197,9 @@ Die Initialisierung erfolgt in folgenden Schritten:
 
 Was sind die Änderungen gegenüber dem ATmega328?
 
-* Die größere Zahl von internen Referenzspannungen bietet eine deutliche Anpassungsfähigkeit an verschiedene Ausgabespannungshorizonte
+* Die größere Zahl von internen Referenzspannungen bietet eine deutliche bessere Anpassungsfähigkeit an verschiedene Ausgabespannungshorizonte
 * Die Definition von Wertefenstern ermöglicht eine spezifischere Auswertung in Hardware (siehe `CTRLE` [^Microchip4809] Seite 409). Interrupts können ausgelöst werden, wenn das Wandlungsergebnis innerhalb, außerhalb der beiden Schranken `WINLT` oder `WINHT` liegt.
-* Mit der Möglichkeit der Akkumlation von Samples kann ohne zusätzliche Implementierung eine Glättung der Werte vorgenommen werden ([^Microchip4809] Seite 406).
+* Mit der Möglichkeit der Akkumulation von Samples kann ohne zusätzliche Implementierung eine Glättung der Werte vorgenommen werden ([^Microchip4809] Seite 406).
 
 Eine gute Dokumentation der Verwendung der ADC Konfiguration liefert [Tutorial](https://onlinedocs.microchip.com/pr/GUID-E551BCD6-7E40-4DB9-BF2D-5E7E95B90AB3-en-US-3/index.html?GUID-590AA50F-CE8E-45E8-B96A-8B491F7FCCE1).
 
@@ -237,20 +236,20 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 ```ascii
 Serial
 Data in                                           <--------+ Serial Data
----------+             +---------------------+             | out     
-         |             |                     |             |          
-         v             |                     v             |          
-       +-+-------------+-+                 +-+-------------+-+     
-       | |   CPU I     | |                 | |   CPU II    | |    
-       | |  +-------+  | |                 | |  +-------+  | |    
+---------+             +---------------------+             | out
+         |             |                     |             |
+         v             |                     v             |
+       +-+-------------+-+                 +-+-------------+-+
+       | |   CPU I     | |                 | |   CPU II    | |
+       | |  +-------+  | |                 | |  +-------+  | |
      ▬-+-□--| Core  |--□-+-▬      +------▬-+-□--| Core  |--□-+-▬
-       | |  | Logic |  | |        |        | |  | Logic |  | |    
+       | |  | Logic |  | |        |        | |  | Logic |  | |
      ▬-+-□--|       |--□-+-▬------+      ▬-+-□--|       |--□-+-▬
-       | |  |       |  | |        zu       | |  |       |  | |    
+       | |  |       |  | |        zu       | |  |       |  | |
      ▬-+-□--|       |--□-+-▬   testende  ▬-+-□--|       |--□-+-▬
-       | |  +-------+  | |    Verbindung   | |  +-------+  | |     
-       | +-------------+ |                 | +-------------+ |     
-       +-----------------+                 +-----------------+     
+       | |  +-------+  | |    Verbindung   | |  +-------+  | |
+       | +-------------+ |                 | +-------------+ |
+       +-----------------+                 +-----------------+
 
 ````
 
@@ -275,7 +274,7 @@ Joint Test Action Group (kurz JTAG) ist ein häufig verwendetes Synonym für das
 | Test Data Output (TDO) | Serieller Ausgang der Schieberegister.               |
 | Test Clock (TCK).      | Das Taktsignal für die gesamte Testlogik.            |
 | Test Mode Select (TMS) | Diese steuert die State Machine des TAP-Controllers. |
-| Test Reset (TRST)      | Reset der Testlogik                                  |
+| Test Reset (TRST)      | Reset der Testlogik (optional)                       |
 
 
 Der TAP-Controller ist ein von TCK getakteter und von der TMS-Leitung gesteuerter Zustandsautomat. Die TMS-Leitung bestimmt dabei, in welchen Folgezustand beim nächsten Takt gesprungen wird. Der TAP-Controller hat sechs stabile Zustände, das heißt Zustände, in denen mehrere Takte lang verblieben werden kann. Diese sechs Zustände sind „Test Logic Reset“, „Run Test / Idle“, „Shift-DR“ und „Shift-IR“ sowie „Pause-DR“ und „Pause-IR“. Im Zustand „Test Logic Reset“ wird die Testlogik zurückgesetzt, „Run Test / Idle“ wird als Ruhezustand oder für Wartezeiten benutzt. Die beiden „Shift“-Zustände schieben jeweils das DR- oder IR-Schieberegister. Die beiden „Pause“-Zustände dienen der Unterbrechung von Schiebeoperationen. Aus allen anderen Zuständen wird beim folgenden Takt in einen anderen Zustand gesprungen. Beim Durchlaufen werden jeweils bestimmte Steuerfunktionen ausgelöst.
@@ -326,7 +325,7 @@ On-chip Debug Support for Break Conditions, Including
 
 ### debugWire (ATmega328)
 
-debugWIRE ist ein serielles Kommunikationsprotokoll, das als einfache Alternative zu JTAG eingeführt wurde und bei Prozessoren mit begrenzten Ressourcen – speziell wenigen Anschlusspins – eingesetzt wird. debugWIRE erlaubt vollen Lese- und Schreibzugriff auf den Speicher und die Überwachung des Programmflusses. Dabei können nur die Aktionen durchgeführt werden, die auch bei normalem Programmablauf möglich sind. Breakpoints werden durch Einfügen eines Break-Opcodes (0x9598) gesetzt
+debugWIRE ist ein serielles Kommunikationsprotokoll, das als einfache Alternative zu JTAG eingeführt wurde und bei Prozessoren mit begrenzten Ressourcen – speziell wenigen Anschlusspins – eingesetzt wird. debugWIRE erlaubt vollen Lese- und Schreibzugriff auf den Speicher und die Überwachung des Programmflusses. Dabei können nur die Aktionen durchgeführt werden, die auch bei normalem Programmablauf möglich sind. Breakpoints werden durch Einfügen von Break-Opcodes (0x9598) in das Programm vor der Übertragung auf den Microcontroller gesetzt.
 
 debugWIRE benutzt serielle Kommunikation über eine Ein-Draht-Leitung mit Open-Drain-Ankopplung. Die Standard-Taktrate ist 1/128 des Prozessortaktes. Eingeleitet wird die Kommunikation durch Senden des Break-Zustandes (alle Bits 0), als Antwort sendet der zu testende Prozessor das Byte 0x55, das aus abwechselnd Null- und Eins-Pegeln besteht. Dies erlaubt dem Debugger eine einfache Identifizierung der Taktrate.
 
@@ -340,10 +339,11 @@ debugWIRE benutzt serielle Kommunikation über eine Ein-Draht-Leitung mit Open-D
 
 Das Unified Program and Debug Interface (UPDI) ist eine proprietäre Schnittstelle zur externen Programmierung und zum On-Chip Debugging eines Gerätes. Das UPDI unterstützt die Programmierung von nichtflüchtigem Speicher (NVM), FLASH, EEPROM, Fuses, Lockbits. Darüber hinaus kann das UPDI auf den gesamten I/O- und Datenbereich des Bausteins zugreifen.
 
-Die Programmierung und das Debugging erfolgen über das UPDI Physical Interface (UPDI PHY), das eine Ein-Draht-UART-basierte Halbduplex-Schnittstelle, die einen eigenen Pin für den Datenempfang und -versand verwendet. Die Taktung des UPDI PHY erfolgt
-durch den internen Oszillator. Die UPDI-Zugriffsschicht ermöglicht den Zugriff auf die Busmatrix, mit speicherbezogenem Zugriff auf Systemblöcke wie Speicher, NVM und Peripheriegeräte.
+Die Programmierung und das Debugging erfolgen über das UPDI Physical Interface (UPDI PHY), das ist eine Ein-Draht-UART-basierte Halbduplex-Schnittstelle, die einen eigenen Pin für den Datenempfang und -versand verwendet. Die Taktung des UPDI PHY erfolgt durch den internen Oszillator. UPDI bietet zwei Zugriffsmöglichkeiten zum einen über eine UPDI-Zugriffsschicht auf die Busmatrix der MCU zum anderen auf das Asynchronous System Interface.
 
-Das Asynchronous System Interface (ASI) bietet direkten Schnittstellenzugriff auf On-Chip Debugging (OCD), NVM und System-Management-Funktionen. Dadurch erhält der Debugger direkten Zugriff auf Systeminformationen, ohne dass ein Bus Zugriff.
+Der Zugriff auf die Busmatrix, ermöglicht den Zugriff auf Systemblöcke wie Speicher, NVM und Peripheriegeräte über deren Speicherabbildungen (wie es auch der laufende Code kann).
+
+Das Asynchronous System Interface (ASI) bietet direkten Schnittstellenzugriff auf On-Chip-Debugging (OCD), NVM und System-Management-Funktionen. Dadurch erhält der Debugger direkten Zugriff auf Systeminformationen, ohne dass ein Bus Zugriff erforderlich ist.
 
 ![alt-text](../images/10_megaAVR_0/UPDI_Konfiguration_4809.png "UPDI Schema [^Microchip4809] Seite 424")
 
@@ -362,7 +362,7 @@ Es exisiteren verschiedensten Open-Source Projekten für die Implementierung von
 
 Dabei wird jeweils die SPI Schnittstelle für die Programmierung genutzt.
 
-Das eigentliche Debugging bleibt mit Blick auf exertene Debugger properitären Lösungen vorbehalten. Ein Beispiel ist der AVR ICE mit folgenden Features:
+Das eigentliche Debugging bleibt bei den ältern ATmega MCU mit Blick auf externe JTAG Debugger properitären Lösungen vorbehalten. Ein Beispiel ist der Atmel ICE mit folgenden Features:
 
 + Programming and on-chip debugging of all AVR 32-bit MCUs on both JTAG and aWire interfaces
 + Programming and on-chip debugging of all AVR XMEGA family devices on both JTAG and PDI 2-wire interfaces
@@ -370,6 +370,11 @@ Das eigentliche Debugging bleibt mit Blick auf exertene Debugger properitären L
 + Programming and debugging of all SAM ARM Cortex-M based MCUs on both SWD and JTAG interfaces
 + Programming of all tinyAVR 8-bit MCUs with support for the TPI interface
 + Programming and debugging of all AVR 8-bit MCUs with UPDI
+
+Das DebugWire-Protokoll wurde zum Teil reverse-engineered [git](https://github.com/dcwbrown/dwire-debug) [protokoll](http://www.ruemohr.org/docs/debugwire.html)
+
+Auch für das UPDI-Protokoll gibt es Nachbauten [git](https://github.com/ElTangas/jtag2updi) [gdb-adapter](https://github.com/stemnic/pyAVRdbg)
+
 
 **Integrierte Programmer / Debugger**
 
