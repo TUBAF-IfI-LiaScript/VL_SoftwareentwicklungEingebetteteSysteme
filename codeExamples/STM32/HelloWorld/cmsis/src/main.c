@@ -12,8 +12,6 @@ void ms_delay(int ms)
 
 // Version 1: Basic Register Usage
 
-// https://www.vishnumaiea.in/articles/electronics/understanding-stm32-arm-microcontroller-gpios
-
 int main(void){
    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
    GPIOA->MODER |= GPIO_MODER_MODER5_0; 
