@@ -115,25 +115,29 @@ Die Intel-Dokumentation klassifiziert Interrupts und Exceptions wie folgt:
 
 ### NVIC
 
-The devices embed a nested vectored interrupt controller able to manage 16 priority levels, and handle up to 62 maskable interrupt channels plus the 16 interrupt lines of the Cortex®-M4 with FPU:
+> Was steht im Werbetext zum Nested Vector Interrupt Controller (NVIC) und was bedeuten diese Aussagen?
 
-+ Closely coupled NVIC gives low-latency interrupt processing
-+ Interrupt entry vector table address passed directly to the core
-+ Allows early processing of interrupts
-+ Processing of late arriving, higher-priority interrupts
-+ Support tail chaining
-+ Processor state automatically saved
+_The devices embed a nested vectored interrupt controller able to manage 16 priority levels, and handle up to 62 maskable interrupt channels plus the 16 interrupt lines of the Cortex®-M4 with FPU:_
+
++ _Closely coupled NVIC gives low-latency interrupt processing_
++ _Interrupt entry vector table address passed directly to the core_
++ _Allows early processing of interrupts_
++ _Processing of late arriving, higher-priority interrupts_
++ _Support tail chaining_
++ _Processor state automatically saved_
 
 
-### Interrupt Trigger
+### Trigger für die ISR
 
 Cortex-M Controller implementieren mindestens die folgenden Exceptions:
 
-- Reset - Dies ist die Routine, die ausgeführt wird, wenn ein Chip aus dem Reset kommt. Weitere Details finden Sie in der Beitragsreihe Zero to main().
+- Reset - Dies ist die Routine, die ausgeführt wird, wenn ein Chip aus dem Reset kommt.
 - Non Maskable Interrupt (NMI) - Wie der Name schon sagt, kann dieser Interrupt nicht deaktiviert werden. Wenn Fehler in anderen Exception-Handlern auftreten, wird ein NMI ausgelöst. Abgesehen von der Reset-Exception hat er die höchste Priorität aller Exceptions.
-- HardFault - Der Auffangbehälter für verschiedene Systemfehler, die auftreten können, wie z. B. Zugriffe auf fehlerhaften Speicher, Divide-by-Zero-Fehler und illegale Zugriffe ohne Vorzeichen. Es ist der einzige Handler für Fehler auf der ARMv6-M-Architektur, aber für ARMv7-M & ARMv8-M können Fault-Handler mit feinerer Granularität für bestimmte Fehlerklassen aktiviert werden (d.h. MemManage, BusFault, UsageFault). 2
+- HardFault - Der Auffangbehälter für verschiedene Systemfehler, die auftreten können, wie z. B. Zugriffe auf fehlerhaften Speicher, Divide-by-Zero-Fehler und illegale Zugriffe ohne Vorzeichen. Es ist der einzige Handler für Fehler auf der ARMv6-M-Architektur, aber für ARMv7-M & ARMv8-M können Fault-Handler mit feinerer Granularität für bestimmte Fehlerklassen aktiviert werden (d.h. MemManage, BusFault, UsageFault).
 - SVCall - Exception Handler, der aufgerufen wird, wenn ein Supervisor Call (svc) Befehl ausgeführt wird.
 - PendSV & SysTick - Interrupts auf Systemebene, die durch Software ausgelöst werden. Sie werden typischerweise beim Betrieb eines RTOS verwendet, um zu verwalten, wann der Scheduler läuft und wann Kontextwechsel stattfinden.
+
+Auf die Core Exeptions folgen die Interrupteinträge der peripheren Elemente. 
 
 > _"Events sind neben Interrupts etwas, das dem Cortex Core seinen Schlaf  rauben kann."_ (mikrocontroller.net Forenbeitrag)
 
