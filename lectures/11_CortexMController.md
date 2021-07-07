@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.1
+version:  1.0.2
 language: de
 narrator: Deutsch Female
 
@@ -135,9 +135,9 @@ Zudem werden die erweiterten Componenten durch ein mehrteiliges Bussystem verkn�
 
 Diese Bus Ausgänge des Core werden auf untnerschiedliche Busse im Controller abgebildet.
 
-![alt-text](../images/11_CortexM/BusMatrix.png "Busmatrix am Beispiel des STM32F401 Controllers[^STM32] Seite 17")
+![alt-text](../images/11_CortexM/BusMatrix.png "Busmatrix am Beispiel des STM32F401 Controllers[^STM32] Seite 36")
 
-[^Microchip4809]: Firma ST, STM32F401xx Controller Data Sheet, [Link](file:///tmp/mozilla_zug0/stm32f401re.pdf)
+[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 
 Unter anderem bieten folgende Halbleiterhersteller Cortex-M4 basierende Mikrocontroller an:
 
@@ -170,9 +170,9 @@ Die STM32 F4-Serie ist die erste Gruppe von STM32-Mikrocontrollern, die auf dem 
 
 ![alt-text](../images/11_CortexM/BlockDiagramm.png "Interne Struktur des STM32F401 [^STM32] Seite 14")
 
-[^Microchip4809]: Firma ST, STM32F401xx Controller Data Sheet, [Link](file:///tmp/mozilla_zug0/stm32f401re.pdf)
+[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 
-[^STM32F4]: Firma ST, Vergleich der Features der STM32F4xx Reihe, [Link](https://www.st.com/en/microcontrollers-microprocessors/stm32g4-series.html)
+[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 
 ## Programmierung
 
@@ -262,5 +262,11 @@ Der Quellcode der HAL- und LL-Treiber ist in ANSI-C entwickelt, was ihn unabhän
 
 ![Nucleo](../images/00_Einfuehrung/Nucleo64.jpg)
 
-1. Hello World in CMSIS
-2. Hello World in HAL
+[Usermanual des Boards](https://usermanual.wiki/Pdf/UM1724UserManualSTM32Nucleo64boards.913537569/view)
+
+| Index | Basis der Umsetzung | Weiterführende Links                                                                       |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------ |
+| 1     | CMSIS               | [ARM CMSIS](https://developer.arm.com/tools-and-software/embedded/cmsis)                   |
+| 2     | HAL                 | [STM HAL Tutorials](http://stm32f4-discovery.net/2014/09/stm32f4-tutorials-one-place/)     |
+| 3     | HAL mit STM32CubeMX |                                                                                            |
+| 4     | mbed                | [mbedOS Einführung](https://os.mbed.com/docs/mbed-os/v6.12/introduction/architecture.html) |
