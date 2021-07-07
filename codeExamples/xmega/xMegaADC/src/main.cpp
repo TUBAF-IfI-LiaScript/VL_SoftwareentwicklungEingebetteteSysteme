@@ -58,8 +58,7 @@ void ADC0_init()
     ADC0.CTRLC = ADC_PRESC_DIV4_gc      /* CLK_PER divided by 4 */
                | ADC_REFSEL_VDDREF_gc;  /* Internal reference */
     
-    ADC0.CTRLA = ADC_ENABLE_bm          /* ADC Enable: enabled */
-               | ADC_RESSEL_10BIT_gc;    /* 10-bit mode */
+    ADC0.CTRLA |= ADC_RESSEL_10BIT_gc;    /* 10-bit mode */
 }
 
 uint16_t ADC_read(uint8_t channel, bool accum)
@@ -72,6 +71,9 @@ uint16_t ADC_read(uint8_t channel, bool accum)
     if (accum == true) ADC0.CTRLB = ADC_SAMPNUM_ACC64_gc;
     else ADC0.CTRLB = 0;
 
+    // Enable ADC conversion after reconfiguration
+    ADC0.CTRLA |= ADC_ENABLE_bm;         
+
     // Trigger an ADC conversion
     ADC0_COMMAND |= ADC_STCONV_bm;
 
@@ -79,7 +81,7 @@ uint16_t ADC_read(uint8_t channel, bool accum)
     while (ADC0_COMMAND & ADC_STCONV_bm);
  
     // Read result
-    return ADC0_RESL;
+    return ADC0_RES;
 }
 
 int main(void)
@@ -96,11 +98,13 @@ int main(void)
 
         char buffer[10];
         itoa(result_A0, buffer, 10);
+        USART3_sendString("ADC:");
         USART3_sendString(buffer);
         USART3_sendChar(',');
         itoa(result_A1, buffer, 10);
+        USART3_sendString("ADC_acc:");
         USART3_sendString(buffer);
         USART3_sendChar('\n');
-        _delay_ms(100);
+        _delay_ms(2);
     }
 }
