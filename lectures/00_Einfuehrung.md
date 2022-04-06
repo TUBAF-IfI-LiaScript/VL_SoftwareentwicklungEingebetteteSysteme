@@ -19,7 +19,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Motiviation und Organisation der Veranstaltung `                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
@@ -29,9 +29,6 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ------------------------------------------------
 
-<div>
-  <span id="simulation-time"></span>
-</div>
 ```cpp       avrlibc.cpp
 // preprocessor definition
 #define F_CPU 16000000UL
@@ -58,7 +55,6 @@ int main (void) {
   return 0;
 }
 ```
-@AVR8js.sketch
 
 ## Zielstellung
 
@@ -79,7 +75,8 @@ Was steht im Modulhandbuch über diesen Kurs?
 * Gegenüberstellung verschieden Architekturen etablierter Controller
 * Integration von Controllern in eingebetteten Anwendungen
 * Erweiterung als Sensor-Aktor-Systeme,
-* Parameter von Sensorssystemen, *Betriebssystemkonzepte für eingebettete Controller
+* Parameter von Sensorssystemen,
+* Betriebssystemkonzepte für eingebettete Controller
 
 
 ********************************************************************************
@@ -99,7 +96,7 @@ Was steht im Modulhandbuch über diesen Kurs?
 | 8-Bit AVR Familie                                                                                                 | 32-Bit Cortex M4 Prozessor                                                                         |
 | C, Assembler                                                                                                      | C, C++                                                                                             |
 | avrlibc, FreeRTOS                                                                                                 | CMSIS, mbedOS, FreeRTOS                                                                            |
-| 10 Bit Analog-Digital-Wandler, 16 Bit Timer,                                                                                                                   | 10 timers, 16- and 32-bit (84 MHz), 12-bit ADC                                                                                                    |
+| 10 Bit Analog-Digital-Wandler, 16 Bit Timer,                                                                      | 10 timers, 16- and 32-bit (84 MHz), 12-bit ADC                                                     |
 
 
 ********************************************************************************
@@ -109,23 +106,23 @@ Was steht im Modulhandbuch über diesen Kurs?
 
 **Inhalte der Vorlesung**
 
-| VL  | Tag    | Inhalt der Vorlesung                  |
-| --- | ------ |:------------------------------------- |
-| 0   | 07.04. | Einführung und Motivation             |
-| 1   | 14.04. | ATmega Architektur                    |
-| 2   | 21.04. | ATmega Komponenten                    |
-| 3   | 28.04. | ATmega Komponenten                    |
-| 4   | 05.04. | Entwicklung eingebetteter Anwendungen |
-| 5   | 12.05. | Echtzeitanwendungen und Scheduling    |
-| 6   | 19.05. | FreeRTOS                              |
-| 7   | 26.05. | ARM / Cortex M Architektur            |
-| 8   | 02.06. | Cortex M Komponenten                  |
-| 9   | 09.06. | Cortex M Komponenten                  |
-| 10  | 16.06. | Cortex M Komponenten                  |
-| 11  | 23.06. | DSP Implementierung im STM32F4        |
-| 12  | 30.06. | STM32 Cube.AI                         |
-| 13  | 07.07. | mbedOS vs Arduino                     |
-| 14  | 14.07. |                                       |
+| VL  | Tag    | Inhalt der Vorlesung                           |
+| --- | ------ |:---------------------------------------------- |
+| 0   | 06.04. | Einführung und Motivation                      |
+| 1   | 13.04. | ATmega Architektur                             |
+| 2   | 20.04. | ATmega Komponenten                             |
+| 3   | 27.04. | Performancebeschränkungen der Architektur      |
+| 4   | 04.04. | Analog Digitalwandler                          |
+| 5   | 12.05. | _Ausfall wegen Konferenzreise_                 |
+| 6   | 18.05. | Kommunikationsprotokolle                       |
+| 7   | 25.05. | Echtzeitanwendungen                            |
+| 8   | 01.06. | Scheduling Algorithmen                         |
+| 9   | 08.06. | FreeRTOS                                       |
+| 10  | 15.06. | megaAVR 0 Series - xMega Controller            |
+| 11  | 22.06. | megaAVR 0 Series - xMega Controller Abgrenzung |
+| 12  | 29.06. | ARM Controllern Architektur                    |
+| 13  | 06.07. | Komponenten des STM32F4                        |
+| 14  | 13.07. | mbedOS                                         |
 
 
 ********************************************************************************
@@ -178,19 +175,19 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 | Name                    | Email                                   |
 |:----------------------- |:--------------------------------------- |
 | Prof. Dr. Sebastian Zug | sebastian.zug@informatik.tu-freiberg.de |
-| Karl Fessel             | karl.fessel@informatik.tu-freiberg.de   |
+| Georg Jäger             | georg.jaeger@informatik.tu-freiberg.de  |
 
-> Bitte melden Sie sich im OPAL unter [Eingebettete Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/26860322818/CourseNode/102563572218999) für die Veranstaltung an. Dies ist im Kontext der Pandemiesituation Teil des Hygienekonzepts der Hochschule.
+> Bitte melden Sie sich im OPAL unter [Eingebettete Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/26860322818/CourseNode/102563572218999) für die Veranstaltung an. Dies ist im Kontext der Pandemiesituation Teil des Hygienekonzepts der Universität.
 
 ### Zeitplan
 
 Die Veranstaltung wird sowohl für die Vorlesung als auch die Übung in Präsenz durchgeführt.
 
-| Veranstaltungen | Tag        | Zeitslot    | Bemerkung      |
-| --------------- | ---------- | ----------- | -------------- |
-| Vorlesung       | Mittwoch   | 16:00-17:30 |                |
-| Praktium        | Dienstag   | 16:00-17:30 | ungerade Woche |
-| Übungen         | Donnerstag | 09:00-11:00 | gerade Woche   |
+| Veranstaltungen | Tag        | Zeitslot   | Bemerkung      |
+| --------------- | ---------- | ---------- | -------------- |
+| Vorlesung       | Mittwoch   | 9:00-10:30 |                |
+| Praktikum       | Donnerstag | 7:30-9:00  | ungerade Woche |
+| Übungen         | Donnerstag | 7:30-9:00  | gerade Woche   |
 
 Die Veranstaltung vollständig als Online-Kurs umgesetzt. Der BBB Link zur Vorlesung lautet: https://teach.informatik.tu-freiberg.de/b/seb-2rs-com-0go. Diese wird aufgezeichnet und steht im Nachgang als Download zur Verfügung.
 
@@ -200,7 +197,7 @@ Die Veranstaltung vollständig als Online-Kurs umgesetzt. Der BBB Link zur Vorle
 
 > *Arbeitsaufwand:* Der Zeitaufwand beträgt 180h und setzt sich zusammen aus 60h Präsenzzeit und 120h Selbststudium. Letzteres umfasst die Vor- undNachbereitung der Lehrveranstaltung, die eigenständige Lösung von Übungsaufgaben sowie die Prüfungsvorbereitung.
 
-> *Prüfungsform:* Die Veranstaltung wird mit einer mündlichen Prüfung abgeschlossen.
+> *Prüfungsform:* Die Veranstaltung wird mit einer mündlichen Prüfung abgeschlossen. Dabei starten wir zunächst mit einem von Ihnen gewählten Codebeispiel und gehen dann auf die Inhalte der Vorlesungen und Übungen ein.
 
 ## Schreiben Sie an den Materialien mit!
 
@@ -216,49 +213,6 @@ Die Unterlagen selbst sind in der Auszeichnungsprache LiaScipt verfasst und öff
 ****************************************************************************
 
                          {{1-2}}
-****************************************************************************
-
-Markdown ist eine Auszeichnungssprache für die Gliederung und Formatierung von Texten und anderen Daten. Analog zu HTML oder LaTex werden die Eigenschaften und Organisation von Textelementen (Zeichen, Wörtern, Absätzen) beschrieben. Dazu werden entsprechende "Schlüsselworte", die sogenannten Tags verwandt.
-
-Markdown wurde von John Gruber und Aaron Swartz mit dem Ziel entworfen, die Komplexität der Darstellung so weit zu reduzieren, dass schon der Code sehr einfach lesbar ist. Als Auszeichnungselemente werden entsprechend möglichst kompakte Darstellungen genutzt.
-
-```markdown HelloWorld.md
-# Überschrift
-
-__eine__ Betonung __in kursiver Umgebung__
-
-* Punkt 1
-* Punkt 2
-
-Und noch eine Zeile mit einer mathematischen Notation $a=cos(b)$!
-```
-
-----------------------------------------------------------------------------<h1>Überschrift</h1>
-<i>eine <em>Betonung</em> in kursiver Umgebung</i>
-<ul>
-<li>Punkt 1</li>
-<li>Punkt 2</li>
-</ul>
-Und noch eine Zeile mit einer mathematischen Notation $a=cos(b)$!
-
-----------------------------------------------------------------------------
-
-Eine gute Einführung zu Markdown finden Sie zum Beispiel unter
-
-* [MarkdownGuide](https://www.markdownguide.org/getting-started/)
-* [GitHubMarkdownIntro](https://guides.github.com/features/mastering-markdown/)
-
-Mit einem entsprechenden Editor und einigen Paketen macht das Ganze dann auch Spaß
-
-* Wichtigstes Element ist ein Previewer, der es Ihnen erlaubt "online" die Korrektheit der Eingaben zu prüfen
-* Tools zur Unterstützung komplexerer Eingaben wie zum Beispiel der Tabellen (zum Beispiel für Atom mit [markdown-table-editor](https://atom.io/packages/markdown-table-editor))
-* Visualisierungsmethoden, die schon bei der Eingabe unterstützen
-* Rechtschreibprüfung (!)
-
-****************************************************************************
-
-
-                                 {{2-3}}
 ****************************************************************************
 
 Allerdings vermisst Markdown trotz seiner Einfachheit einige Features, die
@@ -329,14 +283,6 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 
 * Bringen Sie sich mit Implementierungen in die Veranstaltung ein.
 
-## Und wenn Sie dann immer noch programmieren wollen ...
-
-Dann wartet das TUFbots-Team auf Sie ...
-
-![WALL-E](../images/00_Einfuehrung/AtWorkRobocup.jpg)
-
-Quelle: RoboCup German Open
-
 ## Und jetzt sind Sie an der Reihe
 
 > Mit welchen Systemen haben Sie bereits gearbeitet und welche Projekte haben Sie damit verwirklicht?
@@ -344,3 +290,14 @@ Quelle: RoboCup German Open
 ## Hausaufgabe
 
 + Legen Sie sich, sofern das noch nicht geschehen ist, einen GitHub Account an ... und seien Sie der erste, der einen Fehler, eine unglückliche Formulierung usw. in den Unterlagen findet und diesen als _Contributer_ korrigiert :-)
++ Überlegen Sie sich, zu welches Thema Sie im Praktikum vorstellen wollen:
+
+  + DSP Implementierung im STM32F4    
+  + STM32 Cube.AI                         
+  + mbedOS vs FreeRTOS
+  + LCD Programmierung mit dem STM  
+  + CAN Bus - Theorie und Anwendung
+
+  Die Präsentationen sollten 30 Minuten einnehmen und mit einer praktischen Demonstration kombiniert werden.
+
++ Setzen Sie sich mit Plattform.io auseinder und testen Sie die Features zum Debugging.

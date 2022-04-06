@@ -1,24 +1,24 @@
 # DigitaleSysteme
 
 Dieses Repository umfasst die Materialien für die Veranstaltung "Digitale
-Systeme" an der TU BAF des Sommersemester 2021. Dabei liegt der Schwerpunkt
+Systeme" an der TU BAF des Sommersemester 2022. Dabei liegt der Schwerpunkt
 auf einer detaillierten Einführung der ARM Cortex Prozessoren, deren Komponenten
 und Programmierkonzepten im Vergleich zur Prozessorfamilie der 8-Bit ATmega und Xmega.
 
 | VL  | Tag    | Inhalt der Vorlesung                           |
 | --- | ------ |:---------------------------------------------- |
-| 0   | 07.04. | Einführung und Motivation                      |
-| 1   | 14.04. | ATmega Architektur                             |
-| 2   | 21.04. | ATmega Komponenten                             |
-| 3   | 28.04. | Performancebeschränkungen der Architektur      |
-| 4   | 05.04. | Analog Digitalwandler                          |
-| 5   | 12.05. | Timer und Interrupts                           |
-| 6   | 19.05. | Kommunikationsprotokolle                       |
-| 7   | 26.05. | Echtzeitanwendungen                            |
-| 8   | 02.06. | Scheduling Algorithmen                         |
-| 9   | 09.06. | FreeRTOS                                       |
-| 10  | 16.06. | megaAVR 0 Series - xMega Controller            |
-| 11  | 23.06. | megaAVR 0 Series - xMega Controller Abgrenzung |
-| 12  | 30.06. | ARM Controllern Architektur                    |
-| 13  | 07.07. | Komponenten des STM32F4                        |
-| 14  | 14.07. | mbedOS                                         |
+| 0   | 06.04. | Einführung und Motivation                      |
+| 1   | 13.04. | ATmega Architektur                             |
+| 2   | 20.04. | ATmega Komponenten                             |
+| 3   | 27.04. | Performancebeschränkungen der Architektur      |
+| 4   | 04.04. | Analog Digitalwandler                          |
+| 5   | 12.05. | _Ausfall wegen Konferenzreise_                 |
+| 6   | 18.05. | Kommunikationsprotokolle                       |
+| 7   | 25.05. | Echtzeitanwendungen                            |
+| 8   | 01.06. | Scheduling Algorithmen                         |
+| 9   | 08.06. | FreeRTOS                                       |
+| 10  | 15.06. | megaAVR 0 Series - xMega Controller            |
+| 11  | 22.06. | megaAVR 0 Series - xMega Controller Abgrenzung |
+| 12  | 29.06. | ARM Controllern Architektur                    |
+| 13  | 06.07. | Komponenten des STM32F4                        |
+| 14  | 13.07. | mbedOS                                         |
