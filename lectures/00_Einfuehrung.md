@@ -297,6 +297,7 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
   + mbedOS vs FreeRTOS
   + LCD Programmierung mit dem STM  
   + CAN Bus - Theorie und Anwendung
+  + Micropython im Kontext von Mikrocontrollern
 
   Die Präsentationen sollten 30 Minuten einnehmen und mit einer praktischen Demonstration kombiniert werden.
 
