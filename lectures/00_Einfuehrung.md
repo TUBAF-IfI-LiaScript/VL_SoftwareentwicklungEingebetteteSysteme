@@ -300,4 +300,4 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 
   Die Präsentationen sollten 30 Minuten einnehmen und mit einer praktischen Demonstration kombiniert werden.
 
-+ Setzen Sie sich mit Platform.io auseinder und testen Sie die Features zum Debugging.
++ Setzen Sie sich mit platformio.org auseinader und testen Sie die Features zum Debugging.
