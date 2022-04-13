@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.1
+version:  0.0.2
 language: de
 narrator: Deutsch Female
 
@@ -19,7 +19,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Wiederholung Grundbegriffe`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/01_Grundbegriffe.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/01_Grundbegriffe.md) |
@@ -131,7 +131,7 @@ Folgende Klassen von Verknüpfungen sind in der ALU integriert:
 
 Wie lässt sich ein solches System praktisch realsieren? Schauen wir uns eine 4-Bit PIPO Schieberegister genauer an.
 
-![](../images/01_Grundbegriffe/ShiftRegister.png)[^1]
+![](../images/01_Grundbegriffe/ShiftRegister.png "4-Bit PIPO Schieberegister [^1]")
 
 [^1]: Ali Alnoaman, Foreneintrag Electrical Engineering, [Link](https://electronics.stackexchange.com/questions/443939/need-a-simple-explanation-of-a-left-right-shift-register)
 
@@ -306,7 +306,7 @@ Und wie sieht das Ganze in einem realen System aus? Der Intel 4004 ist ein 4-Bit
 + 4003: I/O-Erweiterungs-Chip, bestehend aus einem statischen Schieberegister
 + 4004: die eigentliche CPU
 
-![intel](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png)[^1]
+![intel](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png "Architektur des 4004 [^1]")
 
 [^1]: [Intel 4004 (Autor Appaloosa)](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png)
 
@@ -328,7 +328,7 @@ Speicherauszug den Intel 4004:
 
 Unterstützung für die Interpretation aus dem Nutzerhandbuch, dass das Instruction-Set beschreibt:
 
-![instruction-set](../images/01_Grundbegriffe/4004_Instruction_set.png)[^2]
+![instruction-set](../images/01_Grundbegriffe/4004_Instruction_set.png "Auszug aus dem Handbuch des 4004 [^2]")
 
 [^2]: [Intel 4004 Assembler](http://e4004.szyc.org/asm.html)
 
@@ -357,7 +357,7 @@ Instruktionen durch den Compiler einfach und überschaubar ist.
 
 |                                    | CISC          | RISC                 |
 | ---------------------------------- | ------------- | -------------------- |
-| Ausführungszeit einer Instruktion  | $geq 1$       | meist 1              |
+| Ausführungszeit einer Instruktion  | $>=1$       | meist 1              |
 | Instruktionssatz                   | groß          | klein                |
 | Instruktionsformat                 | variabel      | strikt               |
 | unterstützte Adressierungsschemata | komplex       | einfach (Load/Store) |

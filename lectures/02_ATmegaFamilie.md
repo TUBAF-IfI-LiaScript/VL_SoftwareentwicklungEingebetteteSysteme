@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.1
+version:  0.0.2
 language: de
 narrator: Deutsch Female
 
@@ -22,7 +22,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Überblick zur ATmega Familie`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md) |
@@ -465,9 +465,8 @@ Variante mittels C und der avrlibc
 int main (void) {
    DDRB |= (1 << PB5);
    while(1) {
-       // PINB = (1 << PB5);   // Dieses Feature ist im Simulator
-                               // nicht implementiert
-       PORTB ^= ( 1 << PB5 );
+       PORTB ^= ( 1 << PB5 );  // Variante 1
+       // PINB = (1 << PB5);   // Variante 2
        _delay_ms(1000);
    }
    return 0;
@@ -478,20 +477,20 @@ int main (void) {
 Das gleiche Programm auf der Basis des Arduino Frameworks.
 
 <div>
-  <wokwi-led color="green" pin="13" port="B" label="13"></wokwi-led>
+  <wokwi-led color="green" pin="12" port="B" label="12"></wokwi-led>
   <span id="simulation-time"></span>
 </div>
 ```cpp       arduino.cpp
 // the setup function runs once
 void setup() {
   // initialize digital pin 13 as an output.
-  pinMode(13, OUTPUT);
+  pinMode(12, OUTPUT);
 }
 
 void loop() {
-  digitalWrite(13, HIGH);
+  digitalWrite(12, HIGH);
   delay(1000);
-  digitalWrite(13, LOW);
+  digitalWrite(12, LOW);
   delay(1000);              
 }
 ```
@@ -634,4 +633,4 @@ Im Programmspeicher steht auf den ersten 8 Byte `jmp 0xe4`
 ## Aufgaben
 
 - [ ] Machen Sie sich mit den Struktur des Handbuches des Controllers vertraut.
-- [ ] Ermitteln Sie die Abläufe bei der Generierung von Arduino Code.
+- [ ] Ermitteln Sie die Abläufe bei der Generierung von Atmega Code. Evaluieren Sie Assembler-Dateien und experimentieren Sie mit verschiedenen Optimierungsstufen.
