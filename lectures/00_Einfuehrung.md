@@ -177,7 +177,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 | Prof. Dr. Sebastian Zug | sebastian.zug@informatik.tu-freiberg.de |
 | Georg Jäger             | georg.jaeger@informatik.tu-freiberg.de  |
 
-> Bitte melden Sie sich im OPAL unter [Eingebettete Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/26860322818/CourseNode/102563572218999) für die Veranstaltung an. Dies ist im Kontext der Pandemiesituation Teil des Hygienekonzepts der Universität.
+> Bitte melden Sie sich im OPAL unter [Digitale Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/19949355008/CourseNode/99400814778000) für die Veranstaltung an. Dies ist im Kontext der Pandemiesituation Teil des Hygienekonzepts der Universität.
 
 ### Zeitplan
 
@@ -185,11 +185,10 @@ Die Veranstaltung wird sowohl für die Vorlesung als auch die Übung in Präsenz
 
 | Veranstaltungen | Tag        | Zeitslot   | Bemerkung      |
 | --------------- | ---------- | ---------- | -------------- |
-| Vorlesung       | Mittwoch   | 9:00-10:30 |                |
+| Vorlesung       | Mittwoch   | 9:15-10:45 |                |
 | Praktikum       | Donnerstag | 7:30-9:00  | ungerade Woche |
 | Übungen         | Donnerstag | 7:30-9:00  | gerade Woche   |
 
-Die Veranstaltung vollständig als Online-Kurs umgesetzt. Der BBB Link zur Vorlesung lautet: https://teach.informatik.tu-freiberg.de/b/seb-2rs-com-0go. Diese wird aufgezeichnet und steht im Nachgang als Download zur Verfügung.
 
 ### Prüfungsmodalitäten
 
@@ -206,7 +205,7 @@ Die Veranstaltung vollständig als Online-Kurs umgesetzt. Der BBB Link zur Vorle
 
 Die Lehrmaterialien finden Sie unter GitHub, einer Webseite für das Versionsmanagement und die Projektverwaltung.
 
-[https://github.com/TUBAF-IfI-LiaScript/VL_EingebetteteSysteme/blob/dev/01_HistorischerUeberblick.md](https://github.com/TUBAF-IfI-LiaScript/VL_EingebetteteSysteme/blob/dev/01_HistorischerUeberblick.md)
+[https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/tree/main/lectures](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/tree/main/lectures)
 
 Die Unterlagen selbst sind in der Auszeichnungsprache LiaScipt verfasst und öffentlich verfügbar.
 
@@ -301,4 +300,4 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 
   Die Präsentationen sollten 30 Minuten einnehmen und mit einer praktischen Demonstration kombiniert werden.
 
-+ Setzen Sie sich mit Plattform.io auseinder und testen Sie die Features zum Debugging.
++ Setzen Sie sich mit platformio.org auseinader und testen Sie die Features zum Debugging.
