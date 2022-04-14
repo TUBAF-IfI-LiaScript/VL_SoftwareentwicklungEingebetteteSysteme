@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.1
+version:  0.0.2
 language: de
 narrator: Deutsch Female
 
