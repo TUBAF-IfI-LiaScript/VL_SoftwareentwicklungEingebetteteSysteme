@@ -32,9 +32,9 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ## Organisation der Übungen
 
-Wir treffen uns 14tägig donnerstags um 9:30 und besprechen die Umsetzung der in den Vorlesungen vermittelten Inhalte. Darauf bauen verschiedene Übungsaufgaben auf, die Sie selbstständig lösen.
+Wir treffen uns in der ersten Phase der Veranstaltung donnerstags um 7:30 und besprechen die Umsetzung der in den Vorlesungen vermittelten Inhalte. Darauf bauen verschiedene Übungsaufgaben auf, die Sie selbstständig lösen.
 
-Der 14tägige Praktikumsteil würde die Umsetzung dieser Aufgaben begleiten. Hierfür legen wir die Termine flexibel fest.
+In der zweiten Phase betten wir Ihre Vorträge ein.
 
 > Ich möchte vorschlagen, dass Sie die Aufgaben gemeinsam realisieren und dafür GitHub nutzen. Das erleichtert mir auch die Begleitung der Entwicklung.
 
