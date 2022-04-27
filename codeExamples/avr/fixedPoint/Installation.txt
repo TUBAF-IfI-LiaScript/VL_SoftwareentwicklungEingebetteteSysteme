@@ -1,0 +1,7 @@
+sudo apt-get install python-dev gcc libelf-dev arduino
+sudo apt-get install python-pip
+
+python3 -m pip install easyprocess==0.2.10
+python3 -m pip install entrypoint2
+python3 -m pip install pysimavr
+python3 -m pip install pandas

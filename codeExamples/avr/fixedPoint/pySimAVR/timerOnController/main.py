@@ -9,6 +9,7 @@ import time
 def prepareHeaderFiles (names, folder):
   # sources may be defined by code OR file names
   # header files have to be passed by source code (no idea why)
+  # lets extract the source code from header files
   headers = {}
   for name in names:
     with open(folder+name) as f:
