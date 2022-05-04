@@ -534,4 +534,4 @@ int main(void)
 ## Aufgaben
 
 - [ ] Reimplementieren Sie die Nutzung des Temperatursensors aus Ihrer "Bastelbox", so dass bis auf die Serielle Kommunikation keine Arduino-Bibliotheken mehr genutzt werden.
-[Wiki des Herstellers](https://www.mangolabs.de/product/steel-head-thermistor/)
+- [ ] Nutzen Sie die Infrarot-Distanzsensoren aus Ihrer Box, um eine Entfernungsmessung zu Implementieren. Für die Ausgabe sollten Sie beide Varianten der Linearsierung nutzen - Look-up-Table und Funktionsdarstellung.
