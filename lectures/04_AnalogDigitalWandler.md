@@ -498,7 +498,7 @@ double getTemp(void)
     double t;
 
     // Set the internal reference and mux.
-    ADMUX = (1<<REFS1) | (1<<REFS0) | (1<<MUX3));
+    ADMUX = (1<<REFS1) | (1<<REFS0) | (1<<MUX3);
     ADCSRA |= (1<<ADEN);  // enable the ADC
 
     // wait for voltages to become stable.
