@@ -34,8 +34,8 @@ _Verschiebungen von Veranstaltungen im Semester_
 | 10  | 15.06.              | Donnerstag | Freitag    | Konferenz                 |
 | 11  | 22.06.              | Mittwoch   | Donnerstag |                           |
 | 12  | 29.06.              | Mittwoch   | Freitag    | Konferenzreise            |
-| 13  | 06.07.              | Mittwoch   | Freitag    |                           |
-| 14  | 13.07.              | Mittwoch   | Freitag    |                           |
+| 13  | 06.07.              | Mittwoch   | Freitag    | Projekttreffen            |
+| 14  | 13.07.              | Mittwoch   | Freitag    | ZEWAF Kolloquium          |
 
 _Vorträge im Seminarteil_
 
