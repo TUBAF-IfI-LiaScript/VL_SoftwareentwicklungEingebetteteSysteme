@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.2
+version:  1.0.3
 language: de
 narrator: Deutsch Female
 
@@ -23,7 +23,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Cortex M Controller Features`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/11_CortexMController.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/11_CortexMController.md) |
@@ -85,7 +85,7 @@ Cortex-M3, mit größerer Chipfläche, umfasst den vollständigen Thumb- und Thu
 | ARM        | Thumb        | Thumb-2     | Hardware Multiplizierer | Hardwaredividierer | DSP--Erweiterung | Sättigungsarithmetik | Gleitkommaeinheit | TrustZone | ARM-Architektur      |
 | ---------- | ------------ | ----------- | ----------------------- | ------------------ | ---------------- | -------------------- | ----------------- | --------- | -------------------- |
 | Cortex-M0  | Größtenteils | Teilmenge   | 1 oder 32 Zyklen        | nein               | nein             | nein                 | nein              | nein      | ARMv6-M[9]           |
-| Cortex-M1  | Größtenteils | Teilmenge   | 3 oder 33 Zyklen        | nein               | nein             | nein                 | nein              | nein      | ARMv6-M[9]           |
+| Cortex-M1  | Größtenteils | Teilmenge   | 3 oder 32 Zyklen        | nein               | nein             | nein                 | nein              | nein      | ARMv6-M[9]           |
 | Cortex-M3  | Vollständig  | Vollständig | 1 Zyklus                | ja                 | nein             | teilweise            | nein              | nein      | Armv7-M[10]          |
 | Cortex-M4  | Vollständig  | Vollständig | 1 Zyklus                | ja                 | ja               | ja                   | Optional          | nein      | Armv7E-M[10]         |
 | Cortex-M7  | Vollständig  | Vollständig | 1 Zyklus                | ja                 | ja               | ja                   | Optional          | nein      | Armv7E-M[10]         |
@@ -110,9 +110,9 @@ Cortex-M3, mit größerer Chipfläche, umfasst den vollständigen Thumb- und Thu
 ||     Digitaler Signal Prozessor        ||          
 ||     optionale FPU Einheit             ||                                             
 |+---------------------------------------+|                                                               
-|     Cortex-M7F                          |  
-|     Erweiterter Signalprozessor         |      
-|     optionale FPU Einheit               |                                            
+|      Cortex-M7F                         |  
+|      Erweiterter Signalprozessor        |      
+|      optionale FPU Einheit              |                                            
 +-----------------------------------------+                                    .
 ```
 
@@ -133,7 +133,7 @@ Zudem werden die erweiterten Componenten durch ein mehrteiliges Bussystem verkn�
 | DMA Bus Verbindungen |                 |
 | USB On-the-go        |                 |
 
-Diese Bus Ausgänge des Core werden auf untnerschiedliche Busse im Controller abgebildet.
+Diese Bus Ausgänge des Core werden auf unterschiedliche Busse im Controller abgebildet.
 
 ![alt-text](../images/11_CortexM/BusMatrix.png "Busmatrix am Beispiel des STM32F401 Controllers[^STM32] Seite 36")
 

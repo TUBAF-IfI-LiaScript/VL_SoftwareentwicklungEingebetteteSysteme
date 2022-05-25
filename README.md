@@ -25,11 +25,23 @@ _Zeitplan_
 | 13  | 06.07. | Scheduling Algorithmen                         |                          |
 | 14  | 13.07. | FreeRTOS                                       |                          |
 
+_Verschiebungen von Veranstaltungen im Semester_
+
+| VL  | Vorlesung laut Plan | Vorlesung  | Übung      | Grund                     |
+| --- | ------------------- |:---------- | ---------- | ------------------------- |
+| 8   | 01.06.              | Donnerstag | Freitag    | Konfrerenzreise           |
+| 9   | 08.06.              | Mittwoch   | Freitag    | Dissertationsverteidigung |
+| 10  | 15.06.              | Donnerstag | Freitag    | Konferenz                 |
+| 11  | 22.06.              | Mittwoch   | Donnerstag |                           |
+| 12  | 29.06.              | Mittwoch   | Freitag    | Konferenzreise            |
+| 13  | 06.07.              | Mittwoch   | Freitag    |                           |
+| 14  | 13.07.              | Mittwoch   | Freitag    |                           |
+
 _Vorträge im Seminarteil_
 
 | Datum    | Thema                |
 | -------- | -------------------- |
 | 23. Juni | DSP Implementierung  |
-| 30. Juni | Konfernzreise        |
-| 7. Juli  | LCD-Display, CAN-BUs |
-| 14. Juli | CubeAI, MicroPython  |
+| 1. Juli  | Konfernzreise        |
+| 8. Juli  | LCD-Display, CAN-BUs |
+| 15. Juli | CubeAI, MicroPython  |
