@@ -29,7 +29,7 @@ _Verschiebungen von Veranstaltungen im Semester_
 
 | VL  | Vorlesung laut Plan | Vorlesung  | Übung      | Grund                     |
 | --- | ------------------- |:---------- | ---------- | ------------------------- |
-| 8   | 01.06.              | Donnerstag | Freitag    | Konfrerenzreise           |
+| 8   | 01.06.              | Freitag    | Donnerstag | Konfrerenzreise           |
 | 9   | 08.06.              | Mittwoch   | Freitag    | Dissertationsverteidigung |
 | 10  | 15.06.              | Donnerstag | Freitag    | Konferenz                 |
 | 11  | 22.06.              | Mittwoch   | Donnerstag |                           |
