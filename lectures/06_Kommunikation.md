@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.0
+version:  1.0.1
 language: de
 narrator: Deutsch Female
 
@@ -58,6 +58,7 @@ Im Rahmen der Veranstaltung wollen wir drei Kommunikationsprotokolle, die durch 
 * UART - Universal Asynchronous Receiver Transmitter
 * I2C - Inter-Integrated Circuit (in der "Atmel Welt" als _Two Wire Interface_ (TWI) bezeichnet)
 * SPI - Serial Perepherial Interface
+* CAN - Controller Area Network (folgt als studentischer Beitrag)
 
 > **Merke** `UART` beschreibt eine Schnittstelle während `I2C` und `SPI` konkrete Protokolldefinitionen darstellen.
 
@@ -88,7 +89,7 @@ Der CD4543 Baustein dient der Ansteuerung von 7-Segment-Anzeigen. Mit dem Dekodi
                                   {{2-3}}
 ********************************************************************************
 
-Unterscheidungsmerkmale:
+Unterscheidungsmerkmale von Kommunikationsmedien:
 
 + Zahl der Kommunikationspartner im System (1:1; 1:n, n:m)
 + Rolle für Teilnehmer (Master/Slave)
@@ -133,6 +134,7 @@ style=" width: 80%;
         min-width: 400px;
         display: block;
         margin-left: auto;
+        | 5   | `GND`            | Die Signale werden gegen diese Referenz gemessen                          |
         margin-right: auto;"
 -->
 
@@ -195,7 +197,6 @@ Der UART basiert auf TTL-Pegel mit 0V (logisch 0) und 5V (logisch 1). Im Untersc
 | 2   | `RxD`  oder `Rx` | Receive Data - Empfang an Gerät 1, Sendelinie für Gerät 2, bzw. Empfänger |
 | 3   | `TxD`  oder `Tx` | Transmit Data - Senden für Gerät 1, Empfang für Gerät 2 bzw. Empfänger    |
 | 4   | `DTR`            | Data Terminal Ready                                                       |
-| 5   | `GND`            | Die Signale werden gegen diese Referenz gemessen                          |
 | 6   | `DSR`            | Data Set Ready                                                            |
 | 7   | `RTS` oder `RTR` | Gerät 1 ist bereit Daten zu empfangen                                     |
 | 8   | `CTS`            | Clear To Send - Empfänger bzw. Gerät 2 ist bereit Daten zu empfangen      |
@@ -366,7 +367,7 @@ Häufig wird eine Funktionalität benötigt, um einen String mit variablen Felde
 
 Normalerweise werden bei der Verwendung von 'printf' die Zeichen an einen Datenstrom gesendet, der Standard-Ausgabestream genannt wird. Auf einem PC wird der Standardausgabestrom von der Funktion zur Anzeige von Zeichen auf dem Bildschirm verarbeitet. Mit dem folgenden Code wird ein benutzerdefinierter Stream erstellt, der von der USART-Sendefunktion verarbeitet wird.
 
-vgl. Beispiel im Bereich [codeExamples](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/tree/main/codeExamples/avr) des projektes.
+vgl. Beispiel im Bereich [codeExamples](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/tree/main/codeExamples/avr) des Projektes.
 
 ## I2C
 
