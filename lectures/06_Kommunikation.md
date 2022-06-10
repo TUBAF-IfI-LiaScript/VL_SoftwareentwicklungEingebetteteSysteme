@@ -17,7 +17,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 [![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/06_Kommunikation.md#1)
 
 
-# Kommunkation
+# Kommunikation
 
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -197,6 +197,7 @@ Der UART basiert auf TTL-Pegel mit 0V (logisch 0) und 5V (logisch 1). Im Untersc
 | 2   | `RxD`  oder `Rx` | Receive Data - Empfang an Gerät 1, Sendelinie für Gerät 2, bzw. Empfänger |
 | 3   | `TxD`  oder `Tx` | Transmit Data - Senden für Gerät 1, Empfang für Gerät 2 bzw. Empfänger    |
 | 4   | `DTR`            | Data Terminal Ready                                                       |
+| 5   | 'GND'		 | 0-Potential
 | 6   | `DSR`            | Data Set Ready                                                            |
 | 7   | `RTS` oder `RTR` | Gerät 1 ist bereit Daten zu empfangen                                     |
 | 8   | `CTS`            | Clear To Send - Empfänger bzw. Gerät 2 ist bereit Daten zu empfangen      |
@@ -579,7 +580,7 @@ Einen Überblick zur Verwendung der SPI Kommunikation liefert das Tutorial [AVR1
 | Pins                  | RxD, TxD    | SDA, SCL    | SCLK, MOSI, MISO, SS |
 | Datenrate             | 20KBps      | 1MBps       | 20MBps               |
 | Kommunikationsmodus   | asynchron   | synchron    | synchron             |
-| Kommunikationspartner | $=2$        | $2<=x<=127$ | $>=2$                |
+| Kommunikationspartner | $=2$        | $2<=x<=1023$ | $>=2$                |
 | Master                | -           | $>=1$       | $>=1$                |
 | Duplex                | Full Duplex | Half Duplex | Full Duplex          |
 
