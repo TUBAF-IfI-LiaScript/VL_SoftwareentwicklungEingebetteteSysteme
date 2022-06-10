@@ -463,7 +463,7 @@ Cons
 
 - Langsamere Datenübertragungsrate als SPI
 - Die Größe des Datenrahmens ist auf 8 Bit begrenzt
--Kompliziertere Hardware zur Implementierung als SPI erforderlich
+- Kompliziertere Hardware zur Implementierung als SPI erforderlich
 
 [^PCF8574]: Datenblatt Texas Instruments, [TI_PCF8574](https://www.ti.com/lit/ds/symlink/pcf8574.pdf?ts=1621388532534&ref_url=https%253A%252F%252Fwww.google.com%252F)
 
