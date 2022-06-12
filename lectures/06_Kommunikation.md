@@ -580,9 +580,11 @@ Einen Überblick zur Verwendung der SPI Kommunikation liefert das Tutorial [AVR1
 | Pins                  | RxD, TxD    | SDA, SCL    | SCLK, MOSI, MISO, SS |
 | Datenrate             | 20KBps      | 1MBps       | 20MBps               |
 | Kommunikationsmodus   | asynchron   | synchron    | synchron             |
-| Kommunikationspartner | $=2$        | $2<=x<=1023$ | $>=2$                |
+| Kommunikationspartner | $=2$        | $2<=x<=127$* | $>=2$                |
 | Master                | -           | $>=1$       | $>=1$                |
 | Duplex                | Full Duplex | Half Duplex | Full Duplex          |
+
+*I2C hat mittlerweile eine 10 Adressenbit-Version, wobei 7-bit und 10-bit Slaves "mischbar" sind: [I2C-Adressbit-Versionen](https://www.thebackshed.com/forum/uploads/BobD/2015-04-23_130513_I2C_Slave_Addressing.pdf)
 
 Die Betrachtung lässt andere Bussysteme (CAN, LIN, FlexRay), die eine erweiterte Hardware benötigen außer Acht. Analog bleiben die aus Sicht der Eingebetteten Systeme interessanten Sensornetze, die drahtlos Daten austauschen unberücksichtigt.
 
