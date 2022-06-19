@@ -42,7 +42,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 ```ascii
                                           zeitliche Toleranz
                         gering                                            hoch
-                        "$\mu s$                                          "$s$"
+                        "$\mu s$                                            _s_
                         +-----------------------------------------------------+
 aperiodische Aufgaben   ||        x                x                   x     ||
                         ||      Notfall-         Automatisches       Klima-  ||
