@@ -34,7 +34,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ## Ausgangspunkt und Begriffe
 
-Nehmen wir an, dass wir ein autonom fahrendes Fahrzeug allein mit einem zentralen Rechner betreiben wollen. Welche Aufgaben müssen dabei abgedeckt werden und welche zeitlichen Eigenschaften sind dabei zu berücksichtigen.
+Nehmen wir an, dass wir ein autonom fahrendes Fahrzeug allein mit einem zentralen Rechner betreiben wollen. Welche Aufgaben müssen dabei abgedeckt werden und welche zeitlichen Eigenschaften sind dabei zu berücksichtigen?
 
 <!--
 style="width: 80%; min-width: 420px; max-width: 720px;"
@@ -42,7 +42,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 ```ascii
                                           zeitliche Toleranz
                         gering                                            hoch
-                        "$\mu s$                                          "$s$"
+                        "$\mu s$                                            _s_
                         +-----------------------------------------------------+
 aperiodische Aufgaben   ||        x                x                   x     ||
                         ||      Notfall-         Automatisches       Klima-  ||
@@ -75,7 +75,7 @@ Die Endzeit $d$ wird durch die Bereitzeit $r$ und die Zeitdauer der Ausführung 
 Echtzeitimplementierung als „nanokernel“
 
 + Ausrichtung an einer minimalen festen Periode $p$
-+ Evaluation des Laufzeitverhaltens aller Tasks nötig notwendig
++ Evaluation des Laufzeitverhaltens aller Tasks zwingend notwendig
 + keine Schutzfunktionen des Speichers
 + Polling als einzige Zugriffsfunktion auf die Hardware
 
@@ -113,10 +113,10 @@ while (1) {
 
 ### Taskmodel
 
-Eine Task ist die Ausführung eines sequentiellen Programms auf einem Prozessor in seiner spezifischen Umgebung (Kontext). Eine Task ist:
+Eine Task ist die Ausführung eines sequentiellen Programms auf einem Prozessor in seiner spezifischen Umgebung (Kontext). Eine Task...
 
 + erfüllt eine von Programm spezifizierte Aufgabe
-+ Träger der Aktivität = Abstraktion der Rechenzeit die kleinste planbare Einheit
++ ist Träger der Aktivität = Abstraktion der Rechenzeit die kleinste planbare Einheit
 
 ```text @plantUML.png
 @startuml
@@ -136,7 +136,7 @@ suspended --> [*]  : deleted
 | Zustand     | Bedeutung                                                                                                                                                                                            |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | _waiting_   |                                                                                                                                                                                                      |
-| _ready_     | Der Scheduler wählt aus der Liste der Tasks denjenigen lauffähigen Prozess als nächstes zur Bearbeitung aus, der die höchste Priorität hat. Mehrere Tasks können sich im Zustand lauffähig befinden. |
+| _ready_     | Der Scheduler wählt aus der Liste der Tasks denjenigen lauffähigen Prozess als nächstes zur Bearbeitung aus, der die höchste Priorität hat. Mehrere Tasks können sich im Zustand _ready_ befinden. |
 | _running_   |    In einem Ein-Prozessorsystem kann immer nur ein Task aktiv sein. Er bekommt die die CPU zugeteilt und wird ausgeführt, bis er entweder (1) sich selbst beendet (in den Zustand _suspended_) versetzt, (2) auf ein Betriebsmittel warten muss (z.B. auf das Ende eine I/O-Aufrufes), oder (3) nicht mehr die höchste Priorität hat, da beispielsweise die Wartebedingung eines höherprioren Prozesses erfüllt wurde.                                                                                                                                                                                                 |
 | _suspended_ |         Ein Task wird in den Zustand _suspended_ versetzt, wenn nicht mehr alle Bedingungen zur direkten Ausführung erfüllt sind. Ein Task kann dabei auf unterschiedliche Bedingungen warten, beispielsweise auf das Ende von I/O-Aufrufen, auf den Ablauf einer definierten Zeitspanne oder auf das Freiwerden sonstiger Betriebsmittel.                                                                                                                                                                                               |
 
@@ -144,10 +144,21 @@ suspended --> [*]  : deleted
 
 ### Charakterisierung von Tasks
 
+          {{0-1}}
+*****************************************************************************
+
 **- Zeitverhalten**
 
+**- Abhängigkeiten**
+
+**- Unterbrechbarkeit**
+
+*****************************************************************************
+ 
                       {{1-2}}
 *****************************************************************************
+
+**- Zeitverhalten**
 
 _Periodische Tasks_ ... werden mit einer bestimmten Frequenz $f$ regelmäßig aktiviert.
 
@@ -166,12 +177,11 @@ _Sporadische Tasks_ ... treten nicht regulär auf. Man nimmt aber eine obere Sch
 
 *****************************************************************************
 
-
- **- Abhängigkeiten**
-
           {{2-3}}
 *****************************************************************************
 
+ **- Abhängigkeiten**
+ 
  _unabhängige Tasks_  ... können in jeder beliebigen Reihenfolge ausgeführt werden
  _abhängige Tasks_ ... werden durch Vorgänger-Relationen beschrieben und in einem Precedencegraphen dargestellt
 
@@ -204,11 +214,14 @@ _Sporadische Tasks_ ... treten nicht regulär auf. Man nimmt aber eine obere Sch
 
 *****************************************************************************
 
- **- Unterbrechbarkeit**
-
           {{3-4}}
+*****************************************************************************
+          
+ **- Unterbrechbarkeit**
+ 
 ![alt-text](../images/07_Scheduling/PreemptiveTaskScheduling.png "Unterbrechung einer Taskausführung beim Bereitwerden höherpriorer Tasks")
 
+*****************************************************************************
 
 ###  Taskparameter
 
@@ -301,11 +314,11 @@ Der Lösungsansatz besteht darin mit Hilfe eines entsprechenden Puffers eine unt
 > _WCET_ ... Worst Case Execution Time
 
 
-Mögliche Messverfahren sind die:
+Mögliche Messverfahren sind:
 
-- Erfassung von oszillierenden Pins
-- automatische Abzählen im Assembler Code  
-- Schätzung auf höherabstrakter Codeebene (grafische Modellierungstools)
+- die Erfassung von oszillierenden Pins
+- das automatische Abzählen im Assembler Code  
+- die Schätzung auf höherabstrakter Codeebene (grafische Modellierungstools)
 
 ![alt-text](../images/07_Scheduling/AblaufMasterarbeitWolf.png "Ablauf der Vorhersage des Laufzeitverhaltens von Simulink Modellen (Quelle Masterarbeit Markus Wolf)")
 
@@ -333,7 +346,7 @@ Scheduling bedeutet die Zuordnung von Prozessoren und Ressourcen zu Tasks, so da
 > **Merke:** In seiner allgemeinen Form ist das Scheduling-Problem NP-vollständig. Dabei gelten folgende Annahmen:
 >
 > - gleiche Bereitzeiten aller Tasks,
-> - keine Anhängigkeiten,
+> - keine Abhängigkeiten,
 > - nur feste Prioritäten, ...
 
 Dafür lassen sich unterschiedliche Optimierungskriterien definieren:
@@ -345,16 +358,17 @@ Dafür lassen sich unterschiedliche Optimierungskriterien definieren:
 
 Diese Metriken sind auf Nicht-Echtzeitscheduling ausgerichtet und können nicht übernommen werden weil:
 
-- keine Deadlines berücksichtigt werden
-- keine unterschiedlichen Prioritäten der Tasks (Fairness)
+- keine Deadlines und
+- keine unterschiedlichen Prioritäten der Tasks (Fairness) berücksichtigt werden
 - Kurze Reaktionszeiten genügen nicht, Zeiten müssen garantiert sein
 - keine weiteren Parameter wie Periodizität oder Abhängigkeiten abgebildet werden
 
 > **Merke:** Echtzeit braucht die Evaluation der Deadlines. Entsprechend muss für die Latency gelten $L_{max} = 0$
 
-Für weiche Echtzeitkriterien lassen eine Abweichung zu dieser Vorgabe zu:
+Weiche Echtzeitkriterien lassen eine Abweichung von dieser Vorgabe zu:
 
 > Maximale Zahl von verspäteten Tasks
+
 > Maximale Verspätung $L_{max} = max(c_i-d_i)$
 
 Bereitzeit für alle Tasks $T_1 - T_5$ = 0
@@ -462,7 +476,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
                          "$d_m$"     "$d_l$"                 "$d_k$"
 ```
 
-> Achtung: Das Scheitern des Tests schließt die Existenz eines gültigen Schedules nicht aus! In beiden nachfolgenden Fällen scheiter das Kriterium!
+> Achtung: Das Scheitern des Tests schließt die Existenz eines gültigen Schedules nicht aus! In beiden nachfolgenden Fällen scheitert das Kriterium!
 
 <!--
 style="width: 80%; min-width: 420px; max-width: 720px;"
