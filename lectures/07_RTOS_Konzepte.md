@@ -144,21 +144,7 @@ suspended --> [*]  : deleted
 
 ### Charakterisierung von Tasks
 
-          {{0-1}}
-*****************************************************************************
-
-**- Zeitverhalten**
-
-**- Abhängigkeiten**
-
-**- Unterbrechbarkeit**
-
-*****************************************************************************
- 
-                      {{1-2}}
-*****************************************************************************
-
-**- Zeitverhalten**
+1. **Zeitverhalten**
 
 _Periodische Tasks_ ... werden mit einer bestimmten Frequenz $f$ regelmäßig aktiviert.
 
@@ -175,20 +161,18 @@ _Sporadische Tasks_ ... treten nicht regulär auf. Man nimmt aber eine obere Sch
  - Fahrradtacho (obere Schranke = Geschwindigkeit)
  - Anfragen auf einer Kommunikationsschnittstelle
 
+
+          {{1-3}}
 *****************************************************************************
 
-          {{2-3}}
-*****************************************************************************
+2. **Abhängigkeiten**
 
- **- Abhängigkeiten**
- 
- _unabhängige Tasks_  ... können in jeder beliebigen Reihenfolge ausgeführt werden
- _abhängige Tasks_ ... werden durch Vorgänger-Relationen beschrieben und in einem Precedencegraphen dargestellt
+_unabhängige Tasks_  ... können in jeder beliebigen Reihenfolge ausgeführt werden
+_abhängige Tasks_ ... werden durch Vorgänger-Relationen beschrieben und in einem Precedencegraphen dargestellt
 
-
-  <!--
-  style="width: 80%; min-width: 420px; max-width: 720px;"
-  -->
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
 ```ascii
                            Auslesen des
                              Sensors
@@ -214,11 +198,11 @@ _Sporadische Tasks_ ... treten nicht regulär auf. Man nimmt aber eine obere Sch
 
 *****************************************************************************
 
-          {{3-4}}
+          {{2-3}}
 *****************************************************************************
-          
- **- Unterbrechbarkeit**
- 
+
+3. **Unterbrechbarkeit**
+
 ![alt-text](../images/07_Scheduling/PreemptiveTaskScheduling.png "Unterbrechung einer Taskausführung beim Bereitwerden höherpriorer Tasks")
 
 *****************************************************************************
