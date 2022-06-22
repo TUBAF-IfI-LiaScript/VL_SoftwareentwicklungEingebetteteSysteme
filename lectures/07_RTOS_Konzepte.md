@@ -158,11 +158,10 @@ _Aperiodische Tasks_ ... lassen sich  nicht auf ein zeitlich wiederkehrendes Mus
 
 _Sporadische Tasks_ ... treten nicht regulär auf. Man nimmt aber eine obere Schranke bzgl. der Häufigkeit ihres Aufrufs an.
 
- - Fahrradtacho (obere Schranke = Geschwindigkeit)
- - Anfragen auf einer Kommunikationsschnittstelle
+- Fahrradtacho (obere Schranke = Geschwindigkeit)
+- Anfragen auf einer Kommunikationsschnittstelle
 
-
-          {{1-3}}
+{{1-3}}
 *****************************************************************************
 
 2. **Abhängigkeiten**
