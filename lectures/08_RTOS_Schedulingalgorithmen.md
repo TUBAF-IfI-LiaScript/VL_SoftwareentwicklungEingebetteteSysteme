@@ -259,14 +259,14 @@ Abhängigkeiten zwischen Tasks lassen sich in den bisher besprochenen Algorithme
 Gegeben: Taskmenge abhängiger Tasks $T = {T_1 , .., T_n}$ und ein azyklischer gerichteter
 Graph, der die Vorrangrelation beschreibt.
 
-Aus der Menge der Tasks deren Nachfolger bereits alle ausgewählt wurden oder die keinen Nachfolger
-besitzen, wählt LDF die Task mit der spätesten Deadline aus. Die Warteschlange der Tasks wird also
-in der Reihenfolge der zuletzt auszuführenden Tasks aufgebaut. LDF ist ein optimaler Scheduler
-(Lawler 1973).
+Aus der Menge der Tasks deren Nachfolger bereits alle ausgewählt wurden oder die keinen Nachfolger besitzen, wählt LDF die Task mit der spätesten Deadline aus. __Die Warteschlange der Tasks wird also in der Reihenfolge der zuletzt auszuführenden Tasks aufgebaut.__ LDF ist ein optimaler Scheduler (Lawler 1973).
 
 Beispiel
 
 ![alt-text](../images/08_Algorithms/LDF_schema.png "Ablauf des Planungsprozesses mit LDF")
+
+Damit ergibt sich ein gültiger Plan mit: $T_1, T_2, T_4, T_3, T_5, T_6$.
+
 
 ### EDF\*
 
