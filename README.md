@@ -43,5 +43,5 @@ _Vorträge im Seminarteil_
 | -------- | -------------------- |
 | 23. Juni | DSP Implementierung  |
 | 1. Juli  | Konfernzreise        |
-| 8. Juli  | LCD-Display, CAN-BUs |
+| 8. Juli  | LCD-Display, CAN-Bus |
 | 15. Juli | CubeAI, MicroPython  |
