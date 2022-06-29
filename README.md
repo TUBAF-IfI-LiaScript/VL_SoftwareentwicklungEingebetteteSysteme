@@ -16,14 +16,14 @@ _Zeitplan_
 | 4   | 04.04. | Analog Digitalwandler                          |                          |
 | 5   | 12.05. | _Ausfall wegen Konferenzreise_                 |                          |
 | 6   | 18.05. | Interrupts                                     | Grundlagen abgeschlossen |
-| 7   | 25.05. | ARM Controllern Architektur                    |                          |
-| 8   | 01.06. | Komponenten des STM32F4                        | STM32F4                  |
-| 9   | 08.06. | megaAVR 0 Series - xMega Controller            | AtMega4809               |
-| 10  | 15.06. | megaAVR 0 Series - xMega Controller Abgrenzung |                          |
-| 11  | 22.06. | Kommunikationsprotokolle                       |                          |
-| 12  | 29.06. | Echtzeitanwendungen                            |                          |
-| 13  | 06.07. | Scheduling Algorithmen                         |                          |
-| 14  | 13.07. | FreeRTOS                                       |                          |
+| 7   | 25.05. | Kommunikationsprotokolle                       |                          |
+| 8   | 01.06. | ARM Controllern Architektur                    |                          |
+| 9   | 08.06. | Komponenten des STM32F4                        | STM32F4                  |
+| 10  | 15.06. | Echtzeitanwendungen                            |                          |
+| 11  | 22.06. | Scheduling Algorithmen, FreeRTOS               |                          |
+| 12  | 29.06. | megaAVR 0 Series - xMega Controller            | AtMega4809               |
+| 13  | 06.07. | megaAVR 0 Series - xMega Controller Abgrenzung |                          |
+| 14  | 13.07. |                                                |                          |
 
 _Verschiebungen von Veranstaltungen im Semester_
 
