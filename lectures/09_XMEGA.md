@@ -313,19 +313,12 @@ Ein weiteres Einführungsbeispiel finden Sie unter [Link](https://liascript.gith
 
 #### Realisierung
 
-Eine Umsetzungsmöglichkeit für Schaltnetze sind die sogenannten PAL (Programmable Array Logic) die bereits in der Vorlesung 4 eingeführt wurden [Link](https://liascript.github.io/course/?https://raw.githubusercontent.com/TUBAF-IfI-LiaScript/VL_EingebetteteSysteme/master/04_Schaltnetze.md#13).
-
-An dieser Stelle wurden die 2 stufigen Schaltfunktionen mit einem programmierbaren `AND` Array vorgestellt.
-
-Kommentar: Wie gemein hier einfach auf eine ES-Vorlesung zu verlinken! :/ Alternativ
-
 Eine Umsetzungsmöglichkeit für Schaltnetze sind die sogenannten PALs (Programmable Array Logic) die bereits aus der Vorlesung [Eingebettete Systeme](https://liascript.github.io/course/?https://raw.githubusercontent.com/TUBAF-IfI-LiaScript/VL_EingebetteteSysteme/master/04_Schaltnetze.md#13) bekannt sind und dort nocheinmal nachgelesen werden können.
 
 Auf der verlinkten Folie wurden die 2 stufigen Schaltfunktionen mit einem programmierbaren `AND` Array vorgestellt.
 
 ![Bild](../images/09_megaAVR_0/PAL.png "PAL Schema")
 ![Bild](../images/09_megaAVR_0/PAL16L8.png "PAL16L8  [^AMD]")
-
 
 Diese erweitern wir nun um die Speicherglieder und deren Rückkopplung. Beachten Sie die Ergänzung auf der Ausgangsseite und die zusätzliche Clock-Leitung.
 
@@ -353,7 +346,7 @@ Abfolge der Konfiguration:
 
 1. ... Konfiguration eines Peripheriegerät als Quelle: Wenn es sich bei der erzeugenden Peripherie z. B. um einen Timer handelt, wird die Vorskalierung, das Vergleichsregister usw. so eingestellt, dass das gewünschte Ereignis erzeugt wird.
 2. ... Konfiguration eines Peripheriegerät als ereignisverarbeitende(n) Senke(m): Wenn z. B. der ADC der Ereignisbenutzer ist, wird der ADC Prescaler, die Auflösung, die Wandlungszeit usw. wie gewünscht eingestellt und die ADC-Wandlung so konfiguriert, dass sie beim Empfang eines Ereignisses startet eines Ereignisses startet.
-3. ... Konfiguration des Ereignissystems: Im genannten Fall leitet der Timer/Compare seine Events  z. B. über Kanal 0, was durch Schreiben in `EVSYS.CHANNEL0` erreicht wird. Der ADC wird so konfiguriert, dass er auf diesen Kanal hört, indem in **AB HIER MACHTS KEINEN SINN MEHR!!** `EVSYS.USERn` schreiben, wobei n der Index ist, der dem ADC.
+3. ... Konfiguration des Ereignissystems: Im genannten Fall leitet der Timer/Compare seine Events  z. B. über Kanal 0, was durch Schreiben in `EVSYS.CHANNEL0` erreicht wird. Der ADC wird so konfiguriert, dass er auf diesen Kanal hört.
 
 ![alt-text](../images/09_megaAVR_0/EventChannelSystem.png "Event-Channel Konzept [^Microchip4809] Seite 123")
 
