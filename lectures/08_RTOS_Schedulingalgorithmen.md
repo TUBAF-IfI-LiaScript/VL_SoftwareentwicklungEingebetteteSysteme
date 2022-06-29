@@ -503,13 +503,7 @@ typedef struct tskTaskControlBlock
 
 ### Implementierung Grundlagen
 
-Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei
-
-ah
-
-ja
-
-die Datei :)
+Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei [FreeRTOSConfig.h](https://github.com/Infineon/freertos/blob/master/Source/portable/COMPONENT_CM33/FreeRTOSConfig.h).
 
 | FreeRTOS Parameter         | Bedeutung                                                                                                                             |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -610,10 +604,10 @@ Beispiele:
 + Ein Semaphore sperrt bzw. gibt den Zugriff auf ein Display frei.
 + Ein Task wartet auf das Eintreffen des Ergebnisses eines anderen Tasks, das über eine Queue übermittelt wurde.
 
-{{1-2}}
+         {{1-2}}
 *****************************************************************************
 
-**Queues**
+__Queues__
 
 Queues bieten eine Inter-Task-Kommunikation mit einer vom Benutzer definierbaren festen Länge. Der Entwickler gibt die Nachrichtenlänge bei der Erstellung der Warteschlange an. Dies geschieht durch den Aufruf
 
@@ -628,7 +622,7 @@ Der Eingabeparameter `queueLength` gibt die Anzahl der Elemente an, die die Wart
           {{2-3}}
 *****************************************************************************
 
-**Semaphoren**
+__Semaphoren__
 
 Semaphore werden zur Synchronisation und zur Steuerung des Zugriffs auf gemeinsame Ressourcen zwischen Tasks verwendet. Ein Semaphor kann entweder binär oder zählend sein und ist im Wesentlichen nur ein nicht-negativer Integer-Zähler.
 
@@ -653,7 +647,7 @@ erstellt. Wenn eine Task eine durch einen Semaphor geschützte Ressource wünsch
           {{3-4}}
 *****************************************************************************
 
-**Mutex**
+__Mutex__
 
 Ein Mutex ist einem binären Semaphor sehr ähnlich, bietet aber zusätzlich einen Mechanismus zur Prioritätsvererbung. Wenn ein hochpriorer Task beim Zugriff auf eine Ressource blockiert wird, die bereits von einem niederprioren Task belegt ist, erbt der niederpriore Task die Priorität des hochprioren Tasks, bis er den Mutex freigegeben hat.
 
@@ -672,7 +666,7 @@ erstellt. Mutexe sollten nicht von einem Interrupt aus verwendet werden, da der 
           {{4-5}}
 *****************************************************************************
 
-**Beispiel**
+__Beispiel__
 
 Im Beispiel wird auf die Ressource Serielle Schnittstelle durch zwei Tasks zugegriffen. Um ein Überschreiben der Inhalte zu verhindern ist eine Synchronisation erforderlich.
 
