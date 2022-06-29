@@ -504,8 +504,11 @@ typedef struct tskTaskControlBlock
 ### Implementierung Grundlagen
 
 Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei
+
 ah
+
 ja
+
 die Datei :)
 
 | FreeRTOS Parameter         | Bedeutung                                                                                                                             |
@@ -607,7 +610,7 @@ Beispiele:
 + Ein Semaphore sperrt bzw. gibt den Zugriff auf ein Display frei.
 + Ein Task wartet auf das Eintreffen des Ergebnisses eines anderen Tasks, das über eine Queue übermittelt wurde.
 
-          {{1-2}}
+{{1-2}}
 *****************************************************************************
 
 **Queues**
