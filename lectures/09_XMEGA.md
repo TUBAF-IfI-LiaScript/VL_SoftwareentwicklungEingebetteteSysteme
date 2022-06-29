@@ -33,7 +33,7 @@ gray: @mark(gray,@0)
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Erweiternde Architekturkonzepte der XMEGA Architektur`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/09_XMEGA.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/09_XMEGA.md) |
@@ -229,7 +229,7 @@ Eine kompaktere Darstellung fasst die Kombinationen der Eingänge zusammen und o
 Insgesamt sind 3 Zustände zu kodieren, entsprechend werden wiederum 2 Flip-Flops benötigt. Dabei wird die Kodierung wie folgt vorgenommen:
 
 <!-- data-type="none" -->
-| Zustand | F   | K   |
+| Zustand | X   | Y   |
 | ------- | --- | --- |
 | E       | 0   | 0   |
 | G       | 0   | 1   |
@@ -247,7 +247,7 @@ Damit ergibt sich folgende Binäre Zustandstabelle
 In der traditionellen Darstellung zeigt sich diese wie folgt:
 
 <!-- data-type="none" -->
-| $F_{t}$ | $G_{t}$ | $A_{t}$ | $B_{t}$ | @gray($F_{t+1}$) | @gray($G_{t+1}$) |
+| $X_{t}$ | $Y_{t}$ | $A_{t}$ | $B_{t}$ | @gray($X_{t+1}$) | @gray($Y_{t+1}$) |
 | ------- | ------- | ------- | ------- | ---------------- | ---------------- |
 | 0       | 0       | 0       | 0       | @gray(0)         | @gray(0)         |
 | 0       | 0       | 0       | 1       | @gray(1)         | @gray(0)         |
@@ -281,7 +281,7 @@ Wir entscheiden uns für einen D Flip-Flop für die Realisierung. Die entspreche
 Damit lässt sich die Zustandsübergangstabelle entsprechend einfach um die zugehörige Eingangsbelegung ergänzen. Für die D-Flip-Flops ist dies einfach eine Kopie der Zustandsspalten.
 
 <!-- data-type="none" -->
-| $F_{t}$ | $G_{t}$ | $A_{t}$ | $B_{t}$ | @gray($F_{t+1}$) | @gray($G_{t+1}$) | $DF$    | $DG$     |
+| $X_{t}$ | $Y_{t}$ | $A_{t}$ | $B_{t}$ | @gray($X_{t+1}$) | @gray($Y_{t+1}$) | $DX$    | $DY$     |
 | ------- | ------- | ------- | ------- | ---------------- | ---------------- | ------- | -------- |
 | 0       | 0       | 0       | 0       | @gray(0)         | @gray(0)         | 0       | 0        |
 | 0       | 0       | 0       | 1       | @gray(1)         | @gray(0)         | @red(1) | 0        |
@@ -304,12 +304,10 @@ Damit lässt sich die Zustandsübergangstabelle entsprechend einfach um die zuge
 
 $$
 \begin{aligned}
-DF &= F +\overline{G}\,\overline{A}\,B\\
-DG &= G +\overline{F}\,A\,\overline{B}
+DX &= X +\overline{Y}\,\overline{A}\,B\\
+DY &= Y +\overline{X}\,A\,\overline{B}
 \end{aligned}
 $$
-
-![Bild](../images/09_megaAVR_0/PAL_example_Solution.png)
 
 Ein weiteres Einführungsbeispiel finden Sie unter [Link](https://liascript.github.io/course/?https://raw.githubusercontent.com/SebastianZug/StateMachines/master/README.md#1)
 
