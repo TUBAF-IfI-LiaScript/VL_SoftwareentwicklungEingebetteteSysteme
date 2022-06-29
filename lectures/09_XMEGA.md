@@ -81,13 +81,13 @@ Als Taktquellen sind vorgesehen:
 + Interne Oszillatoren (16/20 MHz Oszillator, 32KHz Oszillator)
 + Externe Ozillatoren (via External Clock Pin, 32.768 kHz Quarz Oszillator)
 
-Die Konfiguration wird über zwei Register `MCLKCTRLA` (Taktresource) und `MCLKCTRLB` (Prescaler) vorgenommen.
+Die Konfiguration wird über zwei Register `MCLKCTRLA` (Taktressource) und `MCLKCTRLB` (Prescaler) vorgenommen.
 
 [^Microchip4809]: Firma Microchip, ATmega4808/4809 Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega4808-4809-Data-Sheet-DS40002173A.pdf)
 
 ### Variable Konfiguration von Pin-Belegungen
 
-Ein zentraler Unterschied des bishering ATmega328 zum ATmega4809 ist die möglichkeit der Variablen Zuordnung bestimmter Funktionalitäten zu einzelnen Pins. Der Port-Multiplexer (`PORTMUX`) kann entweder die Funktionalität von Pins aktivieren oder deaktivieren, oder zwischen Standard- und alternativen Pin-Positionen.
+Ein zentraler Unterschied des bisherig ATmega328 zum ATmega4809 ist die Möglichkeit der variablen Zuordnung bestimmter Funktionalitäten zu einzelnen Pins. Der Port-Multiplexer (`PORTMUX`) kann entweder die Funktionalität von Pins aktivieren oder deaktivieren, oder zwischen Standard- und alternativen Pin-Positionen schalten.
 
 ![alt-text](../images/09_megaAVR_0/IOMultiplexing.png "IO-Multiplexing des ATmega4809 [^Microchip4809] Seite 18" )
 
@@ -127,7 +127,7 @@ Die Interrupt-Erzeugung muss global aktiviert werden, indem eine '1' in das Glob
 ![alt-text](../images/09_megaAVR_0/InterruptSequence.png "Ablauf der Interruptverarbeitung [^Microchip4809] Seite 114" )
 Wenn ein Interrupt aktiviert ist und die Interrupt-Bedingung eintritt, empfängt die CPUINT die Interrupt-Anforderung. Wenn eine Interrupt-Anforderung von der CPUINT bestätigt wird, wird der Programmzähler so gesetzt, dass er auf den Interrupt-Vektor zeigt. Der Interrupt-Vektor ist ein Sprung zum Interrupt-Handler. Nach der Rückkehr vom Interrupt-Handler wird die Programmausführung an der Stelle fortgesetzt, an der sie vor dem Auftreten der Unterbrechung war.
 
-Standardmäßig haben alle Peripheriegeräte die Prioritätsstufe 0. Es ist möglich, eine Interrupt-Anforderung der Stufe 1 (hohe Priorität) zuzuordnen, indem Sie ihre Interrupt-Vektornummer in das `CPUINT.LVL1VEC`-Register schreibt. Diese Interrupt-Anforderung hat dann eine höhere Priorität als die anderen (normal priorisierten) Interrupt-Anforderungen Anforderungen.
+Standardmäßig haben alle Peripheriegeräte die Prioritätsstufe 0. Es ist möglich, eine Interrupt-Anforderung der Stufe 1 (hohe Priorität) zuzuordnen, indem Sie ihre Interrupt-Vektornummer in das `CPUINT.LVL1VEC`-Register schreibt. Diese Interrupt-Anforderung hat dann eine höhere Priorität als die anderen (normal priorisierten) Interrupt-Anforderungen.
 
 | Priorität | Level                          | Quelle                 |
 | --------- | ------------------------------ | ---------------------- |
@@ -143,7 +143,7 @@ Optional kann für Interrupts der Prioritätsstufe 0 ein Round-Robin-Schema akti
 
 ### Konfigurierbare Logik
 
-Die konfigurierbare benutzerdefinierte Logik (CCL) ist eine programmierbare Logik-Peripherie, die mit den Geräte Pins, an Ereignisse oder an andere interne Peripherie angeschlossen werden kann. Die CCL kann als "Klebelogik" zwischen der Geräteperipherie und externen Geräten dienen.
+Die konfigurierbare benutzerdefinierte Logik (CCL) ist eine programmierbare Logik-Peripherie, die mit den Geräte Pins an Ereignisse oder an andere interne Peripherie angeschlossen werden kann. Die CCL kann als "Klebelogik" zwischen der Geräteperipherie und externen Geräten dienen.
 
 #### Exkurs - Schaltwerke
 
@@ -229,7 +229,7 @@ Eine kompaktere Darstellung fasst die Kombinationen der Eingänge zusammen und o
 Insgesamt sind 3 Zustände zu kodieren, entsprechend werden wiederum 2 Flip-Flops benötigt. Dabei wird die Kodierung wie folgt vorgenommen:
 
 <!-- data-type="none" -->
-| Zustand | F   | G   |
+| Zustand | F   | K   |
 | ------- | --- | --- |
 | E       | 0   | 0   |
 | G       | 0   | 1   |
@@ -319,6 +319,12 @@ Eine Umsetzungsmöglichkeit für Schaltnetze sind die sogenannten PAL (Programma
 
 An dieser Stelle wurden die 2 stufigen Schaltfunktionen mit einem programmierbaren `AND` Array vorgestellt.
 
+Kommentar: Wie gemein hier einfach auf eine ES-Vorlesung zu verlinken! :/ Alternativ
+
+Eine Umsetzungsmöglichkeit für Schaltnetze sind die sogenannten PALs (Programmable Array Logic) die bereits aus der Vorlesung [Eingebettete Systeme](https://liascript.github.io/course/?https://raw.githubusercontent.com/TUBAF-IfI-LiaScript/VL_EingebetteteSysteme/master/04_Schaltnetze.md#13) bekannt sind und dort nocheinmal nachgelesen werden können.
+
+Auf der verlinkten Folie wurden die 2 stufigen Schaltfunktionen mit einem programmierbaren `AND` Array vorgestellt.
+
 ![Bild](../images/09_megaAVR_0/PAL.png "PAL Schema")
 ![Bild](../images/09_megaAVR_0/PAL16L8.png "PAL16L8  [^AMD]")
 
@@ -339,17 +345,17 @@ Benachbarte LUTs können kombiniert werden, um bestimmte Operationen durchzufüh
 
 !?[alt-text](https://www.youtube.com/watch?v=beZXfAUR-PE)
 
-### Event System
+### Eventsystem
 
-Das Eventsystem erlaubt eine direkte Peripherie-zu-Peripherie-Signalisierung, Peripheriegeräte können direkt Peripherieereignisse erzeugen, verwenden und darauf reagieren. Dabei werden entsprechen kurze Reaktionszeit garantiert. Auf dem 4809 sind 8 parallele Ereigniskanäle verfügbar, wobei jeder Kanal wird von einem Ereignisgenerator gesteuert wird und mehrere Ereignisbenutzer haben kann. Ereignisse sind dabei die Zustände der meisten Peripheriegeräten oder manuelle, aus der Software gesendet Signale. Das Ereignissystem funktioniert in den Modi "Aktiv", "Leerlauf" und "Ruhezustand.
+Das Eventsystem erlaubt eine direkte Peripherie-zu-Peripherie-Signalisierung, Peripheriegeräte können direkt Peripherieereignisse erzeugen, verwenden und darauf reagieren. Dabei werden entsprechen kurze Reaktionszeit garantiert. Auf dem 4809 sind 8 parallele Ereigniskanäle verfügbar, wobei jeder Kanal wird von einem Ereignisgenerator gesteuert wird und mehrere Ereignisbenutzer haben kann. Ereignisse sind dabei die Zustände der meisten Peripheriegeräten oder manuelle, aus der Software gesendet Signale. Das Ereignissystem funktioniert in den Modi "Aktiv", "Leerlauf" und "Ruhezustand".
 
 ![alt-text](../images/09_megaAVR_0/EventSystem_Idea.png "Event-Channel Konzept am Beispiel einer Timer / ADC Kombination [^Microchip4809] Seite 124")
 
 Abfolge der Konfiguration:
 
-1. ... Konfiguration eines Peripheriegerät als Quelle: Wenn es sich bei der erzeugenden Peripherie z. B. um einen Timer handelt, stellen Sie die Vorskalierung, das Vergleichsregister usw. so ein, dass das gewünschte Ereignis erzeugt wird.
-2. ... Konfiguration eines Peripheriegerät als ereignisverarbeitende(n) Senke(m): Wenn z. B. der ADC der Ereignisbenutzer ist, stellen Sie den ADC Prescaler, Auflösung, Wandlungszeit usw. wie gewünscht ein und konfigurieren Sie die ADC-Wandlung so, dass sie beim Empfang eines Ereignisses startet eines Ereignisses startet.
-3. ... Konfigurieren Sie des Ereignissystems: Im genannten Fall leitet der Timer/Compare seine Events  z. B. über Kanal 0, was durch Schreiben in `EVSYS.CHANNEL0` erreicht wird. Konfigurieren Sie den ADC so, dass er auf diesen Kanal hört, indem Sie in `EVSYS.USERn` schreiben, wobei n der Index ist, der dem ADC.
+1. ... Konfiguration eines Peripheriegerät als Quelle: Wenn es sich bei der erzeugenden Peripherie z. B. um einen Timer handelt, wird die Vorskalierung, das Vergleichsregister usw. so eingestellt, dass das gewünschte Ereignis erzeugt wird.
+2. ... Konfiguration eines Peripheriegerät als ereignisverarbeitende(n) Senke(m): Wenn z. B. der ADC der Ereignisbenutzer ist, wird der ADC Prescaler, die Auflösung, die Wandlungszeit usw. wie gewünscht eingestellt und die ADC-Wandlung so konfiguriert, dass sie beim Empfang eines Ereignisses startet eines Ereignisses startet.
+3. ... Konfiguration des Ereignissystems: Im genannten Fall leitet der Timer/Compare seine Events  z. B. über Kanal 0, was durch Schreiben in `EVSYS.CHANNEL0` erreicht wird. Der ADC wird so konfiguriert, dass er auf diesen Kanal hört, indem in **AB HIER MACHTS KEINEN SINN MEHR!!** `EVSYS.USERn` schreiben, wobei n der Index ist, der dem ADC.
 
 ![alt-text](../images/09_megaAVR_0/EventChannelSystem.png "Event-Channel Konzept [^Microchip4809] Seite 123")
 
