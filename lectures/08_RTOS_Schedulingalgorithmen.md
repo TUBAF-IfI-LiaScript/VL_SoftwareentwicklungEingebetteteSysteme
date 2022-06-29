@@ -211,7 +211,7 @@ Argumente für EDF:
 
 Das Least Laxity (LL) oder Least-Slack-Time-Scheduling (LST) Scheduling weist die Priorität auf der Grundlage des verbleibenden Spielraums zu. Dieser Begriff beschreibt das bis zur Dealine bestehende Zeitintervall bezogen auf den noch nicht realisierten Anteil der Ausführungsdauer.
 
-Entsprechend wir der Spielraum jedes Tasks (Deadline minus noch benötigte Rechenzeit) mit
+Entsprechend wird der Spielraum jedes Tasks (Deadline minus noch benötigte Rechenzeit) mit
 jedem Schritt neu bestimmt. LL ist ebenfalls optimal im Hinblick auf die Minimierung der Maximalen
 Verspätung.
 
@@ -280,9 +280,9 @@ Entsprechen implementiert der EDF\* folgende drei Schritte:
 
 Bedingungen:
 
-+ Eine Task kann nicht vor ihrer Bereitzeit ausgeführt werden.
-+ Eine abhängige Task kann keine Bereitzeit besitzen die kleiner ist als die Bereitzeit der Task von der sie abhängt.
-+ Eine Task $T_b$, die von einer anderen Task $T_a$ abhängt, kann keine Deadline $d_b \leq d_a$ besitzen.
++ Ein Task kann nicht vor ihrer Bereitzeit ausgeführt werden.
++ Ein abhängiger Task kann keine Bereitzeit besitzen die kleiner ist als die Bereitzeit der Task von der sie abhängt.
++ Ein Task $T_b$, die von einer anderen Task $T_a$ abhängt, kann keine Deadline $d_b \leq d_a$ besitzen.
 
 **Schritt 1: Modifikation der Bereitzeiten**
 
@@ -360,7 +360,7 @@ Nach (Liu, Layland, 1973) gilt für $n$ Tasks:     $U_{lub} =  n  (2^{1/n} - 1 )
 
 Für alle Ausführungszeiten und Periodenverhältnisse von n Tasks wird unter RMS ein gültiger Plan gefunden, wenn die Auslastung die Schranke von  nicht übersteigt.
 
-RMS ist einfacher zu realisieren als EDF, die Prioritäten anhand der Perioden werden einmal zu Beginn festlegen.
+RMS ist einfacher zu realisieren als EDF, die Prioritäten anhand der Perioden werden einmal zu Beginn festgelegt.
 
 Aber RMS ist nicht immer in der Lage eine Lösung zu finden, obwohl eine existiert. Entsprechend ist RMS kein optimaler Scheduler!
 
@@ -371,7 +371,7 @@ Ein Echtzeitbetriebssystem (RTOS) ist ein Betriebssystem (OS), das für Echtzeit
 
 Vorteile des RTOS vs. Super Loop Design
 
-- Trennung von Funktionalität und Timing - RTOS entlastet den Nutzer und behandelte Timing, Signale und Kommunikation
+- Trennung von Funktionalität und Timing - RTOS entlastet den Nutzer und behandelt Timing, Signale und Kommunikation
 - explizite Definition von Prioritäten - deutliche bessere Skalierbarkeit als im SLD
 - Mischung von Hard- und Softrealtime Komponenten
 - Verbesserte Wiederverwendbarkeit des Codes insbesondere bei Hardwarewechseln
@@ -386,13 +386,13 @@ FreeRTOS implementiert mehrere Threads, indem es das Host-Programm in regelmäß
 
 ### FreeRTOS Grundlagen
 
-Das Task Modell unterscheidet 4 Zustände: Running, Blocked, Suspended, Ready, die mit entsprechenden API Funktionen manipuliert werden können, bzw. durch den Scheduler gesetzt werden. FreeRTOS implmentiert dafür einen preemptiven und einen kooperativen Multitasking Mode.
+Das Task Modell unterscheidet 4 Zustände: Running, Blocked, Suspended, Ready, die mit entsprechenden API Funktionen manipuliert werden können, bzw. durch den Scheduler gesetzt werden. FreeRTOS implmentiert dafür einen präemptiven und einen kooperativen Multitasking Mode.
 
 <!--
 style="width: 80%;"
 -->
 ```ascii
-                        preemptiv                              kooperativ
+                        präemptiv                              kooperativ
 Höchste         ^                                        ^                                 
 Priorität   T1  |          XXXXXXXXXX                T1  |                    XXXXXXXXXX            
             T2  |XXXXXXXXXX         XXXXXXXXXX       T2  |XXXXXXXXXXXXXXXXXXXX     
@@ -402,9 +402,9 @@ Priorität   T1  |          XXXXXXXXXX                T1  |                    X
 
 Der FreeRTOS-Echtzeit-Kernel misst die Zeit mit einer Tick-Count-Variable. Ein Timer-Interrupt (der RTOS-Tick-Interrupt) inkrementiert den Tick-Count - so kann der Echtzeit-Kernel die Zeit mit einer Auflösung der gewählten Timer-Interrupt-Frequenz messen.
 
-Jedes Mal, wenn der Tick-Count inkrementiert wird, muss der Echtzeit-Kernel prüfen, ob es nun an der Zeit ist, eine Task zu entsperren oder aufzuwecken. Es ist möglich, dass eine Task, die während des Tick-ISRs geweckt oder entsperrt wird, eine höhere Priorität hat als die unterbrochene Task. Wenn dies der Fall ist, sollte der Tick-ISR zu der neu geweckten/entblockten Task zurückkehren - effektiv unterbricht er eine Task, kehrt aber zu einer anderen zurück.
+Jedes Mal, wenn der Tick-Count inkrementiert wird, muss der Echtzeit-Kernel prüfen, ob es nun an der Zeit ist, einen Task zu entsperren oder aufzuwecken. Es ist möglich, dass ein Task, die während des Tick-ISRs geweckt oder entsperrt wird, eine höhere Priorität hat als der unterbrochene Task. Wenn dies der Fall ist, sollte der Tick-ISR zum neu geweckten/entblockten Task zurückkehren - effektiv unterbricht er einen Task, kehrt aber zu einer anderen zurück.
 
-> **Merke:** Das preemptive Scheduling erfordert sowohl auf de Planungsebene, als auch auf der Verwaltungsebene einen größeren Overhead.
+> **Merke:** Das präemptive Scheduling erfordert sowohl auf de Planungsebene, als auch auf der Verwaltungsebene einen größeren Overhead.
 
 FreeRTOS unterstützt 2 Strategien für die Speicherbereitstellung, eine statische und eine dynamische Allokation. Während die erste Variante es der Anwendung überlässt die notwendigen Speicherareale zu aquirieren, über nimmt das RTOS diese Aufgabe im zweiten Modus. Der angeforderte Speicher wird auf dem Heap abgelegt. Mit dem Aufruf von `xTaskCreate()` wird ein Speicherblock alloziert, so dass der Stack und der _task control block_ (TCB) dort abgelegt werden können. Queues, Mutexe und Semaphoren werden ebenfalls dort eingebunden.  
 
@@ -440,8 +440,6 @@ Beim Kontextwechsel sind auf dem AVR folgende Elemente auf dem Taskzugehörigen 
 + Program counter
 + 2 stack pointer registers.
 
-Die Register werden auf dem zugehörigen Stack des Tasks gespeichert.
-
 ```asm
 #define portSAVE_CONTEXT()           
 asm volatile (	                     
@@ -476,10 +474,10 @@ asm volatile (
 Die TCB enthält unter anderem:
 
 + die Informationen zur Speicherverwaltung - Adresse der Stack-Startadresse in `pxStack` und den aktuellen Stackanfang in `pxTopOfStack`. FreeRTOS speichert auch einen Zeiger auf das Ende des Stacks in `pxEndOfStack`.
-+ die anfängliche Priorität und die aktuelle Priorität der Task in `uxPriority` und `uxBasePriority`
++ die anfängliche Priorität und die aktuelle Priorität des Tasks in `uxBasePriority` und `uxPriority`
 + den Namen des Tasks
 
-Man könnte erwarten, dass jede Task eine Variable hat, die FreeRTOS mitteilt, in welchem Zustand sie sich befindet, aber das tut sie nicht. Stattdessen verfolgt FreeRTOS den Zustand der Task implizit, indem es die Tasks in die entsprechende Liste einträgt: ready list, suspended list, etc. Das Vorhandensein einer Aufgabe in einer bestimmten Liste zeigt den Zustand der Aufgabe an. Wenn eine Task von einem Zustand in einen anderen wechselt, verschiebt FreeRTOS sie einfach von einer Liste in eine andere.
+Man könnte erwarten, dass jeder Task eine Variable hat, die FreeRTOS mitteilt, in welchem Zustand er sich befindet, aber das tut sie nicht. Stattdessen verfolgt FreeRTOS den Zustand des Tasks implizit, indem es den Task in die entsprechende Liste einträgt: ready list, suspended list, etc. Das Vorhandensein einer Aufgabe in einer bestimmten Liste zeigt den Zustand der Aufgabe an. Wenn ein Task von einem Zustand in einen anderen wechselt, verschiebt FreeRTOS ihn einfach von einer Liste in eine andere.
 
 ```c
 typedef struct tskTaskControlBlock
@@ -505,7 +503,7 @@ typedef struct tskTaskControlBlock
 
 ### Implementierung Grundlagen
 
-Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei
+Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei [FreeRTOSConfig.h](https://github.com/Infineon/freertos/blob/master/Source/portable/COMPONENT_CM33/FreeRTOSConfig.h).
 
 | FreeRTOS Parameter         | Bedeutung                                                                                                                             |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -515,7 +513,7 @@ Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei
 | `configCPU_CLOCK_HZ`       | Taktfrequenz des Prozessors                                                                                                           |
 | `configTICK_RATE_HZ`       |                                                                                                                                       |
 
-> **Achtung!** Die verwendete Implementierung für den AVR lässt einzelne Einstellungsmöglichkeiten außer acht und realisiert diese mit fest im Code oder implementiert eigene Konfigurationsmethoden.
+> **Achtung!** Die verwendete Implementierung für den AVR lässt einzelne Einstellungsmöglichkeiten außer Acht und realisiert diese fest im Code oder implementiert eigene Konfigurationsmethoden.
 
 ```c   TaskBasicStructure.c
 xTaskCreate( TaskBlink
@@ -604,9 +602,12 @@ Bisher haben wir allein über isolierte Tasks gesprochen, die ohne Relation zu e
 Beispiele:
 
 + Ein Semaphore sperrt bzw. gibt den Zugriff auf ein Display frei.
-+ Ein Task wartet auf das eintreffen des Ergebnisses eines anderen Tasks, das über eine Queue übermittelt wirde.
++ Ein Task wartet auf das Eintreffen des Ergebnisses eines anderen Tasks, das über eine Queue übermittelt wurde.
 
-**Queues**
+         {{1-2}}
+*****************************************************************************
+
+__Queues__
 
 Queues bieten eine Inter-Task-Kommunikation mit einer vom Benutzer definierbaren festen Länge. Der Entwickler gibt die Nachrichtenlänge bei der Erstellung der Warteschlange an. Dies geschieht durch den Aufruf
 
@@ -614,13 +615,18 @@ Queues bieten eine Inter-Task-Kommunikation mit einer vom Benutzer definierbaren
 QueueHandle_t queueName =xQueueCreate(queueLength, elementSize)
 ```
 
-Der Eingabeparameter `queueLength` gibt die Anzahl der Elemente an, die die Warteschlange aufnehmen kann. `elementSize` gibt die Größe der einzelnen Elemente in Bytes an. Alle Elemente in der Warteschlange müssen die gleiche Größe haben. Die Warteschlange hat eine FIFO-Struktur (first in/first out), so dass der Empfänger immer das Element erhält, das als erstes eingefügt wurde
+Der Eingabeparameter `queueLength` gibt die Anzahl der Elemente an, die die Warteschlange aufnehmen kann. `elementSize` gibt die Größe der einzelnen Elemente in Bytes an. Alle Elemente in der Warteschlange müssen die gleiche Größe haben. Die Warteschlange hat eine FIFO-Struktur (first in/first out), so dass der Empfänger immer das Element erhält, das als erstes eingefügt wurde.
 
-**Semaphoren**
+*****************************************************************************
+
+          {{2-3}}
+*****************************************************************************
+
+__Semaphoren__
 
 Semaphore werden zur Synchronisation und zur Steuerung des Zugriffs auf gemeinsame Ressourcen zwischen Tasks verwendet. Ein Semaphor kann entweder binär oder zählend sein und ist im Wesentlichen nur ein nicht-negativer Integer-Zähler.
 
-Ein binäres Semaphor wird auf 1 initialisiert und kann verwendet werden, um eine Ressource zu bewachen, die nur von einer Task zu einem Zeitpunkt gehandhabt werden kann. Wenn eine Task die Ressource übernimmt, wird der Semaphor auf 0 dekrementiert. Wenn eine andere Task die Ressource verwenden möchte und sieht, dass der Semaphor 0 ist, blockiert sie. Wenn der erste Task mit der Nutzung der Ressource fertig ist, wird das Semaphor inkrementiert und steht damit anderen Tasks zur Verfügung.
+Ein binäres Semaphor wird auf 1 initialisiert und kann verwendet werden, um eine Ressource zu bewachen, die nur von einem Task zu einem Zeitpunkt gehandhabt werden kann. Wenn eine Task die Ressource übernimmt, wird der Semaphor auf 0 dekrementiert. Wenn ein anderer Task die Ressource verwenden möchte und sieht, dass der Semaphor 0 ist, blockiert sie. Wenn der erste Task mit der Nutzung der Ressource fertig ist, wird das Semaphor inkrementiert und steht damit anderen Tasks zur Verfügung.
 
 Ein binärer Semaphor kann mit
 
@@ -636,11 +642,16 @@ SemaphoreHandle_t semaphoreName =xSemaphoreCreateCounting(maxCount, initialCount
 
 erstellt. Wenn eine Task eine durch einen Semaphor geschützte Ressource wünscht, ruft sie die Funktion `xSemaphoreTake(semaphoreName,ticksToWait)` auf. Wenn der Semaphor zu 0 ausgewertet wird, blockiert die Task für die in ticksToWait angegebene Zeit. Wenn die Task mit der Verwendung des Semaphors fertig ist, wird die Funktion `xSemaphoreGive(semaphoreName)` aufgerufen.
 
-**Mutex**
+*****************************************************************************
 
-Ein Mutex ist einem binären Semaphor sehr ähnlich, bietet aber zusätzlich einen Mechanismus zur Prioritätsvererbung. Wenn eine hochpriore Task beim Zugriff auf eine Ressource blockiert wird, die bereits von einer niederprioren Task belegt ist, erbt die niederpriore Task die Priorität der hochprioren Task, bis sie den Mutex freigegeben hat.
+          {{3-4}}
+*****************************************************************************
 
-Dies stellt sicher, dass die Blockierzeit der hochprioren Task minimiert wird, da die niedrigpriore Task nun nicht mehr von anderen Tasks mit mittlerer Priorität preemptiert werden kann.
+__Mutex__
+
+Ein Mutex ist einem binären Semaphor sehr ähnlich, bietet aber zusätzlich einen Mechanismus zur Prioritätsvererbung. Wenn ein hochpriorer Task beim Zugriff auf eine Ressource blockiert wird, die bereits von einem niederprioren Task belegt ist, erbt der niederpriore Task die Priorität des hochprioren Tasks, bis er den Mutex freigegeben hat.
+
+Dies stellt sicher, dass die Blockierzeit des hochprioren Tasks minimiert wird, da der niedrigpriore Task nun nicht mehr von anderen Tasks mit mittlerer Priorität präemptiert werden kann.
 
 Eine Mutex wird mit der Funktion
 
@@ -650,9 +661,16 @@ semaphoreHandle_t mutexName = xSemaphoreCreateMutex(void)
 
 erstellt. Mutexe sollten nicht von einem Interrupt aus verwendet werden, da der Mechanismus der Prioritätsvererbung nur für einen Task sinnvoll ist, nicht aber für ein Interrupt.
 
-**Beispiel**
+*****************************************************************************
+
+          {{4-5}}
+*****************************************************************************
+
+__Beispiel__
 
 Im Beispiel wird auf die Ressource Serielle Schnittstelle durch zwei Tasks zugegriffen. Um ein Überschreiben der Inhalte zu verhindern ist eine Synchronisation erforderlich.
+
+*****************************************************************************
 
 ### Denken wie ein RTOS Entwickler
 

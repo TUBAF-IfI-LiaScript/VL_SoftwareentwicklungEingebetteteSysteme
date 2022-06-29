@@ -42,7 +42,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 ```ascii
                                           zeitliche Toleranz
                         gering                                            hoch
-                        "$\mu s$                                            _s_
+                        "$\mu s$                                           $s$"
                         +-----------------------------------------------------+
 aperiodische Aufgaben   ||        x                x                   x     ||
                         ||      Notfall-         Automatisches       Klima-  ||
@@ -158,11 +158,10 @@ _Aperiodische Tasks_ ... lassen sich  nicht auf ein zeitlich wiederkehrendes Mus
 
 _Sporadische Tasks_ ... treten nicht regulär auf. Man nimmt aber eine obere Schranke bzgl. der Häufigkeit ihres Aufrufs an.
 
- - Fahrradtacho (obere Schranke = Geschwindigkeit)
- - Anfragen auf einer Kommunikationsschnittstelle
+- Fahrradtacho (obere Schranke = Geschwindigkeit)
+- Anfragen auf einer Kommunikationsschnittstelle
 
-
-          {{1-3}}
+{{1-3}}
 *****************************************************************************
 
 2. **Abhängigkeiten**
