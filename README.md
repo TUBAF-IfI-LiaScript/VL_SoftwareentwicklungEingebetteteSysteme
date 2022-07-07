@@ -34,14 +34,14 @@ _Verschiebungen von Veranstaltungen im Semester_
 | 10  | 15.06.              | Donnerstag | Freitag    | Konferenz                 |
 | 11  | 22.06.              | Mittwoch   | Donnerstag |                           |
 | 12  | 29.06.              | Mittwoch   | Freitag    | Konferenzreise            |
-| 13  | 06.07.              | Mittwoch   | Freitag    | Projekttreffen            |
-| 14  | 13.07.              | Mittwoch   | Freitag    | ZEWAF Kolloquium          |
+| 13  | 06.07.              | Donnerstag | Freitag    | Projekttreffen            |
+| 14  | 13.07.              | Donnerstag | Freitag    | Studentenwerbung          |
 
 _Vorträge im Seminarteil_
 
-| Datum    | Thema                |
-| -------- | -------------------- |
-| 23. Juni | DSP Implementierung  |
-| 1. Juli  | Konfernzreise        |
-| 8. Juli  | LCD-Display, CAN-Bus |
-| 15. Juli | CubeAI, MicroPython  |
+| Datum    | Thema                   |
+| -------- | ----------------------- |
+| 23. Juni | DSP Implementierung     |
+| 7. Juli  | CAN-Bus (nach Vorlesung)|
+| 8. Juli  | LCD-Display             |
+| 15. Juli | CubeAI, MicroPython     |
