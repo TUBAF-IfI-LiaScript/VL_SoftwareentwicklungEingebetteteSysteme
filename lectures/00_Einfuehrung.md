@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.2
+version:  0.0.3
 language: de
 narrator: Deutsch Female
 
@@ -106,24 +106,23 @@ Was steht im Modulhandbuch über diesen Kurs?
 
 **Inhalte der Vorlesung**
 
-| VL  | Tag    | Inhalt der Vorlesung                           |
-| --- | ------ |:---------------------------------------------- |
-| 0   | 06.04. | Einführung und Motivation                      |
-| 1   | 13.04. | ATmega Architektur                             |
-| 2   | 20.04. | ATmega Komponenten                             |
-| 3   | 27.04. | Performancebeschränkungen der Architektur      |
-| 4   | 04.04. | Analog Digitalwandler                          |
-| 5   | 12.05. | _Ausfall wegen Konferenzreise_                 |
-| 6   | 18.05. | Kommunikationsprotokolle                       |
-| 7   | 25.05. | Echtzeitanwendungen                            |
-| 8   | 01.06. | Scheduling Algorithmen                         |
-| 9   | 08.06. | FreeRTOS                                       |
-| 10  | 15.06. | megaAVR 0 Series - xMega Controller            |
-| 11  | 22.06. | megaAVR 0 Series - xMega Controller Abgrenzung |
-| 12  | 29.06. | ARM Controllern Architektur                    |
-| 13  | 06.07. | Komponenten des STM32F4                        |
-| 14  | 13.07. | mbedOS                                         |
-
+| VL  | Tag    | Inhalt der Vorlesung                           | Bemerkung                |
+| --- | ------ |:---------------------------------------------- | ------------------------ |
+| 0   | 05.04. | Einführung und Motivation                      |                          |
+| 1   | 12.04. | Grundbegriffe                                  | AtMega328                |
+| 2   | 19.04. | ATmega Familien                                |                          |
+| 3   | 26.04. | Performancebeschränkungen der Architektur      |                          |
+| 4   | 03.05. | Analog Digitalwandler                          |                          |
+| 5   | 11.05. | Interrupts                                     |                          |
+| 6   | 17.05. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen |
+| 7   | 24.05. | _Ausfall wegen Konferenzreise_                 |                          |
+| 8   | 31.05. | RTOS Konzepte                                  |                          |
+| 9   | 07.06. | RTOS Scheduling                                |                          |
+| 10  | 14.06. | XMEGA Architektur                              | AtMega4809               |
+| 11  | 21.06. | XMEGA Perepherie                               |                          |
+| 12  | 28.06. | CortexM Architektur                            |                          |
+| 13  | 05.07. | CortexM Anwendungen                            |                          |
+| 14  | 12.07. |                                                |                          |
 
 ********************************************************************************
 
@@ -175,19 +174,18 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 | Name                    | Email                                   |
 |:----------------------- |:--------------------------------------- |
 | Prof. Dr. Sebastian Zug | sebastian.zug@informatik.tu-freiberg.de |
-| Georg Jäger             | georg.jaeger@informatik.tu-freiberg.de  |
 
-> Bitte melden Sie sich im OPAL unter [Digitale Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/19949355008/CourseNode/99400814778000) für die Veranstaltung an. Dies ist im Kontext der Pandemiesituation Teil des Hygienekonzepts der Universität.
+> Bitte melden Sie sich im OPAL unter [Digitale Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/19949355008/CourseNode/99400814778000) für die Veranstaltung an. 
 
 ### Zeitplan
 
 Die Veranstaltung wird sowohl für die Vorlesung als auch die Übung in Präsenz durchgeführt.
 
-| Veranstaltungen | Tag        | Zeitslot   | Bemerkung      |
-| --------------- | ---------- | ---------- | -------------- |
-| Vorlesung       | Mittwoch   | 9:15-10:45 |                |
-| Praktikum       | Donnerstag | 7:30-9:00  | ungerade Woche |
-| Übungen         | Donnerstag | 7:30-9:00  | gerade Woche   |
+| Veranstaltungen | Tag        | Zeitslot    | Bemerkung      |
+| --------------- | ---------- | ----------- | -------------- |
+| Vorlesung       | Mittwoch   | 11:30-13:00 |                |
+| Praktikum       | Montag     | 9:45-11:15  | ungerade Woche |
+| Übungen         | Freitag    | 11:30-13:00 | gerade Woche   |
 
 
 ### Prüfungsmodalitäten
@@ -205,7 +203,7 @@ Die Veranstaltung wird sowohl für die Vorlesung als auch die Übung in Präsenz
 
 Die Lehrmaterialien finden Sie unter GitHub, einer Webseite für das Versionsmanagement und die Projektverwaltung.
 
-[https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/tree/main/lectures](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/tree/main/lectures)
+[https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme)
 
 Die Unterlagen selbst sind in der Auszeichnungsprache LiaScipt verfasst und öffentlich verfügbar.
 
@@ -243,7 +241,7 @@ int main(void)
   TCCR1B  = 0;
   // Timerwert
   TCNT1   = 0;
-  TCCR1B |= (1 << CS12) | (1 <<CS10);  // 1024 als Prescale-Wert
+  TCCR1B |= (1 << CS12) | (1 <<CS10);  
 
   while (1) //infinite loop
   {
@@ -266,7 +264,7 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 
 ... braucht es aber auch immer etwas zum anfassen.
 
-> Wir stellen Ihnen die entsprechenden Controller beider Plattformen zur Verfügung.
+> Wir stellen Ihnen die entsprechenden Controller der genannten Plattformen zur Verfügung.
 
 ![Bastelbox](../images/00_Einfuehrung/Paket.jpeg)
 
@@ -292,11 +290,13 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 + Überlegen Sie sich, zu welches Thema Sie im Praktikum vorstellen wollen:
 
   + DSP Implementierung im STM32F4    
-  + STM32 Cube.AI                         
+  + STM32 Cube.AI / Edge Computing                        
   + mbedOS vs FreeRTOS
   + LCD Programmierung mit dem STM  
   + CAN Bus - Theorie und Anwendung
-  + Micropython im Kontext von Mikrocontrollern
+  + microROS / micro DDS
+  + Schlafmodi von Controllern (elektrische Vermessung)
+  + virtuelle Maschinen auf eingebetteten Systemen (MicroPython, WASM-Interpreter)
 
   Die Präsentationen sollten 30 Minuten einnehmen und mit einer praktischen Demonstration kombiniert werden.
 
