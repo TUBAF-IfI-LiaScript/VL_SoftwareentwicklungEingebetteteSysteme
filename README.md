@@ -1,4 +1,4 @@
-# Softwareentwicklung Eingebetette Systeme
+# Softwareentwicklung Eingebettete Systeme
 
 Dieses Repository umfasst die Materialien für die Veranstaltung "Softwareentwicklung 
 Eingebetette Systeme" an der TU BAF des Sommersemester 2023. Dabei liegt der Schwerpunkt
