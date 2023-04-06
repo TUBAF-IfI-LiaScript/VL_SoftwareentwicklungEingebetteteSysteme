@@ -63,8 +63,8 @@ Der von Neumann-Rechner arbeitet sequentiell. Befehl für Befehl wird abgeholt, 
 Die Datenbreite, Adressierungsbreite, Registeranzahl und Befehlssatz können als "Gestaltungsparameter" verstanden werden.
 
 ```text @plantUML.png
-@startuml
-ditaa
+@startditaa
+
   ^  |
   |  V
 +-+----+     +----------------------------+
@@ -85,7 +85,8 @@ ditaa
 |      |     |          |    | |  ALU   | |
 |      |     |          |    | +--------+ |
 +------+     +----------+    +------------+
-@enduml
+
+@endditaa
 ```
 
 
@@ -261,7 +262,7 @@ baustein         |       |   |                        |  z.B. SN54HC688
                  +-------+   +-+--+--+--+--+--+--+--+-+
                                |  |  |  |  |  |  |  |
                            ----+--*--+--*--*--+--+--*------ High    
-                               |     |        |  |
+                               |     |        |  |Harvard 
                            ----*-----*--------*--*--------- Low
 
             interne Adresse       Bausteinadresse
@@ -279,16 +280,7 @@ Vorteile:
 
 + Flexibilität bei der Integration neuer Geräte
 + Niedrige Kosten durch Mehrfachnutzung eines Kommunikationsmediums
-
-Nachteile:
-
-+ Mehrfachnutzung durch verschiedene Geräte bremst die Bandbreite aus
-+ Kommunikationsflaschenhals (Maximale Bus-Datenrate kann Systemdurchsatz begrenzen)  
-+ Größtes Anforderungsprofil bestimmt die Konfiguration / Kompromisslösung
-
-## ... und wie wird daraus eine Architektur?
-
-> Rechnerarchitektur ist ein Teilgebiet der Technischen Informatik, das sich mit dem Design von Rechnern (Computern) und speziell mit deren Organisation sowie deren externem und internem Aufbau (was ebenfalls mit 'Rechnerarchitektur' bezeichnet wird) beschäftigt.
+Harvard nem Aufbau (was ebenfalls mit 'Rechnerarchitektur' bezeichnet wird) beschäftigt.
 
 > Die **Architektur** eines Rechners beschreibt dessen grundsätzlichen Aufbau (Hardwarestruktur) und das Zusammenspiel der Komponenten (Organisationsstruktur).
 
