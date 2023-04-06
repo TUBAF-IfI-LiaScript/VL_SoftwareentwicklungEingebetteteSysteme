@@ -375,8 +375,7 @@ Aus den vorangegangen Aussagen ist klar geworden, wie die Komponenten des Rechne
 Die Verarbeitungskette in folgender Grafik adressiert zwar explizit die AVR Tools, lässt sich aber auf jede Plattform übertragen.
 
 ```text @plantUML.png
-@startuml
-ditaa
+@startditaa
 
 +-----------------------------------------------------------------------------------------+
 :  Entwicklungsrechner                                                                    |                  
@@ -427,7 +426,8 @@ ditaa
 | +---------------+        +---------------+         +---------------+                    |
 | Mikrocontroller                                                                         |
 +-----------------------------------------------------------------------------------------+
-@enduml
+
+@endditaa
 ```
 
 ## Hausaufgaben
