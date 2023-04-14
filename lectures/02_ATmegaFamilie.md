@@ -635,3 +635,5 @@ Im Programmspeicher steht auf den ersten 8 Byte `jmp 0xe4`
 - [ ] Machen Sie sich mit den Struktur des Handbuches des Controllers vertraut.
 - [ ] Ermitteln Sie die Abläufe bei der Generierung von Atmega Code. Evaluieren Sie Assembler-Dateien und experimentieren Sie mit verschiedenen Optimierungsstufen.
 - [ ] Suchen Sie eine noch kürzere Implementierung für die Umsetzung des Hello World Beispiels.
+
+!?[](https://www.youtube.com/watch?v=Kv8hT1IVOxQ&t=243s)
