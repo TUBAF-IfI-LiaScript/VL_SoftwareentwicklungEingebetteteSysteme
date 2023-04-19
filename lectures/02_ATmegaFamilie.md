@@ -4,7 +4,7 @@ email:    sebastian.zug@informatik.tu-freiberg.de
 
 version:  0.0.3
 language: de
-narrator: Deutsch Female
+narrator: Deutsch Female 
 
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
          https://github.com/LiaTemplates/AVR8js/main/README.md

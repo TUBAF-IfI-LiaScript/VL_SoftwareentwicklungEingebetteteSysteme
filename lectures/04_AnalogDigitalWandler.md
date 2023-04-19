@@ -5,7 +5,7 @@ email:    sebastian.zug@informatik.tu-freiberg.de
 version:  0.0.3
 language: de
 narrator: Deutsch Female
-comment:  Analog Digital Wandler - Wiederholung und Umsetzung im Atmega328p
+comment:  Analog Digital Wandler - Wiederholung und Umsetzung im Atmega328p 
 icon:     https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md

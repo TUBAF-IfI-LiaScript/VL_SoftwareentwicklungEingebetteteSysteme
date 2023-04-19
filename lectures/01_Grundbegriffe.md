@@ -5,7 +5,7 @@ email:    sebastian.zug@informatik.tu-freiberg.de
 version:  0.0.3
 language: de
 narrator: Deutsch Female
-comment:  Begriffsdefinition in Bezug auf eingebettete Controller in Bezug auf Rechnerarchitektur und den Entwicklungsprozess
+comment:  Begriffsdefinition in Bezug auf eingebettete Controller in Bezug auf Rechnerarchitektur und den Entwicklungsprozess 
 icon:     https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md

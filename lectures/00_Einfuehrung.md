@@ -5,7 +5,7 @@ email:    sebastian.zug@informatik.tu-freiberg.de
 version:  0.0.3
 language: de
 narrator: Deutsch Female
-comment:  Fokus der Lehrveranstaltung und Organisation, Verknüpfungspunkte mit weiteren Inhalten
+comment:  Fokus der Lehrveranstaltung und Organisation, Verknüpfungspunkte mit weiteren Inhalten 
 icon:     https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
