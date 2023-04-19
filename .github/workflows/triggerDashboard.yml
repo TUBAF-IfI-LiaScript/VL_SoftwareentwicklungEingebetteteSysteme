@@ -1,20 +1,21 @@
-name: Update LiaScript Dashboard
-
-# Controls when the workflow will run
+name: Trigger_overview
 on:
-  workflow_dispatch:
-
+  push:
+    branches:
+      - master
+      
 jobs:
-  updateallrepos:
+  dispatch:
+    name: Dispatch dashboard
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: ['TUBAF-IfI-LiaScript/TUBAF-IfI-LiaScript.github.io']
+    timeout-minutes: 5
     steps:
-      - uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: 'TUBAF-IfI-LiaScript',
-              repo: 'TUBAF-IfI-LiaScript.github.io',
-              workflow_id: 'helloWorld.yml',
-              ref: 'main'
-            })
+      - name: Dispatch to workflows
+        run: |
+            curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${{ secrets.TOKEN }}" \
+            --request POST \
+            --data '{"event_type": "new_version", "client_payload": { "repo": "${{ github.repository }}" }}' https://api.github.com/repos/${{ matrix.repo }}/dispatches

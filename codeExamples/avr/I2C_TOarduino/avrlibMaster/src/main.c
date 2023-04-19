@@ -30,5 +30,6 @@ int main()
 		x++; 
   		if (x > 5) x = 0; 
 		printf("Initialisierung abgeschlossen .... %d", x);
+		_delay_ms(1000);
 	}
 }

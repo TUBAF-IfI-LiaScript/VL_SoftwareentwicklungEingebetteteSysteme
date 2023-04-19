@@ -21,7 +21,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Übungen Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Praktische Diskussion der I2C Funktionalität`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/03_Kommunikation.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/03_Kommunikation.md) |
@@ -74,3 +74,5 @@ vgl. Codebeispiel [Link](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSyste
 - [ ] Verteilen Sie die Aufgaben aus dem Beispiel der vergangen Woche auf die zwei Ihnen vorliegenden Controller. Nehmen Sie den Joystick am Arduino Uno Wifi in Betrieb und übertragen Sie die Informationen an den zweiten Controller, der den Schrittmotor und die Datenerfassung steuert. Damit entsteht ein Remote-Fernzugriff.
 
 - [ ] Nehmen Sie die Echtzeituhr aus der Bastelbox in Betrieb und evaluieren Sie deren Registerset. Folgen Sie dazu den Vorgaben auf [MangoLabs](https://www.mangolabs.de/product/real-time-clock-module/). Was ist die grundlegende Idee der Echtzeituhr?
+
+!?[TinyRTC](https://www.youtube.com/watch?v=lyvoOEO-Ncg)
