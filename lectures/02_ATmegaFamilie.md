@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.2
+version:  0.0.3
 language: de
 narrator: Deutsch Female
 
@@ -22,7 +22,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Überblick zur ATmega Familie`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md) |
@@ -178,7 +178,7 @@ ditaa
 |  |     Speicher{o}     |  | Mikroprozessor  |  |      Timer{o}       |  |
 |  +---------------------+  +-----------------+  +---------------------+  |
 |                                 |     |                                 |
-|  +---------------------+        |     |        +---------------------+  |
+|  +---------------------+        |     |        +---------------------+  |dont
 |  |   Reset-System{o}   |        |     |        |   Analog I/O{o}     |  |
 |  +---------------------+        |     |        +---------------------+  |
 |                                 |     |                                 |
@@ -634,3 +634,6 @@ Im Programmspeicher steht auf den ersten 8 Byte `jmp 0xe4`
 
 - [ ] Machen Sie sich mit den Struktur des Handbuches des Controllers vertraut.
 - [ ] Ermitteln Sie die Abläufe bei der Generierung von Atmega Code. Evaluieren Sie Assembler-Dateien und experimentieren Sie mit verschiedenen Optimierungsstufen.
+- [ ] Suchen Sie eine noch kürzere Implementierung für die Umsetzung des Hello World Beispiels.
+
+!?[](https://www.youtube.com/watch?v=Kv8hT1IVOxQ&t=243s)
