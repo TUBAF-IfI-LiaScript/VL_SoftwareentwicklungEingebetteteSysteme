@@ -8,3 +8,7 @@ Pipfile.lock
 .vscode/
 
 STMCubeExample/
+
+.mxproject
+*.ioc
+*.gpdsc

@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+easyprocess = "==0.2.10"
+entrypoint2 = "*"
+pandas = "*"
+setuptools = "==57.5.0"
+pysimavr = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

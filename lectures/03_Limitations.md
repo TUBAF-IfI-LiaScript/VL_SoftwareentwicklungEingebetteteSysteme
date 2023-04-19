@@ -21,7 +21,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2021`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Überblick zur ATmega Familie`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/03_Limitations.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/03_Limitations.md) |
@@ -34,6 +34,36 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 ## Welche Einschränkungen ergeben sich aus der Architektur?
 
 > Warum sprechen wir im Zusammenhang mit den Controllern von fehlender Performance verglichen mit anderen Systemen?
+
+## Einschub - Inline Assembler 
+
+Inline-Assembler erlaubt die Einbettung von kleinen Assembler-Codes direkt in den C/C++-Code. Folglich muss keine Assembler-Funktion aufgerufen werden, was die Unterstützung durch den Compiler bei der Registerverwendung ermöglicht.
+
+> Eine sehr gute Übersicht zur Konfiguration von Inlineassambler bietet [Link](https://rn-wissen.de/wiki/index.php/Inline-Assembler_in_avr-gcc).
+
+```
+asm volatile (asm-template 
+             : output-operand-list 
+             : input-operand-list 
+             : clobber-list);
+```
+
+| Elemente              | Bedeutung                                                                         |
+| --------------------- | --------------------------------------------------------------------------------- |
+| `asm-template`        | ... String mit Assembler-Befehlen und Platzhaltern                                |
+| `output-operand-list` | ... Constraints und C-Ausdruck                                             |
+| `input-operand-list`  |                                                                                   |
+| `clobber-list`        | ... Liste von Registern, deren Inhalt durch den Inline-Assembler manipuliert wird |
+
+> Warum die Frage nach den verwendeten Registern?
+
+| Kategorie           | Register          | Bedeutung                                                                                                                                                                                                           |
+| ------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feste Register      | R0                | ... wird als Scratch-Register verwendet, das nach seiner Verwendung nicht wiederhergestellt werden muss. Es muss im Prolog und Epilog der Interrupt Service Routine (ISR) gespeichert und wiederhergestellt werden. |
+|                     | R1                | ...  enthält immer Null. Dieses Register muss in ISR-Prologs gespeichert und dann auf Null gesetzt werden, da R1 andere Werte als Null enthalten  kann.                                                             |
+| Call-Used-Register  | R18–R27, R30, R31 | Diese Register sind Call-Clobbered. Eine normale Funktion kann sie verwenden, ohne ihren Inhalt wiederherzustellen. ISRs müssen jedes von ihnen verwendete Register speichern und wiederherstellen.                 |
+| Call-Saved-Register | R2-R17, R28, R29  | Die gennannten Register sind aufrufgesichert, d.h. eine Funktion, die ein solches Register verwendet, muss dessen ursprünglichen Inhalt wiederherstellen.                                                           |
+
 
 ### 8-Bit Datenbreite
 
@@ -69,6 +99,7 @@ int main (void) {
 
   Serial.print("Das Ergebnis ist ");
   Serial.println(sample);
+  Serial.flush();
 
   while(1) {
        _delay_ms(1000);
@@ -126,21 +157,21 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 -->
 ```ascii
 
-    +----------+
-r16 |   0x10   | Faktor 1   low Byte  "$m1_L$"
-    +----------+ 8208
-r17 |   0x20   |            high Byte "$m1_H$"
-    +----------+
-r18 |   0xFF   | Faktor 2             "$m2$"
-    +----------+ ........ -. .........................................                 
-r19 |   0xF0   | Ergebnis  |       
-    +----------+ 2093040   ⎬ "$m1_L\cdot m2$"-.
-r20 |   0xEF   |           |                  |   
-    +----------+          -.                  ⎬ "$m1_H \cdot m2$"
-r21 |   0x1F   |                              |                 carry
-    +----------+                             -.
-r22 |   0x00   |      0
-    +----------+                                                               .
+         +----------+
+     r16 |   0x10   | Faktor 1   low Byte  "$m1_L$"
+         +----------+ 8208
+     r17 |   0x20   |            high Byte "$m1_H$"
+         +----------+
+     r18 |   0xFF   | Faktor 2             "$m2$"
+         +----------+ ........ -. .........................................                 
+%A0  r19 |   0xF0   | Ergebnis  |       
+         +----------+ 2093040   ⎬ "$m1_L\cdot m2$"-.
+%B0  r20 |   0xEF   |           |                  |   
+         +----------+          -.                  ⎬ "$m1_H \cdot m2$"
+%C0  r21 |   0x1F   |                              |                 carry
+         +----------+                             -.
+%D0  r22 |   0x00   |      0
+         +----------+                                                               .
 ```
 
 <div>
@@ -179,6 +210,7 @@ int main (void) {
 
   Serial.print("Das Ergebnis ist ");
   Serial.println(sample);
+  Serial.flush();
 
   while(1) {
        _delay_ms(1000);
@@ -216,6 +248,11 @@ style="width: 100%; max-width: 560px; display: block; margin-left: auto; margin-
 > 2. Berechnung des Ergebnisses
 > 3. Normierung des Resultats
 
+<iframe width="100%" height="60%" src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:2,endLineNumber:22,positionColumn:2,positionLineNumber:22,selectionStartColumn:2,selectionStartLineNumber:22,startColumn:2,startLineNumber:22),source:'%23define+F_CPU+16000000UL%0A%0A%23include+%3Cavr/io.h%3E%0A%0Aint+main+(void)+%7B%0A%0A++char+a+%3D+5%3B%0A++char+b+%3D+6%3B%0A++char+c+%3D+0%3B%0A%0A++//float+a+%3D+5.1%3B%0A++//float+b+%3D+6.3%3B%0A++//float+c+%3D+0%3B%0A%0A++for+(int+i+%3D+1%3B+i+%3C+11%3B+%2B%2Bi)%0A++%7B%0A++++c+%3D+a+%2B+b%3B%0A++++if+(c%3E15)+break%3B%0A++%7D%0A%0A++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:avrg930,deviceViewOpen:'1',filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'0',trim:'1'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+AVR+gcc+9.3.0+(Editor+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
+
+> Ändern Sie die Operation in Zeile 17 von einer Addition in eine Mulitplikation. Was beobachten Sie und warum?
+> Welche Änderungen beobachten Sie, wenn Sie den Datentyp auf `float` setzen?
+
 ###  Fehlende Festkommaeinheit
 
 Neben den Fließkommadarstellungen lassen sich auch Festkommakonzepte für die Darstellung gebrochener Zahlen in Hardware/Software umsetzen. Dabei wird die Speicherbreite in den Anteil vor und nach einer spezifischen und unveränderlichen Kommaposition eingeteilt.
@@ -239,7 +276,7 @@ Ein Beschreibungsformat dafür ist die Q-Notation bei der die Anzahl der Nachkom
 
 Eine 16 Bit breite, vorzeichenbehaftete Festkommazahl `Q15.1` kann also Zahlenwerte im Bereich $[-16384.0, +16383.5]$ abbilden. Die Auflösung der Darstellung ist $2^{-n} = 0.5$
 
-> **Merke:** Anders als eine Fließkommazahl ist die Auflösung der Festkommazahl konstant!
+> **Merke:** Anders als für eine Fließkommazahl, ist die Auflösung der Festkommazahl konstant!
 
 Bei der Rechnung mit Festkommazahlen werden die binären Muster prinzipiell so verarbeitet wie bei der Rechnung mit ganzen Zahlen. Festkomma-Arithmetik kann daher von jedem digitalen Prozessor durchgeführt werden, der arithmetische Operationen mit ganzen Zahlen unterstützt. Dennoch sind einige Regeln zu beachten, die sich auf die Position des Kommas vor und nach der Rechenoperation beziehen:
 
@@ -291,7 +328,7 @@ Wie ist das Ganze implementiert? Seit der Version 4.8 integriert der [avr-gcc](h
 
 > **Merke:** Daneben existieren verschiedene andere Festkommabibliotheken, die andere Konfigurationen unterstützen und verschiedene Implementierungen aufzeigen.
 
-Lassen Sie uns einen genaueren Blick auf die Implementierung werfen. Im Codebeispiel, dass Sie im Projektordner XXX finden, addieren wir zwei Variablen unterschiedlichen Formates.
+Lassen Sie uns einen genaueren Blick auf die Implementierung werfen. Im Codebeispiel, dass Sie im Projektordner finden, addieren wir zwei Variablen unterschiedlichen Formates.
 
 ```c    FixedPoint.c
 #define F_CPU 16000000UL
