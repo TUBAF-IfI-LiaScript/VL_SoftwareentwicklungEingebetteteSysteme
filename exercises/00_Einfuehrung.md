@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.2
+version:  0.0.4
 language: de
 narrator: Deutsch Female
 
@@ -15,12 +15,12 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 [![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/exercises/00_Einfuehrung.md#1)
 
-# Erste Gehversuche
+# Fingerübung
 
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Übungen Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                      |
+| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Einarbeitung und digitale Input/Output Operationen`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
@@ -32,14 +32,24 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ## Organisation der Übungen
 
-Wir treffen uns in der ersten Phase der Veranstaltung donnerstags um 7:30 und besprechen die Umsetzung der in den Vorlesungen vermittelten Inhalte. Darauf bauen verschiedene Übungsaufgaben auf, die Sie selbstständig lösen.
+| Tag      | Termin        | Woche          |
+| -------- | ------------- | -------------- |
+| Montag   | 9:45 - 11:15  | ungerade Woche |
+| Dienstag | 11:30 - 13:00 | gerade Woche |
 
-In der zweiten Phase betten wir Ihre Vorträge ein.
+In der zweiten Phase der Übungen betten wir Ihre Vorträge ein.
 
 > Ich möchte vorschlagen, dass Sie die Aufgaben gemeinsam realisieren und dafür GitHub nutzen. Das erleichtert mir auch die Begleitung der Entwicklung.
 
-
-
+  + DSP Implementierung im STM32F4    
+  + ~~STM32 Cube.AI / Edge Computing~~
+  + mbedOS vs FreeRTOS
+  + ~~LCD Programmierung mit dem STM~~
+  + CAN Bus - Theorie und Anwendung
+  + microROS / micro DDS
+  + Schlafmodi von Controllern (elektrische Vermessung)
+  + virtuelle Maschinen auf eingebetteten Systemen (MicroPython, WASM-Interpreter)
+  + ~~USB - Konzept und Implementierung~~
 
 ## Entwicklungsumgebungen
 
@@ -189,7 +199,7 @@ int main()
 
 - [ ] Recherchieren Sie die Abläufe zum Entprellen eines Tasters in Software. Wie ließe sich diese Lösung auf eine Hardware abbilden?
 
-- [ ] Schreiben Sie ein Programm, welches einen String mittels Morse-Code über die eingebaute LED ausgibt, sobald ein Schalter gedrückt wird.
+- [ ] Schreiben Sie ein Programm, welches einen String mittels Morse-Code über die eingebaute LED ausgibt, sobald der Taster gedrückt wird. Gehen Sie davon aus, das das Programm möglichst variabel parameterisierbar sein soll (Timings, Codes). 
 
 ```c
 //For letters
@@ -206,6 +216,4 @@ const char *numbers[] = {
 };
 ```
 
-- [ ] Fügen Sie in der simavr Umgebung eine weitere Untersuchung für `float` und `double` Variablen ein.
-
-    https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/tree/main/codeExamples/avr/fixedPoint/pySimAVR/vcdBased
+- [ ] Wie würden Sie mit simavr eine Testumgebung für die Anwendung aufsetzen? 
