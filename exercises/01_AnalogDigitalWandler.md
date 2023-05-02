@@ -2,14 +2,13 @@
 author:   Sebastian Zug, Karl Fessel
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.1
+version:  0.0.2
 language: de
 narrator: Deutsch Female
 
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
          https://github.com/LiaTemplates/AVR8js/main/README.md
          https://github.com/liascript/CodeRunner
-         https://github.com/LiaTemplates/Pyodide
 
 icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 -->
@@ -33,8 +32,22 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ## Diskussion des vergangenen Aufgabenblattes
 
+Lösungsansätze
+============================================
+
 > Hier sind Sie gefragt ...
 
+Einbettung der Simulation in die Entwicklungsumgebung
+============================================
+
+Plattformio integiert zwei Debugging Tools für den Arduino Uno unmittelbar:
+
++ `simavr` als reine Simulationumgebung [Link](https://docs.platformio.org/en/latest/plus/debug-tools/simavr.html)
++ `avr-stub` als Hardware-in-the-loop Debugger [Link](https://docs.platformio.org/en/latest/plus/debug-tools/avr-stub.html#debugging-tool-avr-stub)
++ `avr-jtag`
++ `unity` als Serial basierte Testumgebung 
++ ...
++ `pysimavr` als Python-basiertes Testtool
 
 ## Hinweise und Anregungen
 
@@ -184,12 +197,12 @@ ax.grid(True)
 print ("Koffizienten =" + ''.join(["%+.10f" % x for x in fir_coeff]))
 
 
-plt.show()
-plot(fig) # <- this is required to plot the fig also on the LiaScript canvas
+#plt.show()  
+plt.savefig('foo.png') # notwendig für die Ausgabe in LiaScript
 ```
-@Pyodide.eval
+@LIA.eval(`["main.py"]`, `none`, `python3 main.py`)
 
-Dies Lösung illustriert die intuitive Umsetzung des Ansatzes anhand von Gleitkommazahlen. Welche Adaptionen drängen sich auf?
+Die nachfolgende Lösung illustriert die intuitive Umsetzung des Ansatzes anhand von Gleitkommazahlen. Welche Adaptionen drängen sich auf?
 
 ```c          FIRimplementation.c
 #define nc 11    // Anzahl der Filterkoeffizienten  
@@ -205,8 +218,8 @@ float circular_buffer[i] = {0};
 // Schreibe neuen Eingangswert in Buffer  
 
 circular_buffer[zeiger] = new_sample;
-// Inkrementiere Zeiger
-modulo nc  zeiger = (zeiger + 1) % nc;
+// Inkrementiere Zeiger modulo nc  
+zeiger = (zeiger + 1) % nc;
 
 // Berechne neuen Ausgangswert  
 y = 0;
@@ -214,13 +227,6 @@ for(i = 0; i < nc; i++){
   y += (b[i] * circular_buffer[(zeiger + i) % nc]);
 }
 ```
-
-### Einbettung der Simulation in die Entwicklungsumgebung
-
-Plattformio integiert zwei Debugging Tools für den Arduino Uno unmittelbar:
-
-+ `simavr` als reine Simulationumgebung [Link](https://docs.platformio.org/en/latest/plus/debug-tools/simavr.html)
-+ `avr-stub` als Hardware-in-the-loop Debugger [Link](https://docs.platformio.org/en/latest/plus/debug-tools/avr-stub.html#debugging-tool-avr-stub)
 
 ## Beispiel - Analoger Comperator
 
@@ -278,4 +284,4 @@ int main (void) {
 
 - [ ] Entwerfen Sie einen Filter für die Glättung der Joystick-Daten. Experimentieren Sie mit unterschiedlichen Konfigurationen des Filters!
 
-- [ ] Implementieren Sie die Bereitstellung von Sinus Werten mit einer Lookup Table. Evaluieren Sie den Geschwindigkeitsvorteil bei der Berechnung gegenüber der Umsetzung mit einer avrlibc Funktion.
+- [ ] Speichern Sie die Filterparameter mit `progmem` im Programmspeicher. Analysieren Sie die Konsequnzen anhand einer Analyse des Assemblercodes - evaluieren Sie den Geschwindigkeitsnachteil.
