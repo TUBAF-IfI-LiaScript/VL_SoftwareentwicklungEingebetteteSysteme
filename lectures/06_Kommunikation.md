@@ -21,8 +21,8 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                      |
+| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Grundlegende Kommunkationskonzepte`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/06_Kommunikation.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/06_Kommunikation.md) |
@@ -58,7 +58,7 @@ Im Rahmen der Veranstaltung wollen wir drei Kommunikationsprotokolle, die durch 
 * UART - Universal Asynchronous Receiver Transmitter
 * I2C - Inter-Integrated Circuit (in der "Atmel Welt" als _Two Wire Interface_ (TWI) bezeichnet)
 * SPI - Serial Perepherial Interface
-* CAN - Controller Area Network (folgt als studentischer Beitrag)
+* CAN - Controller Area Network
 
 > **Merke** `UART` beschreibt eine Schnittstelle während `I2C` und `SPI` konkrete Protokolldefinitionen darstellen.
 
@@ -146,7 +146,7 @@ Anmerkungen:
 + Das Paritätsbit ist eine einfache Möglichkeit, EINEN Fehler bei der Übertragung zu prüfen ohne diesen aber korrigieren zu können.
 + Historisch kommen noch zwei Pins für die Flusskontrolle hinzu - RTS (Ready to send) und CTS (Clear to send). Diese sollen der Synchronisation von Geräten dienen und zeigen an, ob ein Gerät bereit ist die Datenübernahme zu realsieren.
 
-Die Datenrate wird in _Bit pro Sekunde_ (bps) bzw. Baud (nach dem französischen Ingenieur und Erfinder [Jean Maurice Émile Baudot](https://de.wikipedia.org/wiki/%C3%89mile_Baudot)) angegeben. Dabei werden alle Bits (auch Start- und Stoppbit) gezählt und Lücken zwischen den Bytetransfers ignoriert. Dabei sind die spezifische Datenraten - 150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600 und 115200 Baud - üblich:
+Die Datenrate wird Baud (nach dem französischen Ingenieur und Erfinder [Jean Maurice Émile Baudot](https://de.wikipedia.org/wiki/%C3%89mile_Baudot)) angegeben. Für die UART entspricht dies in _Bit pro Sekunde_ (bps). Dabei werden alle Bits (auch Start- und Stoppbit) gezählt und Lücken zwischen den Bytetransfers ignoriert. Dabei sind die spezifische Datenraten - 150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600 und 115200 Baud - üblich:
 
 Der Abstand zwischen den Geräten wirkt sich direkt auf die Kommunikationsgeschwindigkeit aus! Welche Datenübertragungsraten sind damit möglich?
 
@@ -197,7 +197,7 @@ Der UART basiert auf TTL-Pegel mit 0V (logisch 0) und 5V (logisch 1). Im Untersc
 | 2   | `RxD`  oder `Rx` | Receive Data - Empfang an Gerät 1, Sendelinie für Gerät 2, bzw. Empfänger |
 | 3   | `TxD`  oder `Tx` | Transmit Data - Senden für Gerät 1, Empfang für Gerät 2 bzw. Empfänger    |
 | 4   | `DTR`            | Data Terminal Ready                                                       |
-| 5   | 'GND'		 | 0-Potential
+| 5   | `GND`       		 | 0-Potential                                                               |
 | 6   | `DSR`            | Data Set Ready                                                            |
 | 7   | `RTS` oder `RTR` | Gerät 1 ist bereit Daten zu empfangen                                     |
 | 8   | `CTS`            | Clear To Send - Empfänger bzw. Gerät 2 ist bereit Daten zu empfangen      |
@@ -398,7 +398,10 @@ Jedes I²C-fähige IC hat eine (üblicherweise vom Hersteller) festgelegte Adres
 
 ![alt-text](../images/06_Kommunikation/I2C_adressing.png "PCF8574 I2C Expander - Darstellung der Adressierung [^PCF8574] Seite 9")
 
+> Link auf den internen Controller des [LCD](https://www.sparkfun.com/datasheets/LCD/HD44780.pdf) / [PCF8574](https://www.ti.com/lit/ds/symlink/pcf8574.pdf)
+
 Hierdurch wird es möglich, mehrere ICs dieses Typs am selben I2C-Bus zu betreiben, ohne dass es zu Adresskonflikten kommt. Lassen sich Adresskonflikte nicht vermeiden, so müssen die entsprechenden ICs mit getrennten I²C-Bussen angesteuert oder temporär vom Bus getrennt werden.
+
 
 **Aufbau der Datenframes**
 
@@ -423,6 +426,7 @@ Slave                          | AKN |              | AKN |              | AKN |
 
 
 Schreiben in eines der Slave-Register
+
 <!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
 
@@ -436,6 +440,7 @@ Slave                          | AKN |              | AKN |              | AKN |
 ```
 
 Lesen aus einem der Slave-Register
+
 <!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
 
@@ -492,14 +497,14 @@ Cons
 #define F_CPU 16000000UL
 #define BITRATE(TWSR)	((F_CPU/SCL_CLK)-16)/(2*pow(4,(TWSR&((1<<TWPS0)|(1<<TWPS1)))))
 
-void I2C_Init()			/* I2C initialize function */
+void I2C_Init()
 {
-    TWBR = BITRATE(TWSR=0x00);	/* Get bit rate register value by formula */
+    TWBR = BITRATE(TWSR=0x00);	
 }
 
-uint8_t I2C_Start(charwrite_address)/* I2C start function */
+uint8_t I2C_Start(charwrite_address)
 {
-    uint8_t status;	                     	/* Declare variable */
+    uint8_t status;	                     	
     TWCR=(1<<TWSTA)|(1<<TWEN)|(1<<TWINT); /* Enable TWI, generate START */
     while(!(TWCR&(1<<TWINT)));          	/* Wait until TWI finish its current job */
     status=TWSR & 0xF8;		                /* Read TWI status register */
@@ -514,12 +519,12 @@ uint8_t I2C_Start(charwrite_address)/* I2C start function */
     if(status==0x20)	                  	/* Check for SLA+W transmitted &nack received */
        return 2;		                      /* Return 2 to indicate nack received */
     else
-       return3;			                      /* Else return 3 to indicate SLA+W failed */
+       return 3;			                    /* Else return 3 to indicate SLA+W failed */
 }
 
-uint8_t I2C_Write(char data)							/* I2C write function */
+uint8_t I2C_Write(char data)
 {
-	uint8_t status;										     	/* Declare variable */
+	uint8_t status;										     	
 	TWDR = data;										      	/* Copy data in TWI data register */
 	TWCR = (1<<TWEN)|(1<<TWINT);				  	/* Enable TWI and clear interrupt flag */
 	while (!(TWCR & (1<<TWINT)));					  /* Wait until TWI finish its current job (Write operation) */
@@ -531,7 +536,6 @@ uint8_t I2C_Write(char data)							/* I2C write function */
 	else
 	  return 2;											        /* Else return 2 to indicate data transmission failed */
 }
-
 ```
 
 !?[alt-text](https://www.youtube.com/watch?v=PjsK6uxUZeA)
@@ -548,7 +552,7 @@ In unserer Bastelbox befinden sich 3 Komponenten mit einem I2C Interface:
 
 ## SPI
 
-Das Serial Peripheral Interface (SPI) ist ein im Jahr 1987 von Susan C. Hill und anderen beim Halbleiterhersteller Motorola (heute NXP Semiconductors), entwickeltes synchron arbeitendes Bus-System, das ähnlich umlaufenden Schieberegister arbeitet.
+Das Serial Peripheral Interface (SPI) ist ein im Jahr 1987 voPn Susan C. Hill und anderen beim Halbleiterhersteller Motorola (heute NXP Semiconductors), entwickeltes synchron arbeitendes Bus-System, das ähnlich umlaufenden Schieberegister arbeitet.
 
 ![alt-text](../images/06_Kommunikation/SPI_Principle.png "SPI Prinzip [^AtMega328] Seite 170")
 
