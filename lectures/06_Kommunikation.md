@@ -1,8 +1,8 @@
 <!--
-author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
+author:   Sebastian Zug, Karl Fessel & Andrè Dietrich, Bastian Zötzl
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.2
+version:  1.0.3
 language: de
 narrator: Deutsch Female
 
@@ -568,7 +568,6 @@ An den Bus können so viele Teilnehmer angeschlossen werden, wie Slave-Select-Le
 
 [^WikipdeiaSPI]: Wikipedia, Autor en:User:Cburnett, [Link](https://de.wikipedia.org/wiki/Serial_Peripheral_Interface)
 
-
 ### Umsetzung im AVR
 
 ![alt-text](../images/06_Kommunikation/SPI_module_avr.png "SPI Modul im AVR [^AtMega328] Seite 169")
@@ -576,6 +575,75 @@ An den Bus können so viele Teilnehmer angeschlossen werden, wie Slave-Select-Le
 [^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
 Einen Überblick zur Verwendung der SPI Kommunikation liefert das Tutorial [AVR151: Setup and Use of the SPI](https://ww1.microchip.com/downloads/en/AppNotes/Atmel-2585-Setup-and-Use-of-the-SPI_ApplicationNote_AVR151.pdf)
+
+## CAN Bus
+
+Geschichte
+---------------------
+
+* Entwicklung begann 1981 (Fertigungstechnik), 1983 begann die Weiterentwicklung für Kraftfahrzeuge
+* Daimler nutzt erste Serienanwendung in 1991
+* 1987 stellt Bosch das Controller-Area-Network vor
+* Jahrtausendwende bringt Weiterentwicklungen: Subsystem LIN (Local Interconnect Network)
+* Weiterentwicklung in 2012 mit vergrößertem Datenfeld auf 64 Byte (urspr. 8) - CAN FD
+
+### Konzept 
+
+Das "Can-Bus-Kabel" besteht aus zwei ineinander verdrehten Drähten. Eine gute Abschirmung ist nicht zwingend notwendig. Die Impedanz des Kabels muss laut ISO im Bereich zwischen 100–130 Ohm liegen.
+
+Zusätzlich müssen an den Enden Abschlusswiderstände von 120 Ohm angebracht sein. Solche "line terminations" sind keine Besonderheit des CAN-Bus und lassen sich über elektrotechnische Phänomene erklären.
+
+![](https://upload.wikimedia.org/wikipedia/commons/9/9e/CAN-Bus_Elektrische_Zweidrahtleitung.svg "SCAN-Bus Topologie (Elektrische Zweidrahtleitung) - Autor Stefan-Xp, avialable at: https://commons.wikimedia.org/wiki/File:CAN-Bus_Elektrische_Zweidrahtleitung.svg")
+
+Bei der CAN-Übertragung heißt die logische 1 "rezessiv", die logische 0 "dominant", wobei der rezessive Zustand der Ruhezustand ist. Wird eine logische 0 gesendet, wechselt CANH aus ein höheres Spannungsniveau, CANL auf ein niedrigeres. 
+
+![](https://upload.wikimedia.org/wikipedia/commons/4/4d/Canbus_levels.svg "Spannungspegel im Highspeed-CAN-Bus - Autor Plupp, avialable at: https://commons.wikimedia.org/wiki/File:Canbus_levels.svg")
+
+Verbreitete CAN-Bus-Geschwindigkeiten sind 125kbit/s (Lowspeed), 250kbit/s, 500kbit/s und 1Mbit/s (Highspeed). Dabei wird eine Kabellänge von bis 40m betrachtet.
+
+### Nachrichtenpakete
+
+Es gibt vier verschiedene Arten von Frames:
+
++ Daten-Frame, dient dem Transport von Daten
++ Remote-Frame, dient der Anforderung eines Daten-Frames von einem anderen Teilnehmer
++ Error-Frame, signalisiert allen Teilnehmern eine erkannte Fehlerbedingung in der Übertragung
++ Overload-Frame, dient als Zwangspause zwischen Daten- und Remote-Frames
+
+Wir fokussieren uns an dieser Stelle auf den Datenframe:
+
+![](https://upload.wikimedia.org/wikipedia/commons/5/54/CAN-bus-frame-with-stuff-bit-and-correct-CRC.png "Ein kompletter CAN Bus Frame mit Stuff bits, CRC und Interframe-Spaces - Author: Dr Ken Tindell Source https://kentindell.github.io/2020/01/03/canframe_py_tool/ avialable at: https://commons.wikimedia.org/wiki/File:CAN-bus-frame-with-stuff-bit-and-correct-CRC.png")
+
+| Feld            | Größe        | Bedeutung                             |
+| --------------- | ------------ | ------------------------------------- |
+| Start           | 1 bit        | dominant, zur Syncronisation          |
+| Identifier      | 11 bits      | Prioritätenübermittlung               |
+| RTR             | 1 bit        | Anforderung (dominant) / Senden       |
+| IDE             | 1 bit        | Identifier Extension (CAN2.0 A / B)   |
+| r0              | 1 bit        | "reserviert", in KFZ ungenutzt        |            
+| DLC             | 4 bits       | data length code                      |
+| DATA            | 64 bit (max) | 1 - 8 Byte                            |
+| CRC             | 15 bits      | 14 Fehlererkennungsbits, 1 Delimiter  |
+| ACK             | 2 bits       | 1 Acknowledge, 1 Delimiter            |
+| EOF             | 7 bits       | end of field, rezessiv                |
+| IFS             | 3 / 7 bits   | rezessiv, Puffer-Feld!                | 
+
+### Fehlererkennung 
+
+Das CAN-Protokoll beinhaltet 5 Fehlerüberprüfungsmethoden. Drei davon sind aus "Nachrichten-Level", zwei davon auf "Bit-Level". Sobald einer der Fehler auftritt wird ein ***Error-Frame*** generiert. 
+
+Nachrichtenlevel
+
+1. Cyclic Redundancy Check (CRC)
+2. Frame-check
+3. ACK-Fehler
+
+Bit-Level
+
+1. Monitoring und Vergleich zwischen Senden und Empfangen
+2. Bit-stuffing
+
+Tritt ein Fehler mehrmals aufeinanderfolgend auf, führt dies zur automatischen Abschaltung des Knotens. Da immer alle Teilnehmer (auch der Sender selbst) mitlesen wird eine Fehlererkennung sicher gewährleistet.
 
 ## Ausblick und Vergleich
 

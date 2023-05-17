@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.3
+version:  1.0.4
 language: de
 narrator: Deutsch Female
 
@@ -22,8 +22,8 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                      |
+| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Cortex M Controller Features`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/11_CortexMController.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/11_CortexMController.md) |
@@ -116,6 +116,8 @@ Cortex-M3, mit größerer Chipfläche, umfasst den vollständigen Thumb- und Thu
 +-----------------------------------------+                                    .
 ```
 
+## Architekturelemente
+
 Erweiterte Elemente der Architektur:
 
 + Memory Protection Unit (MPU) - Die MPU überwacht Transaktionen, einschließlich Befehlsabrufe und Datenzugriffe des Prozessors, die eine Fehlerausnahme auslösen können, wenn eine Zugriffsverletzung festgestellt wird. Der Hauptzweck des Speicherschutzes besteht darin, einen Prozess daran zu hindern, auf Speicher zuzugreifen, der ihm nicht zugewiesen wurde.
@@ -138,6 +140,8 @@ Diese Bus Ausgänge des Core werden auf unterschiedliche Busse im Controller abg
 ![alt-text](../images/11_CortexM/BusMatrix.png "Busmatrix am Beispiel des STM32F401 Controllers[^STM32] Seite 36")
 
 [^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+
+## Hersteller
 
 Unter anderem bieten folgende Halbleiterhersteller Cortex-M4 basierende Mikrocontroller an:
 
@@ -162,7 +166,7 @@ Um das Bezeichnungsgewirr komplett zu machen, führen die Hersteller, hier STMic
 | F0, J                  | Cortex-M0    |
 
 
-## STM32F
+## Microchip STM32F
 
 Die STM32 F4-Serie ist die erste Gruppe von STM32-Mikrocontrollern, die auf dem ARM Cortex-M4F-Kern basieren und über DSP- und Fließkomma-Befehle verfügt. Die F4-Serie ist Pin-zu-Pin-kompatibel mit der STM32 F2-Serie und bietet zusätzlich eine höhere Taktrate, 512 KB Flash Memory, bis zu 96 Kbytes SRAM, Full-Duplex I2S, eine Echtzeituhr und schnellere ADCs. Die Betriebsspannungsbereich beträgt 1,8 bis 3,6 Volt.
 
@@ -270,3 +274,5 @@ Der Quellcode der HAL- und LL-Treiber ist in ANSI-C entwickelt, was ihn unabhän
 | 2     | HAL                 | [STM HAL Tutorials](http://stm32f4-discovery.net/2014/09/stm32f4-tutorials-one-place/)     |
 | 3     | HAL mit STM32CubeMX |                                                                                            |
 | 4     | mbed                | [mbedOS Einführung](https://os.mbed.com/docs/mbed-os/v6.12/introduction/architecture.html) |
+
+!?[](https://www.youtube.com/watch?v=eumKLXNlM0U)
