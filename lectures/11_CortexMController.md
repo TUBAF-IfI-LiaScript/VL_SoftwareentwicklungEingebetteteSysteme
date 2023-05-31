@@ -241,6 +241,8 @@ int main (void)
 
 Der STM32CubeMX, ein grafisches Software-Konfigurationswerkzeug, das die Generierung von C-Initialisierungscode mithilfe grafischer Assistenten ermöglicht. Der STM32Cube Hardware Abstraction Layer (HAL), eine STM32 Abstraktionsschicht für eingebettete Software, die maximale Portabilität über den STM32 Mikrocontroller hinweg gewährleistet. Der HAL ist für die gesamte Hardware-Peripherie verfügbar.
 
+![alt-text](../images/11_CortexM/stm32_software_development_tools.png "STM32 Tool Chain Dokumentation [Link](https://www.st.com/en/development-tools/stm32cubemx.html)")
+
 ![alt-text](../images/11_CortexM/CubeMX.jpeg "Ansicht des Konfigurationsframeworks")
 
 Die Low-Layer-APIs (LL) bieten eine expertenorientierte Schicht, die näher an der Hardware ist als der HAL. Die LL-APIs sind nur für eine Reihe von Peripheriegeräten verfügbar.
@@ -276,3 +278,5 @@ Der Quellcode der HAL- und LL-Treiber ist in ANSI-C entwickelt, was ihn unabhän
 | 4     | mbed                | [mbedOS Einführung](https://os.mbed.com/docs/mbed-os/v6.12/introduction/architecture.html) |
 
 !?[](https://www.youtube.com/watch?v=eumKLXNlM0U)
+
+![alt-text](https://os.mbed.com/docs/mbed-os/v6.16/introduction/images/Mbed_OS_diagram_for_intro.png "mbed OS Architektur - Mbed OS 6 Dokumentation [Link](https://os.mbed.com/docs/mbed-os/v6.16/introduction/architecture.html)")
