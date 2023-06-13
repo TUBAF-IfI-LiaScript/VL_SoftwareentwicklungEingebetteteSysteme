@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.4
+version:  1.0.5
 language: de
 narrator: Deutsch Female
 
@@ -597,12 +597,17 @@ static void WorkerTask(void *pvParameters)
 
 ### Kommunikation / Synchronisation zwischen Tasks
 
+         {{0-1}}
+*****************************************************************************
+
 Bisher haben wir allein über isolierte Tasks gesprochen, die ohne Relation zu einander bestehen. FreeRTOS bietet fünf primäre Mechanismen für die Kommunikation zwischen Tasks: _queues_, _semaphores_, _mutexes_, _stream buffers_ und _message buffers_. Allen gemeinsam ist, dass sie dazu führen können, dass Tasks blockieren, wenn die Ressource oder die Daten eines anderen Tasks nicht verfügbar sind.
 
 Beispiele:
 
 + Ein Semaphore sperrt bzw. gibt den Zugriff auf ein Display frei.
 + Ein Task wartet auf das Eintreffen des Ergebnisses eines anderen Tasks, das über eine Queue übermittelt wurde.
+
+*****************************************************************************
 
          {{1-2}}
 *****************************************************************************
@@ -669,6 +674,88 @@ erstellt. Mutexe sollten nicht von einem Interrupt aus verwendet werden, da der 
 __Beispiel__
 
 Im Beispiel wird auf die Ressource Serielle Schnittstelle durch zwei Tasks zugegriffen. Um ein Überschreiben der Inhalte zu verhindern ist eine Synchronisation erforderlich.
+
+[Codesammlung](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/codeExamples/avr/FreeRTOS_taskHandling/src/main.cpp)
+
+```c 
+#include <Arduino.h>
+#include <Arduino_FreeRTOS.h>
+#include <semphr.h>  // add the FreeRTOS functions for Semaphores (or Flags).
+
+SemaphoreHandle_t xSerialSemaphore;
+
+void TaskA( void *pvParameters );
+void TaskB( void *pvParameters );
+
+void setup() {
+
+  Serial.begin(9600);
+  
+  if ( xSerialSemaphore == NULL )  
+  {
+    xSerialSemaphore = xSemaphoreCreateMutex();  
+    if ( ( xSerialSemaphore ) != NULL )
+      xSemaphoreGive( ( xSerialSemaphore ) );  
+  }
+
+  xTaskCreate(
+    TaskA
+    ,  "A"  
+    ,  128  
+    ,  NULL
+    ,  2  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  NULL );
+
+  xTaskCreate(
+    TaskB
+    ,  "B"
+    ,  128 
+    ,  NULL
+    ,  1  
+    ,  NULL );
+
+}
+
+void loop()
+{
+  // Empty. Things are done in Tasks.
+}
+
+/*--------------------------------------------------*/
+/*---------------------- Tasks ---------------------*/
+/*--------------------------------------------------*/
+
+void TaskA( void *pvParameters __attribute__((unused)) )  // This is a Task.
+{
+  for (;;) 
+  {
+    //Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    // If the semaphore is not available, wait 5 ticks of the Scheduler to see if it becomes free.
+    if ( xSemaphoreTake( xSerialSemaphore, ( TickType_t ) 5 ) == pdTRUE )
+    {
+      Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+      xSemaphoreGive( xSerialSemaphore );
+    }
+
+    vTaskDelay(1);  // one tick delay (15ms) in between reads for stability
+  }
+}
+
+void TaskB( void *pvParameters __attribute__((unused)) )  // This is a Task.
+{
+  for (;;)
+  {
+    //Serial.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+    if ( xSemaphoreTake( xSerialSemaphore, ( TickType_t ) 5 ) == pdTRUE )
+    {
+      Serial.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+      xSemaphoreGive( xSerialSemaphore ); 
+    }
+
+    vTaskDelay(1);
+  }
+}
+```
 
 *****************************************************************************
 
