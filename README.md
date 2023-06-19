@@ -27,14 +27,18 @@ _Zeitplan_
 
 _Verschiebungen von Veranstaltungen im Semester_
 
-| VL  | Vorlesung laut Plan | Vorlesung  | Übung      | Grund                     |
-| --- | ------------------- |:---------- | ---------- | ------------------------- |
-|  1  | 12. April           | Freitag, 14. April, 11:30   |            | Habilitationsverfahren    |
+| VL  | Vorlesung laut Plan | Vorlesung                 | Übung         | Grund                  |
+| --- | ------------------- | :------------------------ | ------------- | ---------------------- |
+| 1   | 12. April           | Freitag, 14. April, 11:30 |               | Habilitationsverfahren |
+|     |                     |                           | 10. Juli 9:45 | Projektmeeting         |
+|     |                     |                           |               |                        |
 
 
 _Vorträge im Seminarteil_
 
-| Datum    | Thema                   |
-| -------- | ----------------------- |
-| Juni / Juli|                       |
+| Datum                                          | Thema                                     |
+| ---------------------------------------------- | ----------------------------------------- |
+| 27. Juni (Dienstag)                            | Virtuelle Maschinen für ARM Architekturen |
+| 3. Juli (Montag)                               | LCD Programmierung mit dem STM32          |
+| 14. Juli (ausnahmsweise Freitagstermin, 13:15) | USB Protokoll und Umsetzung               |
 
