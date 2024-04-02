@@ -1,44 +1,34 @@
 # Softwareentwicklung Eingebettete Systeme
 
 Dieses Repository umfasst die Materialien für die Veranstaltung "Softwareentwicklung 
-Eingebetette Systeme" an der TU BAF des Sommersemester 2023. Dabei liegt der Schwerpunkt
-auf einer detaillierten Einführung der ARM Cortex Prozessoren, deren Komponenten
-und Programmierkonzepten im Vergleich zur Prozessorfamilie der 8-Bit ATmega und Xmega.
+Eingebetette Systeme" an der TU BAF des Sommersemester 2024. Dabei hat 3 Schwerpunkte:
+
++ Auffrischung und Erweiterung der Architekturbegriffe von Mikrocontrollern
++ Diskussion von Echtzeitbetriebssystemen
++ Methodische Softwareentwicklung 
+
+Grundlage der Diskussionen und praktischen Übungen sind 
+
++ die Mikrocontrollerfamilie ATmega von Microchip
++ die Mikrocontrollerfamilie XMEGA von Microchip
++ die Implementierung der CortexM Controllern durch STM
 
 _Zeitplan_
 
-| VL  | Tag    | Inhalt der Vorlesung                           | Bemerkung                |
-| --- | ------ |:---------------------------------------------- | ------------------------ |
-| 0   | 05.04. | Einführung und Motivation                      |                          |
-| 1   | 12.04. | Grundbegriffe                                  | AtMega328                |
-| 2   | 19.04. | ATmega Familien                                |                          |
-| 3   | 26.04. | Performancebeschränkungen der Architektur      |                          |
-| 4   | 03.05. | Analog Digitalwandler                          |                          |
-| 5   | 11.05. | Interrupts                                     |                          |
-| 6   | 17.05. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen |
-| 7   | 24.05. | _Ausfall wegen Konferenzreise_                 |                          |
-| 8   | 31.05. | RTOS Konzepte                                  |                          |
-| 9   | 07.06. | RTOS Scheduling                                |                          |
-| 10  | 14.06. | XMEGA Architektur                              | AtMega4809               |
-| 11  | 21.06. | XMEGA Perepherie                               |                          |
-| 12  | 28.06. | CortexM Architektur                            |                          |
-| 13  | 05.07. | CortexM Anwendungen                            |                          |
-| 14  | 12.07. |                                                |                          |
-
-_Verschiebungen von Veranstaltungen im Semester_
-
-| VL  | Vorlesung laut Plan | Vorlesung                 | Übung         | Grund                  |
-| --- | ------------------- | :------------------------ | ------------- | ---------------------- |
-| 1   | 12. April           | Freitag, 14. April, 11:30 |               | Habilitationsverfahren |
-|     |                     |                           | 10. Juli 9:45 | Projektmeeting         |
-|     |                     |                           |               |                        |
-
-
-_Vorträge im Seminarteil_
-
-| Datum                                          | Thema                                     |
-| ---------------------------------------------- | ----------------------------------------- |
-| 27. Juni (Dienstag)                            | Virtuelle Maschinen für ARM Architekturen |
-| 3. Juli (Montag)                               | LCD Programmierung mit dem STM32          |
-| 14. Juli (ausnahmsweise Freitagstermin, 13:15) | USB Protokoll und Umsetzung               |
-
+| VL  | Tag    | Inhalt der Vorlesung                           | Bemerkung                          |
+| --- | ------ | :--------------------------------------------- | ---------------------------------- |
+| 0   | 02.04. | Einführung und Motivation / Grundbegriffe      | Wiederholung                       |
+| 1   | 09.04. | ATmega Familien                                |                                    |
+| 2   | 16.04. | Analog Digitalwandler / Interrupts             |                                    |
+| 3   | 23.04. | Performancebeschränkungen von 8Bit Controllern |                                    |
+| 4   | 30.04. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen           |
+| 5   | 07.05. | XMEGA Architektur (AtMega4809)                 |                                    |
+| 6   | 14.05. | CortexM Architektur                            |                                    |
+| 7   | 21.05. | CortexM Perepherie                             | Architekturüberblick abgeschlossen |
+| 8   | 28.05. | _Konferenzreise_                               |                                    |
+| 9   | 04.06. | RTOS Konzepte                                  |                                    |
+| 10  | 11.06. | RTOS Implementierungen                         | Echtzeitdiskussion abgeschlossen   |
+| 11  | 18.06. | Requiermentanalyse                             |                                    |
+| 12  | 25.06. | Systementwurf                                  |                                    |
+| 13  | 02.07. | Testen / Wartungsphase                         |                                    |
+| 14  | 09.07. | _Projekttreffen_                               |                                    |

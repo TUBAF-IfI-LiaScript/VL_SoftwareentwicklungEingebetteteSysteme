@@ -11,18 +11,22 @@ icon:     https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakadem
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
          https://github.com/LiaTemplates/AVR8js/main/README.md
 
+
+@CS: $\overline{CS}$
+@AA: $A_{21-0}$
+
 -->
 
 [![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/01_Grundbegriffe.md#1)
 
 # Einführung und Motivation
 
-| Parameter                | Kursinformationen                                                                                                                                                                    |
-| ------------------------ | Fokus der Lehrveranstaltung und Organisation, Verknüpfungspunkte mit weiteren Inhalten------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
-| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
-| **Inhalte:**             | `Wiederholung Grundbegriffe`                                                       Fokus der Lehrveranstaltung und Organisation, Verknüpfungspunkte mit weiteren Inhalten
+| Parameter          | Kursinformationen                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Veranstaltung:** | `Vorlesung Digitale Systeme`                                                                                                                                              |
+| **Semester**       | `Sommersemester 2024`                                                                                                                                                     |
+| **Hochschule:**    | `Technische Universität Freiberg`                                                                                                                                         |
+| **Inhalte:**       | `Wiederholung Grundbegriffe`                                                       Fokus der Lehrveranstaltung und Organisation, Verknüpfungspunkte mit weiteren Inhalten |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
 
@@ -47,10 +51,7 @@ Die interaktive Version des Kurses ist unter diesem [Link](https://liascript.git
 * Was bedeutet die Angabe _8Bit-Controller_?
 
 ## Was sind die Grundkomponenten eines Rechners?
-<!--
-@CS: $\overline{CS}$
-@AA: $A_{21-0}$
--->
+
 
 Der von Neumann-Rechner arbeitet sequentiell. Befehl für Befehl wird abgeholt, interpretiert, ausgeführt und das Resultat abgespeichert. Seine Komponenten definieren sich zu
 
@@ -91,7 +92,7 @@ Die Datenbreite, Adressierungsbreite, Registeranzahl und Befehlssatz können als
 
 ### Das Steuerwerk
 
-Das Steuerwerk ist für die Ausführung der Befehlsfolgen, die aus dem Speicher gelanden werden verantwortlich.
+Das Steuerwerk ist für die Ausführung der Befehlsfolgen, die aus dem Speicher geladen werden verantwortlich.
 
 + Befehlszähler (Programm Counter)
 + Einheit zur Befehlsentschlüsselung  
@@ -129,7 +130,7 @@ Folgende Klassen von Verknüpfungen sind in der ALU integriert:
 
 + Verschiebeoperationen, wie Rotation, arithmetischer und logischer Shift
 
-Wie lässt sich ein solches System praktisch realsieren? Schauen wir uns eine 4-Bit PIPO Schieberegister genauer an.
+Wie lässt sich ein solches System praktisch realisieren? Schauen wir uns eine 4-Bit PIPO Schieberegister genauer an.
 
 ![](../images/01_Grundbegriffe/ShiftRegister.png "4-Bit PIPO Schieberegister [^1]")
 
@@ -152,11 +153,11 @@ Grundlegende Designvorgaben:
   Speicherbaustein
     +----------+
     | 1 0 1 1  |<------
-    | 0 1 0 1  |<------ Adressbus     "$2^3 Adressleitungen = 8 Adressen$"
+    | 0 1 0 1  |<------ Adressbus     "$2^3$ Adressleitungen = 8 Adressen"
     | 0 0 0 0  |<------
     | 1 1 0 1  |  
     | 1 0 1 1  |------>
-    | 0 1 0 1  |------> Datenbus      "$2^4 Datenleitungen$"
+    | 0 1 0 1  |------> Datenbus      "$2^4$ Datenleitungen"
     | 0 0 0 0  |------>
     | 1 1 0 1  |------>               "8 x 4 Bit = 32 Bit Speicherelement"
     +----------+
@@ -261,7 +262,7 @@ baustein         |       |   |                        |  z.B. SN54HC688
                  +-------+   +-+--+--+--+--+--+--+--+-+
                                |  |  |  |  |  |  |  |
                            ----+--*--+--*--*--+--+--*------ High    
-                               |     |        |  |Harvard 
+                               |     |        |  | 
                            ----*-----*--------*--*--------- Low
 
             interne Adresse       Bausteinadresse
@@ -432,3 +433,6 @@ Die Verarbeitungskette in folgender Grafik adressiert zwar explizit die AVR Tool
 ## Hausaufgaben
 
 Sofern Sie noch keine Erfahrung in der Entwicklung mit AVR-Controllern haben, sollten Sie sich mit den [avr-gcc Tutorials](https://www.mikrocontroller.net/articles/AVR-GCC-Tutorial) auseinander setzen.
+
+> __Wettbewerb:__ Entwerfen Sie das kleinste Programm, dass die LED des AVR zum Blinken bringt.
+ 

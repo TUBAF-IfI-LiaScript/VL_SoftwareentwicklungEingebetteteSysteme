@@ -20,7 +20,7 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2024`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Motiviation und Organisation der Veranstaltung `                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
@@ -62,8 +62,6 @@ int main (void) {
                                       {{0-1}}
 ********************************************************************************
 
-Was steht im Modulhandbuch über diesen Kurs?
-
 **Qualifikationsziele /Kompetenzen:**
 
 + die Komponenten realer eingebetteter Controller-Architekturen(8Bit -32Bit) zu beschreiben und analysieren zu können
@@ -73,11 +71,9 @@ Was steht im Modulhandbuch über diesen Kurs?
 
 **Inhalte**
 
-* Gegenüberstellung verschieden Architekturen etablierter Controller
-* Integration von Controllern in eingebetteten Anwendungen
-* Erweiterung als Sensor-Aktor-Systeme,
-* Parameter von Sensorssystemen,
-* Betriebssystemkonzepte für eingebettete Controller
++ Auffrischung und Erweiterung der Architekturbegriffe von Mikrocontrollern
++ Diskussion von Echtzeitbetriebssystemen
++ Methodische Softwareentwicklung 
 
 
 ********************************************************************************
@@ -107,23 +103,23 @@ Was steht im Modulhandbuch über diesen Kurs?
 
 **Inhalte der Vorlesung**
 
-| VL  | Tag    | Inhalt der Vorlesung                           | Bemerkung                |
-| --- | ------ |:---------------------------------------------- | ------------------------ |
-| 0   | 05.04. | Einführung und Motivation                      |                          |
-| 1   | 12.04. | Grundbegriffe                                  | AtMega328                |
-| 2   | 19.04. | ATmega Familien                                |                          |
-| 3   | 26.04. | Performancebeschränkungen der Architektur      |                          |
-| 4   | 03.05. | Analog Digitalwandler                          |                          |
-| 5   | 11.05. | Interrupts                                     |                          |
-| 6   | 17.05. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen |
-| 7   | 24.05. | _Ausfall wegen Konferenzreise_                 |                          |
-| 8   | 31.05. | RTOS Konzepte                                  |                          |
-| 9   | 07.06. | RTOS Scheduling                                |                          |
-| 10  | 14.06. | XMEGA Architektur                              | AtMega4809               |
-| 11  | 21.06. | XMEGA Perepherie                               |                          |
-| 12  | 28.06. | CortexM Architektur                            |                          |
-| 13  | 05.07. | CortexM Anwendungen                            |                          |
-| 14  | 12.07. |                                                |                          |
+| VL  | Tag    | Inhalt der Vorlesung                           | Bemerkung                          |
+| --- | ------ | :--------------------------------------------- | ---------------------------------- |
+| 0   | 02.04. | Einführung und Motivation / Grundbegriffe      | Wiederholung                       |
+| 1   | 09.04. | ATmega Familien                                |                                    |
+| 2   | 16.04. | Analog Digitalwandler / Interrupts             |                                    |
+| 3   | 23.04. | Performancebeschränkungen von 8Bit Controllern |                                    |
+| 4   | 30.04. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen           |
+| 5   | 07.05. | XMEGA Architektur (AtMega4809)                 |                                    |
+| 6   | 14.05. | CortexM Architektur                            |                                    |
+| 7   | 21.05. | CortexM Perepherie                             | Architekturüberblick abgeschlossen |
+| 8   | 28.05. | _Konferenzreise_                               |                                    |
+| 9   | 04.06. | RTOS Konzepte                                  |                                    |
+| 10  | 11.06. | RTOS Implementierungen                         | Echtzeitdiskussion abgeschlossen   |
+| 11  | 18.06. | Requiermentanalyse                             |                                    |
+| 12  | 25.06. | Systementwurf                                  |                                    |
+| 13  | 02.07. | Testen / Wartungsphase                         |                                    |
+| 14  | 09.07. | _Projekttreffen_                               |                                    |
 
 ********************************************************************************
 
@@ -176,17 +172,17 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 |:----------------------- |:--------------------------------------- |
 | Prof. Dr. Sebastian Zug | sebastian.zug@informatik.tu-freiberg.de |
 
-> Bitte melden Sie sich im OPAL unter [Digitale Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/19949355008/CourseNode/99400814778000) für die Veranstaltung an. 
+> Bitte melden Sie sich im OPAL unter [Digitale Systeme/Softewareentwicklung für eingebettete Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/19949355008/CourseNode/99400814778000) für die Veranstaltung an. 
 
 ### Zeitplan
 
 Die Veranstaltung wird sowohl für die Vorlesung als auch die Übung in Präsenz durchgeführt.
 
-| Veranstaltungen | Tag        | Zeitslot    | Bemerkung      |
-| --------------- | ---------- | ----------- | -------------- |
-| Vorlesung       | Mittwoch   | 11:30-13:00 |                |
-| Praktikum       | Montag     | 9:45-11:15  | ungerade Woche |
-| Übungen         | Freitag    | 11:30-13:00 | gerade Woche   |
+| Veranstaltungen | Tag      | Zeitslot    | Bemerkung      |
+| --------------- | -------- | ----------- | -------------- |
+| Vorlesung       | Dienstag | 09:45-11:15 |                |
+| Praktikum       | Dienstag | 18:00-19:30 | ungerade Woche |
+| Übungen         | Mittwoch | 08:00-09:30 | gerade Woche   |
 
 
 ### Prüfungsmodalitäten
@@ -206,7 +202,7 @@ Die Lehrmaterialien finden Sie unter GitHub, einer Webseite für das Versionsman
 
 [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme)
 
-Die Unterlagen selbst sind in der Auszeichnungsprache LiaScipt verfasst und öffentlich verfügbar.
+Die Unterlagen selbst sind in der Auszeichnungsprache LiaScript verfasst und öffentlich verfügbar.
 
 ****************************************************************************
 
