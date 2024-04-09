@@ -393,4 +393,4 @@ Im Ergebnis zeigt sich folgendes Bild:
 
 ## Aufgaben
 
-- [ ] Integrieren Sie die Berechung im Beispiel vcdBased auf Basis von `float` und `double` Werten
+- [ ] Integrieren Sie die Berechnung im Beispiel vcdBased auf Basis von `float` und `double` Werten

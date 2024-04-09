@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.3
+version:  0.0.4
 language: de
 narrator: Deutsch Female 
 
@@ -19,14 +19,14 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 # ATmega Controller
 
-| Parameter                | Kursinformationen                                                                                                                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
-| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
-| **Inhalte:**             | `Überblick zur ATmega Familie`                                                                                            |
+| Parameter                | Kursinformationen                                                                                                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Veranstaltung:**       | `Vorlesung Digitale Systeme / Softwareentwicklung für eingebettete Systeme`                                                                                                                          |
+| **Semester**             | `Sommersemester 2024`                                                                                                                                                                                |
+| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                    |
+| **Inhalte:**             | `Überblick zur ATmega Familie`                                                                                                                                                                       |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md) |
-| **Autoren**              | @author                                                                                                                                                                              |
+| **Autoren**              | @author                                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
 
@@ -68,50 +68,6 @@ ditaa
 +---------------------------------------------------------------------+
 @enduml
 ```
-> **Merke:** Der Übergang zwischen Mikrocontrollern und Mikroprozessoren ist fließend!
-
-### Kenngrößen eines Controllers
-
-Feature/Parameter des Controllers
----------------------------------------------
-
-+ x-Bit-Architektur
-+ vorhandene Peripheriebausteine (Kommunikationsschnittstellen, Debug-Interfaces, Gleitkomma-Recheneinheiten)
-+ maximale/minimale Taktrate
-+ Größe des internen / extern anschließbaren Speichers
-+ Energieverbrauch
-+ Debugging-Interfaces
-+ ...
-+ verfügbare Compiler
-+ unterstützte Programmiersprachen, Bibliotheken
-+ ...
-+ garantierte Lieferbarkeit
-
-### Mechanische Konfiguration
-
-![Bild](../images/02_ATmegaFamilie/ControllerBauformen.png)
-
-Grundsätzlich unterscheidet man bei elektronischen Bauteilen zwischen:
-
-+ „durchsteckmontierbaren“ (Through Hole Technology – THT) und
-+ „oberflächenmontierbaren“ (Surface Mounted Technologys – SMT)
-
-Bauformen. „Surface Mounted Devices – SMD“ bezieht sich auf ein Bauteil der vorgenannten Gruppe. Durchsteck-Teile benötigen zusätzliche Arbeitsschritte und werden in hochautomatisiert gefertigten Platinen nur aus Gründen der Stabilität realisiert.
-
-Das Rastermaß der Pins wird aus historischen Gründen im Zoll-Basis (25,4mm) beschrieben. Das „Grundmaß“ war demzufolge das Zoll und für kleine Maße wurde meist das `mil` verwendet (1⁄1000 Zoll = 25,4 µm). Im Zuge der Internationalisierung setzen sich immer mehr die metrischen Maße durch, so dass typische Pitches heute bei z. B. 0,5 mm liegen.
-
-| Bezeichnung | Bedeutung                                                                          |
-| ----------- | ---------------------------------------------------------------------------------- |
-| DIP / DIL   | Dual In-Line (Package) meist im Raster 2,54 mm (=100 mil)                          |
-| xQFP        | (Low Profile / Thin) Quad Flat Package Pins an vier Seiten, Raster 1,27 bis 0,4 mm |
-| xPGA        | (Plastic / Ceramic) Pin Grid Array mit Pin-Stiften an der Unterseite               |
-| xBGA        | Ball Grid Array Package mit kleinen Lotkügelchen an der Unterseite                 |
-
-Das Gehäuse schützt den Mikrocontroller vor Umwelteinflüssen. Achten Sie bei der Auswahl insbesondere auf den Temperaturbereich!
-
-Für unseren Controller gibt das Handbuch einen zulässigen Temperaturbereich von -40°C to 85°C an. Dabei ist aber kein vollständig identisches Verhalten innerhalb dieses Spektrums zu erwarten. Vielmehr unterscheiden sich die Stromaufnahme und die Verlässlichkeit der Speicherelemente:
-
-_Reliability Qualification results show that the projected data retention failure rate is much less than 1 PPM over 20 years at 85°C or 100 years at 25°C_ ([Handbuch](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf), Seite 17)
 
 ## Mikrocontroller Familie
 
@@ -178,7 +134,7 @@ ditaa
 |  |     Speicher{o}     |  | Mikroprozessor  |  |      Timer{o}       |  |
 |  +---------------------+  +-----------------+  +---------------------+  |
 |                                 |     |                                 |
-|  +---------------------+        |     |        +---------------------+  |dont
+|  +---------------------+        |     |        +---------------------+  |
 |  |   Reset-System{o}   |        |     |        |   Analog I/O{o}     |  |
 |  +---------------------+        |     |        +---------------------+  |
 |                                 |     |                                 |
@@ -209,7 +165,6 @@ Die folgende Darstellung zeigt die Stromaufnahme eines AtmegaX Controllers.
 
 [^AtMega328, Seite 312]
 
-> **Aufgabe:** Zeichen Sie ein Diagramm das die maximale Taktfrequenz über der anliegenden Betriebsspannung zeigt.
 
 ************************************************************
 
@@ -243,27 +198,6 @@ abgestimmt werden.
 ### Taktgenerator
 
 ![Bild](../images/02_ATmegaFamilie/Taktgenerierung.png "[^AtMega328] Seite 36")
-
-!?[movie](https://www.youtube.com/watch?v=eYVOdlK15Og)<!--
-style = "width: 720px; height: 420px;"
--->
-
-+ Interne Oszillatoren (RC-osciallators)
-
-  - Schwingkreis aus Widerstand und Kondensator
-  - Maximale Frequenz 8 MHz
-  - standardmäßig als Taktquelle vorkonfiguriert
-  - Frequenzabweichung +/- (3-10) %
-
-![Bild](../images/02_ATmegaFamilie/RC_Oscillator.png "[^AtMega328] Seite 312")
-
-+ Schwingquarze (crystal oscillators)
-
-  - deutliche geringere Maximalabweichung +/- 0.1 %
-  - Einschwingdauer deutlich höher (10.000 Taktzyklen)
-  - mindestens 3 externe Bauteile (2 Lastkondensatoren + Quarz)
-
-+ Externes Taktsignal
 
 [^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
@@ -361,35 +295,6 @@ Das Latch entkoppelt die Eingangsspannung und deren Erfassung, bewirkt aber eine
 
 [^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
-## Integration in Schaltung
-
-Und wie setzen wir das Ganze in einer konkreten Schaltung um?
-
-![Bild](../images/02_ATmegaFamilie/ArduinoDrawing.png "Schaltplan des Arduino Uno Boards Version 3 [^Arduino]")
-
-![Bild](../images/02_ATmegaFamilie/ArduinoBoard.jpeg  "Arduino Uno Boards")
-
-
-**Arduino Hardware/Software Cosmos**
-
-Ziel: Einfache Entwicklung für Mikrocontroller für studentische (& professionelle) Projekten
-
-+ Open-Hardware:
-
-  + Hardwareentwurf und Software sind Open Source
-  + Basismodule mit unterschiedlichen Controllern
-  + „Shields“ zur Erweiterung der Funktionalität
-
-+ Software
-
-  + Entwicklungsumgebung auf der Basis von Processing
-  + Bibliotheken für häufig genutzte Funktionen
-  + Abstraktion der Programmstruktur `loop` und `setup`
-
-> **Merke: ** Die Programmierung erfolgt allein mit der `avrlibc`.
-
-[^Arduino]: Arduino Webseite [Link](https://content.arduino.cc/assets/UNO-TH_Rev3e_sch.pdf)
-
 ## Umsetzung eines Hello-World Beispiels
 
 Für das Verständnis der Abläufe sind folgende Dokumente elementar:
@@ -474,37 +379,6 @@ int main (void) {
 ```
 @AVR8js.sketch
 
-Das gleiche Programm auf der Basis des Arduino Frameworks.
-
-<div>
-  <wokwi-led color="green" pin="12" port="B" label="12"></wokwi-led>
-  <span id="simulation-time"></span>
-</div>
-```cpp       arduino.cpp
-// the setup function runs once
-void setup() {
-  // initialize digital pin 13 as an output.
-  pinMode(12, OUTPUT);
-}
-
-void loop() {
-  digitalWrite(12, HIGH);
-  delay(1000);
-  digitalWrite(12, LOW);
-  delay(1000);              
-}
-```
-@AVR8js.sketch
-
-### Simulink
-
-
-![Bild](../images/02_ATmegaFamilie/Simulink_ueberblick.png)<!-- style="width: 85%; max-width: 1000px" -->[^16]
-
-[^16]: Mathworks Simulink, Simulink Support Package for Arduino Hardware, [Link](https://de.mathworks.com/help/supportpkg/arduino/examples/getting-started-with-arduino-hardware.html#d122e134)
-
-
-![Bild](../images/02_ATmegaFamilie/Simulink_beispiel.png)<!-- style="width: 85%; max-width: 1000px" -->
 
 ### Vergleich
 

@@ -23,7 +23,7 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 | Parameter          | Kursinformationen                                                                                                                                                         |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Veranstaltung:** | `Vorlesung Digitale Systeme`                                                                                                                                              |
+| **Veranstaltung:** | `Vorlesung Digitale Systeme / Softwareentwicklung für eingebettete Systeme`                                                                                               |
 | **Semester**       | `Sommersemester 2024`                                                                                                                                                     |
 | **Hochschule:**    | `Technische Universität Freiberg`                                                                                                                                         |
 | **Inhalte:**       | `Wiederholung Grundbegriffe`                                                       Fokus der Lehrveranstaltung und Organisation, Verknüpfungspunkte mit weiteren Inhalten |
