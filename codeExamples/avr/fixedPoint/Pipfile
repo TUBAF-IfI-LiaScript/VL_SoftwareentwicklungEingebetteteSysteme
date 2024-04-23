@@ -6,9 +6,8 @@ name = "pypi"
 [packages]
 easyprocess = "==0.2.10"
 entrypoint2 = "*"
-pandas = "*"
-setuptools = "==57.5.0"
 pysimavr = "*"
+pandas = "*"
 
 [dev-packages]
 
