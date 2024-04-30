@@ -2,7 +2,7 @@
 
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
-version:  0.0.4
+version:  0.0.5
 language: de
 narrator: Deutsch Female
 comment:  Darstellung der grundlegenden Eigenschaften der atmega Mikroncontroler-Familie, Abstraktionsebenen der Programmierung
@@ -13,7 +13,7 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 -->
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/03_Limitations.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/04_Limitations.md#1)
 
 
 # Aritmethik und Analog-Digital-Wandler
