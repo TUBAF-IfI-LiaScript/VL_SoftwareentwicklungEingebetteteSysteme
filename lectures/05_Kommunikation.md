@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich, Bastian Zötzl
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.3
+version:  1.0.4
 language: de
 narrator: Deutsch Female
 
@@ -22,7 +22,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2024`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Grundlegende Kommunkationskonzepte`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/06_Kommunikation.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/06_Kommunikation.md) |
@@ -36,22 +36,6 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
                     {{0-1}}
 ********************************************************************************
-
-Für die Organisation von Multiprocessor-Anwendungen aber auch das Debugging und die Nutzerinteraktion benötigen wir Kommunkationskonzepte, die den Datenaustausch ermöglichen.
-
-```cpp       uart.cpp
-int thisByte = 33;
-
-void setup() {
-  Serial.begin(9600);
-  Serial.print("[Debug] Wert von thisByte: ");
-  Serial.println(thisByte);
-}
-
-void loop() {
-}
-```
-@AVR8js.sketch
 
 Im Rahmen der Veranstaltung wollen wir drei Kommunikationsprotokolle, die durch den AVR unterstützt werden, näher betrachten:
 
@@ -92,7 +76,7 @@ Der CD4543 Baustein dient der Ansteuerung von 7-Segment-Anzeigen. Mit dem Dekodi
 Unterscheidungsmerkmale von Kommunikationsmedien:
 
 + Zahl der Kommunikationspartner im System (1:1; 1:n, n:m)
-+ Rolle für Teilnehmer (Master/Slave)
++ Rolle für Teilnehmer (Controller/Peripheral oder gleichberechtigt)
 + Übertragungsmodus (unidirektional, bidirektional)
 + Synchrone vs. asynchrone Kommunikation  
 + Kommunikationsgeschwindigkeit
@@ -148,7 +132,7 @@ Anmerkungen:
 
 Die Datenrate wird Baud (nach dem französischen Ingenieur und Erfinder [Jean Maurice Émile Baudot](https://de.wikipedia.org/wiki/%C3%89mile_Baudot)) angegeben. Für die UART entspricht dies in _Bit pro Sekunde_ (bps). Dabei werden alle Bits (auch Start- und Stoppbit) gezählt und Lücken zwischen den Bytetransfers ignoriert. Dabei sind die spezifische Datenraten - 150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600 und 115200 Baud - üblich:
 
-Der Abstand zwischen den Geräten wirkt sich direkt auf die Kommunikationsgeschwindigkeit aus! Welche Datenübertragungsraten sind damit möglich?
+Welche Datenübertragungsraten sind damit möglich?
 
 $$
 \text{duration} = \frac{\text{bytes} \cdot  \text{bitsPerCharacter}} { \text{bitsPerSecond}}
@@ -164,6 +148,8 @@ $$
 $$
 
 Ein Byte wird entsprechend in 1.041ms übertragen, jeder Zustand hat eine Dauer von $0.1041 ms$. Wie können wir diese spezifische Taktung realisieren?
+
+> Die Baudrate wird oft mit der Datenübertragungsrate verwechselt, die die Menge an übertragenen Daten je Zeitspanne in Bit je Sekunde als Bitrate angibt. Die Baudrate gibt jedoch die Anzahl der Symbole pro Zeitspanne an. Bei einer Übertragungsdauer eines Symbols von z. B. 200 Millisekunden beträgt die Baudrate 5 Baud. 
 
 [^WikiUART]: Wikipedia, Autor Chris828, Der asynchrone serielle Datenstrom, wie ihn ein sog. CMOS-UART erzeugt (logisch 0 und 1). Das untere Diagramm zeigt die dazu invertierten Spannungspegel auf der RS-232-Schnittstelle. [Wikimedia RS232](https://de.wikipedia.org/wiki/Universal_Asynchronous_Receiver_Transmitter#/media/Datei:RS-232_timing.svg)
 
@@ -614,6 +600,7 @@ Wir fokussieren uns an dieser Stelle auf den Datenframe:
 
 ![](https://upload.wikimedia.org/wikipedia/commons/5/54/CAN-bus-frame-with-stuff-bit-and-correct-CRC.png "Ein kompletter CAN Bus Frame mit Stuff bits, CRC und Interframe-Spaces - Author: Dr Ken Tindell Source https://kentindell.github.io/2020/01/03/canframe_py_tool/ avialable at: https://commons.wikimedia.org/wiki/File:CAN-bus-frame-with-stuff-bit-and-correct-CRC.png")
 
+<!-- data-type="none" -->
 | Feld            | Größe        | Bedeutung                             |
 | --------------- | ------------ | ------------------------------------- |
 | Start           | 1 bit        | dominant, zur Syncronisation          |
@@ -647,20 +634,15 @@ Tritt ein Fehler mehrmals aufeinanderfolgend auf, führt dies zur automatischen 
 
 ## Ausblick und Vergleich
 
-|                       | UART        | I2C         | SPI                  |
-| --------------------- | ----------- | ----------- | -------------------- |
-| Pins                  | RxD, TxD    | SDA, SCL    | SCLK, MOSI, MISO, SS |
-| Datenrate             | 20KBps      | 1MBps       | 20MBps               |
-| Kommunikationsmodus   | asynchron   | synchron    | synchron             |
-| Kommunikationspartner | $=2$        | $2<=x<=127$* | $>=2$                |
-| Master                | -           | $>=1$       | $>=1$                |
-| Duplex                | Full Duplex | Half Duplex | Full Duplex          |
+|                       | UART        | I2C          | SPI                  | CAN             |
+| --------------------- | ----------- | ------------ | -------------------- | --------------- |
+| Pins                  | RxD, TxD    | SDA, SCL     | SCLK, MOSI, MISO, SS | CANH, CANL      |
+| Datenrate             | 20KBps      | 1MBps        | 20MBps               | bis zu 1 Mbit/s |
+| Kommunikationsmodus   | asynchron   | synchron     | synchron             | asynchron       |
+| Kommunikationspartner | $=2$        | $2<=x<=127$* | $>=2$                | $2<=x<=128$     |
+| Master                | -           | $>=1$        | $>=1$                | -               |
+| Duplex                | Full Duplex | Half Duplex  | Full Duplex          | Half Duplex     |
 
 *I2C hat mittlerweile eine 10 Adressenbit-Version, wobei 7-bit und 10-bit Slaves "mischbar" sind: [I2C-Adressbit-Versionen](https://www.thebackshed.com/forum/uploads/BobD/2015-04-23_130513_I2C_Slave_Addressing.pdf)
 
 Die Betrachtung lässt andere Bussysteme (CAN, LIN, FlexRay), die eine erweiterte Hardware benötigen außer Acht. Analog bleiben die aus Sicht der Eingebetteten Systeme interessanten Sensornetze, die drahtlos Daten austauschen unberücksichtigt.
-
-## Aufgaben
-
-- [ ] Testen Sie das Tiny RTC Modul entsprechend der Vorgaben des Herstellers in einem kleinen Arduino Programm
-- [ ] Machen Sie sich mit den Protokollvorgaben vertraut und reimplementieren Sie die Lösung unter Nutzung der I2C Bibliothek von [Peter Fleury](http://www.peterfleury.epizy.com/doxygen/avr-gcc-libraries/index.html)
