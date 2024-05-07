@@ -37,7 +37,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
                     {{0-1}}
 ********************************************************************************
 
-Im Rahmen der Veranstaltung wollen wir drei Kommunikationsprotokolle, die durch den AVR unterstützt werden, näher betrachten:
+Im Rahmen der Veranstaltung wollen wir vier Kommunikationsprotokolle, die durch den AVR unterstützt werden, näher betrachten:
 
 * UART - Universal Asynchronous Receiver Transmitter
 * I2C - Inter-Integrated Circuit (in der "Atmel Welt" als _Two Wire Interface_ (TWI) bezeichnet)
@@ -46,7 +46,11 @@ Im Rahmen der Veranstaltung wollen wir drei Kommunikationsprotokolle, die durch 
 
 > **Merke** `UART` beschreibt eine Schnittstelle während `I2C` und `SPI` konkrete Protokolldefinitionen darstellen.
 
-Alle drei Schnittstellen/Protokolle sind auf die serielle Kommunikation von Daten ausgerichtet!
+> **Merke** Die drei Erstgenannten sind nativ von den meisten Mikrocontrollern unterstützt. Für CAN braucht es ggf. zusätzliche Hardware.
+
+Alle vier Schnittstellen/Protokolle sind auf die serielle Kommunikation von Daten ausgerichtet!
+
+
 
 ********************************************************************************
 
@@ -63,7 +67,7 @@ Ein paralleler Austausch von 8Bit breiten Daten ist für die AVRs zum Beispiel i
 
 **Beispiele Paralleler Datenaustausch - Spezifische Aktoren**
 
-Der CD4543 Baustein dient der Ansteuerung von 7-Segment-Anzeigen. Mit dem Dekodieren einer 4-Bit Zahlendarstellung auf die zugehörigen Steuerleitungen werden 3 Pins eingespart. Vergleichen Sie die Schaltung mit der in Vorlesung 4 hergeleiteten Lösung.
+Der CD4543 Baustein dient der Ansteuerung von 7-Segment-Anzeigen. Mit dem Dekodieren einer 4-Bit Zahlendarstellung auf die zugehörigen Steuerleitungen werden 3 Pins eingespart. 
 
 ![Bild](../images/06_Kommunikation/CD4543.png "BCD zu Sieben-Segmentanzeige Codierer CD4543 der Firma Texas Instruments [^TexasInstruments]")
 
