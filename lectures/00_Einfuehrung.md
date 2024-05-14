@@ -17,14 +17,14 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 # Einführung und Motivation
 
-| Parameter                | Kursinformationen                                                                                                                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2024`                                                                                                                                                                |
-| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
-| **Inhalte:**             | `Motiviation und Organisation der Veranstaltung `                                                                                            |
+| Parameter                | Kursinformationen                                                                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Veranstaltung:**       | `Vorlesung Digitale Systeme / Softwareentwicklung für eingebettete Systeme`                                                                                                                      |
+| **Semester**             | `Sommersemester 2024`                                                                                                                                                                            |
+| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                |
+| **Inhalte:**             | `Motiviation und Organisation der Veranstaltung `                                                                                                                                                |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
-| **Autoren**              | @author                                                                                                                                                                              |
+| **Autoren**              | @author                                                                                                                                                                                          |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
 
@@ -112,11 +112,11 @@ int main (void) {
 | 4   | 30.04. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen           |
 | 5   | 07.05. | XMEGA Architektur (AtMega4809)                 |                                    |
 | 6   | 14.05. | CortexM Architektur                            |                                    |
-| 7   | 21.05. | CortexM Perepherie                             | Architekturüberblick abgeschlossen |
+| 7   | 21.05. | CortexM Peripherie                             | Architekturüberblick abgeschlossen |
 | 8   | 28.05. | _Konferenzreise_                               |                                    |
 | 9   | 04.06. | RTOS Konzepte                                  |                                    |
 | 10  | 11.06. | RTOS Implementierungen                         | Echtzeitdiskussion abgeschlossen   |
-| 11  | 18.06. | Requiermentanalyse                             |                                    |
+| 11  | 18.06. | Anforderungsanalyse                            |                                    |
 | 12  | 25.06. | Systementwurf                                  |                                    |
 | 13  | 02.07. | Testen / Wartungsphase                         |                                    |
 | 14  | 09.07. | _Projekttreffen_                               |                                    |

@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.1
+version:  1.0.2
 language: de
 narrator: Deutsch Female
 
@@ -33,7 +33,7 @@ gray: @mark(gray,@0)
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2022`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2024`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Erweiternde Architekturkonzepte der XMEGA Architektur`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/09_XMEGA.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/09_XMEGA.md) |
@@ -45,7 +45,7 @@ gray: @mark(gray,@0)
 
 ## Ausgangspunkt
 
-![alt-text](../images/09_megaAVR_0/Controller8Bit.png "Speicherstruktur des ATMega2560 [^ATmega640] Seite 20")
+![alt-text](../images/09_megaAVR_0/Controller8Bit.png "Vergleich unterschiedlicher ATtiny und ATmega Controller [Microchip, Herstellerwebseite]")
 
 Welche Erweiterungen ergeben sich dabei:
 
@@ -59,9 +59,7 @@ Welche Erweiterungen ergeben sich dabei:
 + Softwareresets sind über ein eigenes Register möglich.
 + UPDI ersetzt die bisherige OneWire Debug Schnittstelle
 
-![alt-text](../images/09_megaAVR_0/Blockdiagram.png "Speicherstruktur des ATMega2560 [^ATmega640] Seite 20")
-
-
+![alt-text](../images/09_megaAVR_0/Blockdiagram.png "Architektur des ATmega4809 [^ATmega640] Seite 20")
 
 
 ![alt-text](../images/09_megaAVR_0/Arduino_UNO_WIFI.jpg "Atmel ATmega4809 auf dem Arduino Uno Wifi Rev. 2" )
@@ -361,12 +359,177 @@ Welche Inhalte können mit welchen Ausgaben verknüpft werden finden Sie im Hand
 
 Events könnnen auch in Software ausgelöst werden.
 
-## Software
 
-siehe Beispielfälle im Coderepository!
+### Analog Comparator
 
-## Aufgaben
+![alt-text](../images/10_megaAVR_0/AC_Structure.png "Struktur des ACs im 4809 [^Microchip4809] Seite 386")
 
-- [ ] Installieren Sie sich das AVR Studio für die Arbeit mit dem 4809 Controller. Testen Sie den Aufbau anhand von einfachen Programmen.
+**Erweiterung gegenüber dem ATmega328**
 
-- [ ] Implementieren Sie die Beispielumsetzung des Eventsystems mit Ihrem Controller als Einstiegsaufgabe nach. Den Taster dazu finden Sie im Bastelset.
+1. Erweiterte Konfigurierbarkeit der Vergleichsspannung.
+
+    mehrere wählbare Eingänge unabhängig vom ADC, einstellbare interne Referenz
+
+![alt-text](../images/10_megaAVR_0/DAC_Configuration_AC.png "Struktur des ACs im 4809 [^Microchip4809] Seite 386")
+
+2. Integration in das Eventsystem
+
+    Der digitale Ausgang der AC steht als Quelle für das Ereignissystem zur Verfügung. Die Ereignisse von der AC sind unabhängig vom allen Takten im Gerät.
+
+3. Definition eines Hysterese-Fensters
+
+    Das Anlegen einer Eingangshysterese hilft, ein ständiges Umschalten des Ausgangs zu verhindern, wenn die verrauschten Eingangssignale nahe beieinander liegen.
+    Die Eingangshysterese kann entweder deaktiviert werden oder eine von drei Stufen haben. Die Hysterese wird durch Beschreiben des Hysteresis Mode Select-Bitfeld (HYSMODE) im Register Control A (ACn.CTRLA).
+
+<!-- data-type="none" -->
+| lowpower mode | disabled             | enabled              |
+| ------------- | -------------------- | -------------------- |
+| off           | 0 - **0** - 10 mV    | 0 - **0** - 10 mV    |
+| small         | 0 - **10** - 30 mV   | 0 - **10** - 30 mV   |
+| medium        | 10 - **30** - 90 mV  | 5 - **25** - 50 mV   |
+| large         | 20 - **60** - 150 mV | 12 - **50** - 190 mV |
+
+    Die Festlegung des Ausgabesignal kann durch das `INVERT` Bit invertiert werden.
+
+```ascii
+              ^
+              |
+              ┤                  ╭─╮
+              ┤~~~~~~~~~~~~~~~~~~│~│~~~~~~~~~~~~~~~~~~╭─╮~~~~
+              ┤                  │ │  ╭╮ ╭╮ ╭╮   ╭╮  ╭╯ ╰─╮
+              ┤  ╭╮          ╭─╮ │ │ ╭╯╰╮│╰─╯╰╮╭╮│╰──╯    │╭
+Vergleichs-  v┼╭╮││╭╮ ╭╮╭╮   │ ╰─╯ ╰─╯  ││    ││││        ╰╯   Analoges Eingangs-
+wert          ┤│││││╰╮│╰╯│   │          ╰╯    ╰╯╰╯             signal
+              ┤╯╰╯╰╯ ╰╯  ╰─╮ │
+              ┤~~~~~~~~~~~~│~│~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ┤            ╰─╯
+              ┤------------+ +---+ +------------------+ +---
+              ┤            | |   | |                  | |
+              ┤            +-+   +-+                  +-+
+              ┼───┴──────────┴──────────┴───────────┴────> t
+
+```
+
+[^Microchip4809]: Firma Microchip, ATmega4808/4809 Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega4808-4809-Data-Sheet-DS40002173A.pdf)
+
+### Analog Converter
+
+Die Analog-Digital-Wandler (ADC)-Peripherie des 4809 liefert 10-Bit-Ergebnisse. Dabei "vergleicht" der ADC entweder analoge Eingangspins, eine interne Spannungsreferenz oder die Ausgabe eines Temperatursensors mit entsprechenden Referenzspannungen `AVDD`, `VREFA` oder einer intern erzeugten Spannung. Der ADC ist mit einem analogen Multiplexer verbunden, der die Auswahl von mehreren unsymmetrischen Spannungseingängen ermöglicht. Der ADC unterstützt die Abtastung in Bursts, wobei eine konfigurierbare Anzahl von Wandlungsergebnissen zu einem einzigen ADC-Ergebnis akkumuliert wird (Sample Accumulation).
+
+Das ADC-Eingangssignal wird durch eine Sample-and-Hold-Schaltung geführt, die sicherstellt, dass die Eingangsspannung zum ADC während der Abtastung auf einem konstanten Pegel gehalten wird.
+
+Zur Überwachung des Eingangssignals steht eine Fenstervergleichsfunktion mit benutzerdefinierten Schwellenwerten zur Verfügung, die so konfiguriert werden kann, dass sie Interrupts für Messwerte unter, über, innerhalb oder außerhalb des Fensters auslöst, wobei nur minimaler Software-Eingriff erforderlich ist.
+
+![alt-text](../images/10_megaAVR_0/ADC_blockDiagram.png "Basic structure of ADC [^Microchip4809] Seite 396")
+
+Der ADC kann zwei Interrupttypen auslösen `WCOMP`  Window Comparator Interrupt und `RESRDY` Result Ready Interrupt. Letztgenannter steht als Quelle im Event-System zur Verfühgung.
+
+Der ADC benötigt für eine maximale Auflösung eine Eingangstaktfrequenz zwischen 50 kHz und 1,5 MHz. Wenn eine niedrigere Auflösung als 10 Bit genutzt wird (z.B durch kürzen des Ergebnisses auf 8 Bit), kann die Eingangstaktfrequenz zum ADC höher als 1,5 MHz sein, um eine höhere Abtastrate zu erhalten.
+
+Die Initialisierung erfolgt in folgenden Schritten:
+
+1. Konfigurieren Sie die Auflösung durch Beschreiben des Bits "Resolution Selection" (RESSEL) im Register "Control A (ADCn.CTRLA).
+2. _Optional: Aktivieren Sie den Free-Running-Modus, indem Sie eine '1' in das Free-Running-Bit (FREERUN) in ADCn.CTRLA._
+3. _Optional: Konfigurieren Sie die Anzahl der Samples, die pro Wandlung akkumuliert werden sollen, indem Sie die Sample Accumulation Number Select-Bits (SAMPNUM) im Register Control B (ADCn.CTRLB)._
+4. Konfigurieren Sie eine Spannungsreferenz, indem Sie das Referenzauswahl-Bit (`REFSEL`) im Register Control C (ADCn.CTRLC). Die Voreinstellung ist die interne Spannungsreferenz des Geräts (VREF, wie dort konfiguriert).
+5. Konfigurieren Sie den `CLK_ADC` durch Beschreiben des Bitfeldes Prescaler (`PRESC`) im Register Control C (ADCn.CTRLC).
+6. Konfigurieren Sie einen Eingang durch Beschreiben des Bitfeldes MUXPOS im MUXPOS-Register (ADCn.MUXPOS).
+7. _Optional: Aktivieren Sie den Start-Event-Eingang, indem Sie eine '1' in das Start-Event-Input-Bit (STARTEI) im Event Control Register (ADCn.EVCTRL) schreiben. Konfigurieren Sie das Ereignissystem entsprechend._
+8. Aktivieren Sie den ADC, indem Sie eine '1' in das enable-Bit in ADCn.CTRLA schreiben.
+
+![alt-text](../images/10_megaAVR_0/TimingsADC.png "Zeitverhalten des Analog Digital Wandlers im 4809 [^Microchip4809] Seite 396")
+
+Was sind die Änderungen gegenüber dem ATmega328?
+
+* Die größere Zahl von internen Referenzspannungen bietet eine deutliche bessere Anpassungsfähigkeit an verschiedene Ausgabespannungshorizonte
+* Die Definition von Wertefenstern ermöglicht eine spezifischere Auswertung in Hardware (siehe `CTRLE` [^Microchip4809] Seite 409). Interrupts können ausgelöst werden, wenn das Wandlungsergebnis innerhalb, außerhalb der beiden Schranken `WINLT` oder `WINHT` liegt.
+* Mit der Möglichkeit der Akkumulation von Samples kann ohne zusätzliche Implementierung eine Glättung der Werte vorgenommen werden ([^Microchip4809] Seite 406).
+
+Eine gute Dokumentation der Verwendung der ADC Konfiguration liefert [Tutorial](https://onlinedocs.microchip.com/pr/GUID-E551BCD6-7E40-4DB9-BF2D-5E7E95B90AB3-en-US-3/index.html?GUID-590AA50F-CE8E-45E8-B96A-8B491F7FCCE1).
+
+[^Microchip4809]: Firma Microchip, ATmega4808/4809 Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega4808-4809-Data-Sheet-DS40002173A.pdf)
+
+## Zugriff auf die Register und Speicherelemente
+
+Die Adressierungen der Register und Konfigurationsbits für den ATmega erfolgte bisher individuell durch Nutzung der einzelnen Adressen und Positionen.
+
+```c
+#include <avr/io.h>
+
+int main()
+{
+    /* Setzt das Richtungsregister des Ports A auf 0xff
+       (alle Pins als Ausgang, vgl. Abschnitt Zugriff auf Ports): */
+    DDRA = 0xff;
+
+    /* Setzt PortA auf 0x03, Bit 0 und 1 "high", restliche "low": */
+    PORTA = 0x03;
+
+    // Setzen der Bits 0,1,2,3 und 4
+    // Binär 00011111 = Hexadezimal 1F
+    DDRB = 0x1F;    /* direkte Zuweisung - unübersichtlich */
+
+    /* Ausführliche Schreibweise: identische Funktionalität, mehr Tipparbeit
+       aber übersichtlicher und selbsterklärend: */
+    DDRB = (1 << DDB0) | (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4);
+
+    while (1);
+}
+```
+
+Dahinter stehen folgende Macros der `avrlibc`.
+
+```c iom328p.h
+#define PINC _SFR_IO8(0x06)
+#define PINC0 0
+```
+
+```c  sfr_defs.h
+#define __SFR_OFFSET 0x20
+#define _SFR_IO8(io_addr) _MMIO_BYTE((io_addr) + __SFR_OFFSET)
+#define _MMIO_BYTE(mem_addr) (*(volatile uint8_t *)(mem_addr))
+```
+
+In der Umsetzung für den 4809 geht man einen anderen Weg. Hier definieren wir
+ein Set von `structs`, die auf den Speicher gemapt werden.
+
+![alt-text](../images/10_megaAVR_0/Structs_Register_avr.png "Darstellung der Strukturen über dem Speicherraum [^AR1000] Seite 5")
+
+```c  sfr_defs.h
+typedef struct ADC_struct {
+   unsigned char CH0MUXCTRL;     // Channel 0 MUX Control
+   unsigned char CH1MUXCTRL;     // Channel 1 MUX Control
+   unsigned char CH2MUXCTRL;     // Channel 2 MUX Control
+   unsigned char CH3MUXCTRL;     // Channel 3 MUX Control
+   unsigned char CTRLA;          // Control Register A
+   unsigned char CTRLB;          // Control Register B
+   unsigned char REFCTRL;        // Reference Control
+   unsigned char EVCTRL;         // Event Control
+   WORDREGISTER(CH0RES);         // Channel 0 Result
+   ....
+} ADC_t;
+
+#define WORDREGISTER(regname)  \
+  union { \
+    unsigned short regname; \
+    struct { \
+      unsigned char regname ## L; \
+      unsigned char regname ## H; \
+    };    \
+}
+```
+
+| Postfix | Meaning               | Example           |
+| ------- | --------------------- | ----------------- |
+| `_gm`   | Group - Mask          | TC_CLKSEL_gm      |
+| `_gc`   | Group - Configuration | TC_CLKSEL_DIV1_gc |
+| `_bm`   | Bit   - Mask          | TC_CCAEN_bm       |
+| `_bp`   | Bit   - Position      | TC_CCAEN_bp       |
+
+[^AR1000]: Firma Microchip, AVR1000: Getting Started Writing C-code for XMEGA, [Link](http://ww1.microchip.com/downloads/en/AppNotes/doc8075.pdf)
+
+## Anwendungsfall
+
+> Auslesen eines Potentiometers am Analog Pin des Controllers unter Ausnutzung des Akkumulators
+
+https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/tree/main/codeExamples/xmega/xMegaADC

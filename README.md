@@ -24,11 +24,11 @@ _Zeitplan_
 | 4   | 30.04. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen           |
 | 5   | 07.05. | XMEGA Architektur (AtMega4809)                 |                                    |
 | 6   | 14.05. | CortexM Architektur                            |                                    |
-| 7   | 21.05. | CortexM Perepherie                             | Architekturüberblick abgeschlossen |
+| 7   | 21.05. | CortexM Peripherie                             | Architekturüberblick abgeschlossen |
 | 8   | 28.05. | _Konferenzreise_                               |                                    |
 | 9   | 04.06. | RTOS Konzepte                                  |                                    |
 | 10  | 11.06. | RTOS Implementierungen                         | Echtzeitdiskussion abgeschlossen   |
-| 11  | 18.06. | Requiermentanalyse                             |                                    |
+| 11  | 18.06. | Anforderungsanalyse                            |                                    |
 | 12  | 25.06. | Systementwurf                                  |                                    |
 | 13  | 02.07. | Testen / Wartungsphase                         |                                    |
 | 14  | 09.07. | _Projekttreffen_                               |                                    |
