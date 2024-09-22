@@ -513,6 +513,7 @@ den der Zähler erreicht haben muss.
   <wokwi-led color="red" pin="13" port="B" label="13"></wokwi-led>
   <span id="simulation-time"></span>
 </div>
+
 ```cpp       avrlibc.cpp
 #ifndef F_CPU
 #define F_CPU 16000000UL // 16 MHz clock speed
@@ -540,6 +541,7 @@ int main(void)
      }
   }
 }
+
 ```
 @AVR8js.sketch
 
@@ -566,6 +568,7 @@ Hardware und unser Hauptprogramm könnte eigenständige Aufgaben wahrnehmen.
   <wokwi-led color="green" pin="9" port="B" label="B1"></wokwi-led>
   <span id="simulation-time"></span>
 </div>
+
 ```cpp       avrlibc.cpp
 #ifndef F_CPU
 #define F_CPU 16000000UL // 16 MHz clock speed
@@ -583,6 +586,7 @@ int main(void)
   while (1) _delay_ms(500);
 }
 ```
+
 @AVR8js.sketch
 
 Was passiert, wenn die Aktivierung und Deaktivierung mit einer höheren Frequenz vorgenommen wird? Die effektiv wirkende Spannung wird durch den Mittelwert repräsentiert. Damit ist eine Quasi-Digital-Analoge Ausgabe ohne eine entsprechende Hardware möglich.
