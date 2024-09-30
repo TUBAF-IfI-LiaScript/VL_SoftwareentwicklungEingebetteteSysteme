@@ -421,7 +421,7 @@ Schreiben in eines der Slave-Register
 ```ascii
 
        +-----+------------+----+     +--------------+     +--------------+     +------+
-Master |Start| Adressframe| 1  |     | Reg. Adresse |     |    Daten     |     | Stop |
+Master |Start| Adressframe| 0  |     | Reg. Adresse |     |    Daten     |     | Stop |
        +-----+------------+----+     +--------------+     +--------------+     +------+
 
                                +-----+              +-----+              +-----+
@@ -435,7 +435,7 @@ Lesen aus einem der Slave-Register
 ```ascii
 
        +-----+------------+----+     +--------------+                    +-----+------+
-Master |Start| Adressframe| 0  |     | Reg. Adresse |                    |NAKN | Stop |
+Master |Start| Adressframe| 1  |     | Reg. Adresse |                    |NAKN | Stop |
        +-----+------------+----+     +--------------+                    +-----+------+
 
                                +-----+              +-----+--------------+
