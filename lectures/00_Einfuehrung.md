@@ -20,7 +20,7 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 | Parameter                | Kursinformationen                                                                                                                                                                                |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme / Softwareentwicklung für eingebettete Systeme`                                                                                                                      |
-| **Semester**             | `Sommersemester 2024`                                                                                                                                                                            |
+| **Semester**             | `Sommersemester 2025`                                                                                                                                                                            |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                |
 | **Inhalte:**             | `Motiviation und Organisation der Veranstaltung `                                                                                                                                                |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
@@ -93,7 +93,7 @@ int main (void) {
 | 8-Bit AVR Familie                                                                                                 | 32-Bit Cortex M4 Prozessor                                                                         |
 | C, Assembler                                                                                                      | C, C++                                                                                             |
 | avrlibc, FreeRTOS                                                                                                 | CMSIS, mbedOS, FreeRTOS                                                                            |
-| 10 Bit Analog-Digital-Wandler, 16 Bit Timer,                                                                      | 10 timers, 16- and 32-bit (84 MHz), 12-bit ADC                                                     |
+| 10 Bit Analog-Digital-Wandler, 16 Bit Timer,                                                                      | 10 Timer, 16- and 32-bit (84 MHz), 12-bit ADC                                                     |
 
 
 ********************************************************************************
@@ -105,21 +105,22 @@ int main (void) {
 
 | VL  | Tag    | Inhalt der Vorlesung                           | Bemerkung                          |
 | --- | ------ | :--------------------------------------------- | ---------------------------------- |
-| 0   | 02.04. | Einführung und Motivation / Grundbegriffe      | Wiederholung                       |
-| 1   | 09.04. | ATmega Familien                                |                                    |
-| 2   | 16.04. | Analog Digitalwandler / Interrupts             |                                    |
-| 3   | 23.04. | Performancebeschränkungen von 8Bit Controllern |                                    |
-| 4   | 30.04. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen           |
-| 5   | 07.05. | XMEGA Architektur (AtMega4809)                 |                                    |
-| 6   | 14.05. | CortexM Architektur                            |                                    |
-| 7   | 21.05. | CortexM Peripherie                             | Architekturüberblick abgeschlossen |
-| 8   | 28.05. | _Konferenzreise_                               |                                    |
-| 9   | 04.06. | RTOS Konzepte                                  |                                    |
-| 10  | 11.06. | RTOS Implementierungen                         | Echtzeitdiskussion abgeschlossen   |
-| 11  | 18.06. | Anforderungsanalyse                            |                                    |
-| 12  | 25.06. | Systementwurf                                  |                                    |
-| 13  | 02.07. | Testen / Wartungsphase                         |                                    |
-| 14  | 09.07. | _Projekttreffen_                               |                                    |
+| 0   | 01.04. | Einführung und Motivation / Grundbegriffe      | Wiederholung                       |
+| 1   | 08.04. | ATmega Familien                                |                                    |
+| 2   | 15.04. | Analog Digitalwandler / Interrupts             |                                    |
+| 3   | 22.04. | Performancebeschränkungen von 8Bit Controllern |                                    |
+| 4   | 29.04. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen           |
+| 5   | 06.05. | XMEGA Architektur (AtMega4809)                 |                                    |
+| 6   | 13.05. | CortexM Architektur                            |                                    |
+| 7   | 20.05. | _Konferenzreise_                               | Architekturüberblick abgeschlossen |
+| 8   | 27.05. | CortexM Peripherie                             |                                    |
+| 9   | 03.06. | RTOS Konzepte                                  |                                    |
+| 10  | 10.06. | RTOS Implementierungen                         | Echtzeitdiskussion abgeschlossen   |
+| 11  | 17.06. | Anforderungsanalyse                            |                                    |
+| 12  | 24.06. | Systementwurf                                  |                                    |
+| 13  | 01.07. | Testen / Wartungsphase                         |                                    |
+| 14  | 08.07. | Vorstellung der Praktikumsergebnisse           |                                    |
+
 
 ********************************************************************************
 
@@ -182,7 +183,7 @@ Die Veranstaltung wird sowohl für die Vorlesung als auch die Übung in Präsenz
 | --------------- | -------- | ----------- | -------------- |
 | Vorlesung       | Dienstag | 09:45-11:15 |                |
 | Praktikum       | Dienstag | 18:00-19:30 | ungerade Woche |
-| Übungen         | Mittwoch | 08:00-09:30 | gerade Woche   |
+| Übungen         | Freitag  | 08:00-09:30 | gerade Woche   |
 
 
 ### Prüfungsmodalitäten
@@ -286,14 +287,14 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 + Legen Sie sich, sofern das noch nicht geschehen ist, einen GitHub Account an ... und seien Sie der erste, der einen Fehler, eine unglückliche Formulierung usw. in den Unterlagen findet und diesen als _Contributer_ korrigiert :-)
 + Überlegen Sie sich, zu welches Thema Sie im Praktikum vorstellen wollen:
 
-  + DSP Implementierung im STM32F4    
-  + STM32 Cube.AI / Edge Computing                        
-  + mbedOS vs FreeRTOS
-  + LCD Programmierung mit dem STM  
-  + CAN Bus - Theorie und Anwendung
   + microROS / micro DDS
+  + DSP Implementierung im STM32F4    
+  + mbedOS vs FreeRTOS
+  + CAN Bus - Theorie und Anwendung
   + Schlafmodi von Controllern (elektrische Vermessung)
   + virtuelle Maschinen auf eingebetteten Systemen (MicroPython, WASM-Interpreter)
+  + Echtzeitfähigkeit des Raspberry Pi 
+  + ... eigene Ideen
 
   Die Präsentationen sollten 30 Minuten einnehmen und mit einer praktischen Demonstration kombiniert werden.
 
