@@ -22,7 +22,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme / Softwareentwicklung für eingebettete Systeme`                                                                                                                          |
-| **Semester**             | `Sommersemester 2024`                                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2025`                                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                    |
 | **Inhalte:**             | `Überblick zur ATmega Familie`                                                                                                                                                                       |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md) |
@@ -383,14 +383,14 @@ int main (void) {
 ### Vergleich
 
 <!-- data-type="none" -->
-| Aspekte                   | Simulink                                    | Arduino                | avrlibc                                 | Assembler                               |     |
-| ------------------------- | ------------------------------------------- | ---------------------- | --------------------------------------- | --------------------------------------- | --- |
-| Code Größe                | 3232 Byte                                   | 928 Byte               | 30 Byte                                 | 24 Byte                                 |     |
-|                           |                                             |                        | (162 Byte)                              |                                         |     |
-| Bemerkung                 | Kompletter Scheduler, erweiterte Interfaces | Hardware Timer, printf | Statische Loop für blockierendes Warten | Statische Loop für blockierendes Warten |     |
-| Übertragbarkeit des Codes | einige Arduino Boards                       | Alle Arduino Boards    | Gesamte ATmega Familie                  | Einige Controller der Atmega Familie    |     |
-| Taktrate                  | explizit                                    | implizit               | explizit                                | implizit                                |     |
-| Expertenwissen            | gering                                      | mittel                 | hoch                                    | sehr hoch                               |     |
+| Aspekte                   | Simulink                                    | Arduino                | avrlibc                                 | Assembler                               | 
+| ------------------------- | ------------------------------------------- | ---------------------- | --------------------------------------- | --------------------------------------- | 
+| Code Größe                | 3232 Byte                                   | 928 Byte               | 30 Byte                                 | 24 Byte                                 | 
+|                           |                                             |                        | (162 Byte)                              |                                         | 
+| Bemerkung                 | Kompletter Scheduler, erweiterte Interfaces | Hardware Timer, printf | Statische Loop für blockierendes Warten | Statische Loop für blockierendes Warten | 
+| Übertragbarkeit des Codes | einige Arduino Boards                       | Alle Arduino Boards    | Gesamte ATmega Familie                  | Einige Controller der Atmega Familie    | 
+| Taktrate                  | explizit                                    | implizit               | explizit                                | implizit                                | 
+| Expertenwissen            | gering                                      | mittel                 | hoch                                    | sehr hoch                               | 
 
 Was wir nicht betrachtet haben ...
 
@@ -467,6 +467,7 @@ Die 16 Bit breiten Befehle sind im Little Endian Muster im Speicher abgelegt.
 Das erste Befehlswort entspricht somit  $94 0c$ = $1001.0100.0000.1100$. Wir übernehmen nun die Rolle des Instruktion-Dekoders und durchlaufen alle Befehle,
 die im Befehlssatz vorhanden sind.
 
+https://ww1.microchip.com/downloads/en/devicedoc/AVR-Instruction-Set-Manual-DS40002198A.pdf
 
 ![Bild](../images/02_ATmegaFamilie/JumpInstruction.png "Auszug Intruction Set [^InstManual] Seite 103")
 

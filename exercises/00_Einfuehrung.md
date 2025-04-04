@@ -34,22 +34,20 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 | Tag      | Termin        | Woche          |
 | -------- | ------------- | -------------- |
-| Montag   | 9:45 - 11:15  | ungerade Woche |
-| Dienstag | 11:30 - 13:00 | gerade Woche |
+| Dienstag | 18:00 - 19:30 | ungerade Woche |
+| Freitag  | 8:00 -  9:30  | gerade Woche   |
 
-In der zweiten Phase der Übungen betten wir Ihre Vorträge ein.
+Die Übungen dienen der praktischen Vertiefung der Vorlesungsinhalte. Das Praktikum ist eine alleinverantwortliche Arbeit an einem Mini-Projekt. Im Kontext eines Forschungsvorhabens sollen dabei Remote-Labore mit Bezug zu Eingebetteten Systemen entstehen. 
 
 > Ich möchte vorschlagen, dass Sie die Aufgaben gemeinsam realisieren und dafür GitHub nutzen. Das erleichtert mir auch die Begleitung der Entwicklung.
 
   + DSP Implementierung im STM32F4    
-  + ~~STM32 Cube.AI / Edge Computing~~
   + mbedOS vs FreeRTOS
-  + ~~LCD Programmierung mit dem STM~~
   + CAN Bus - Theorie und Anwendung
-  + microROS / micro DDS
   + Schlafmodi von Controllern (elektrische Vermessung)
   + virtuelle Maschinen auf eingebetteten Systemen (MicroPython, WASM-Interpreter)
-  + ~~USB - Konzept und Implementierung~~
+  + Echtzeitfähigkeit des Raspberry Pi 
+  + ... eigene Ideen
 
 ## Entwicklungsumgebungen
 

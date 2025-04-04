@@ -259,11 +259,11 @@ Wie kann die Adresskodierung der I/O Komponenten vorgenommen werden?
 Perepherie-      |  "@CS"+---+"$\overline{Q=P}$"      |  Adresslogik
 baustein         |       |   |                        |  z.B. SN54HC688
                  |       |   | P7 P6 P5 P4 P3 P2 P1 P0|
-                 +-------+   +-+--+--+--+--+--+--+--+-+
-                               |  |  |  |  |  |  |  |
-                           ----+--*--+--*--*--+--+--*------ High    
-                               |     |        |  | 
-                           ----*-----*--------*--*--------- Low
+                 +---+---+   +-+--+--+--+--+--+--+--+-+
+                     |          |  |  |  |  |  |  |  |
+            Activate |       --+--*--+--*--*--+--+--*------ High    
+                     |         |     |        |  | 
+                             --*-----*--------*--*--------- Low
 
             interne Adresse       Bausteinadresse
                 (A8-A9)              (A0-A7)    
