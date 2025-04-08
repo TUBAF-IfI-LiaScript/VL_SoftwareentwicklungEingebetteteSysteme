@@ -197,9 +197,8 @@ abgestimmt werden.
 
 ### Taktgenerator
 
-![Bild](../images/02_ATmegaFamilie/Taktgenerierung.png "[^AtMega328] Seite 36")
+![Bild](../images/02_ATmegaFamilie/Taktgenerierung.png "Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf Seite 36")<!-- style="width: 75%; max-width: 1000px" -->
 
-[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
 ### Speicher
 
@@ -250,7 +249,7 @@ Der EEPROM ist beim AVR nicht Bestandteil des _Mapped Memory IO_ Konzepts! Vielm
 
 ### Reset-System
 
-![Bild](../images/02_ATmegaFamilie/ResetSystem.png "[^AtMega328] Seite 57")
+![Bild](../images/02_ATmegaFamilie/ResetSystem.png "Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf Seite 57")<!-- style="width: 75%; max-width: 700px" -->
 
 Quellen für Reset
 
@@ -269,8 +268,6 @@ Quellen für Reset
 + Initialisieren des Stacks
 + Beginn der Programmabarbeitung
 
-[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
-
 ### Digitale Ein/Ausgaben
 
 Für die letztendliche Inbetriebnahme fehlt uns noch ein Baustein, die Ansteuerung eines "externen Gerätes". Im Bereich der eingebetteten Systeme ist dies zumeist ein LED, die direkt an einen der Pins des Mikrocontrollers angeschlossen wird.
@@ -287,7 +284,7 @@ Wie ist das Ganze konkret am AVR umgesetzt?
 | 1 (output) | 0     | Push-Pull Ausgang auf Low  |
 | 1 (output) | 1     | Push-Pull Ausgang auf High |
 
-https://www.youtube.com/watch?v=bDPdrWS-YUc&feature=emb_logo
+!?[](https://www.youtube.com/watch?v=bDPdrWS-YUc&feature=emb_logo)
 
 Das Latch entkoppelt die Eingangsspannung und deren Erfassung, bewirkt aber eine Verzögerung. Im schlimmsten Fall beträgt diese 1.5 Clockzyklen im besten 1 Clockzyklus.
 
