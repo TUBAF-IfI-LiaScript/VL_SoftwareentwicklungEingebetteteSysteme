@@ -174,9 +174,9 @@ int main()
   std::cout << std::bitset<8>(PORTB) << std::endl;
 
   if (PORTB & (1 << PB0))
-       std::cout << "Bit 2 gesetzt" << std::endl;
+       std::cout << "Bit 0 gesetzt" << std::endl;
   if (!(PORTB & (1 << PB0)))
-       std::cout << "Bit 2 nicht gesetzt" << std::endl;
+       std::cout << "Bit 0 nicht gesetzt" << std::endl;
   // Ist PB0 ODER PB2 gesetzt?
   if (PORTB & ((1 << PB0) | (1 << PB2)))
      std::cout << "Bit 0 oder 2 gesetzt" << std::endl;
