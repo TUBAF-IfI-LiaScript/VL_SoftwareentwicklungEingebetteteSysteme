@@ -2,7 +2,7 @@
 
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
-version:  0.0.5
+version:  0.0.6
 language: de
 narrator: Deutsch Female
 comment:  Darstellung der grundlegenden Eigenschaften der atmega Mikroncontroler-Familie, Abstraktionsebenen der Programmierung
