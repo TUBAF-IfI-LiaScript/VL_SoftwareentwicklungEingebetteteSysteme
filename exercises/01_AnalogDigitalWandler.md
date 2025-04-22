@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.2
+version:  0.0.3
 language: de
 narrator: Deutsch Female
 
@@ -284,4 +284,11 @@ int main (void) {
 
 - [ ] Entwerfen Sie einen Filter für die Glättung der Joystick-Daten. Experimentieren Sie mit unterschiedlichen Konfigurationen des Filters!
 
-- [ ] Speichern Sie die Filterparameter mit `progmem` im Programmspeicher. Analysieren Sie die Konsequnzen anhand einer Analyse des Assemblercodes - evaluieren Sie den Geschwindigkeitsnachteil.
+- [ ] Speichern Sie die Filterparameter mit `progmem` im Programmspeicher. Analysieren Sie die Konsequenzen anhand einer Analyse des Assemblercodes - evaluieren Sie den Geschwindigkeitsnachteil.
+
+
+__Alternativ__
+
+- [ ] Testen Sie das GDB Interface des `simavr` simulators. Alternativ könnte auch SimulAVR eine Option sein. Auf dieser Basis könnten wir dann einen Prototypen für das Skriptgetriebene Debugging bauen. 
+
+- [ ] Evaluieren Sie die Zeitdauer für die Realisierung einer Messung mit dem Analog-Comperator und dem ADC. Erörtern Sie die Vor- und Nachteile der beiden Ansätze.
