@@ -20,7 +20,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2023`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2025`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Einarbeitung und digitale Input/Output Operationen`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
@@ -41,13 +41,14 @@ Die Übungen dienen der praktischen Vertiefung der Vorlesungsinhalte. Das Prakti
 
 > Ich möchte vorschlagen, dass Sie die Aufgaben gemeinsam realisieren und dafür GitHub nutzen. Das erleichtert mir auch die Begleitung der Entwicklung.
 
-  + DSP Implementierung im STM32F4    
-  + mbedOS vs FreeRTOS
-  + CAN Bus - Theorie und Anwendung
-  + Schlafmodi von Controllern (elektrische Vermessung)
-  + virtuelle Maschinen auf eingebetteten Systemen (MicroPython, WASM-Interpreter)
-  + Echtzeitfähigkeit des Raspberry Pi 
-  + ... eigene Ideen
++ microROS / micro DDS
++ DSP Implementierung im STM32F4    
++ mbedOS vs FreeRTOS
++ CAN Bus - Theorie und Anwendung
++ Schlafmodi von Controllern (elektrische Vermessung)
++ virtuelle Maschinen auf eingebetteten Systemen (MicroPython, WASM-Interpreter)
++ Echtzeitfähigkeit des Raspberry Pi 
++ ... eigene Ideen
 
 ## Entwicklungsumgebungen
 
@@ -191,11 +192,13 @@ int main()
 
 - [ ] Wo liegt der Unterschied in den Schaltungen? Wie heißen die jeweiligen Widerstände? Warum werden die Widerstände verwendet?
 
-![Bild](../images/exercises/Aufbau.png)
-
-- [ ] Schreiben Sie ein Programm, welches beim Drücken eines angeschlossenen Schalters an Pin 12 die eingebaute LED an Pin 13 schnell blinken lässt. Nutzen Sie dabei den folgenden Aufbau. Wie hängt dieser Aufbau mit Übung 3 zusammen? Wo ist der benötigte Widerstand?
+- [ ] Recherchieren Sie die Dimension des benötigten Vorwiderstandes an Pin 13.
 
 - [ ] Recherchieren Sie die Abläufe zum Entprellen eines Tasters in Software. Wie ließe sich diese Lösung auf eine Hardware abbilden?
+
+![Bild](../images/exercises/Aufbau.png)
+
+- [ ] Schreiben Sie ein C-Programm, welches beim Drücken eines angeschlossenen Schalters an Pin 12 die eingebaute LED an Pin 13 schnell blinken lässt. 
 
 - [ ] Schreiben Sie ein Programm, welches einen String mittels Morse-Code über die eingebaute LED ausgibt, sobald der Taster gedrückt wird. Gehen Sie davon aus, das das Programm möglichst variabel parameterisierbar sein soll (Timings, Codes). 
 
@@ -214,4 +217,4 @@ const char *numbers[] = {
 };
 ```
 
-- [ ] Wie würden Sie mit simavr eine Testumgebung für die Anwendung aufsetzen? 
+- [ ] Schreiben Sie ein Assembler Programm, dass die LED an Pin 13 blinken lässt. Versuchen Sie diese Aufgabe mit einem möglichst mininalen Code zu lösen.
