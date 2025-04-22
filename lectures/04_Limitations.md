@@ -21,10 +21,10 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2024`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2025`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Beschränkungen des 8-Bit Controllers und Rekapitulation der Analog-Digital-Wandler Begriffe`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/03_Limitations.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/03_Limitations.md) |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/04_Limitations.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/04_Limitations.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
@@ -253,10 +253,14 @@ style="width: 100%; max-width: 560px; display: block; margin-left: auto; margin-
 > 2. Berechnung des Ergebnisses
 > 3. Normierung des Resultats
 
+![](https://www.researchgate.net/profile/Peter-Wilson-14/publication/224698133/figure/fig3/AS:669064468893710@1536528808587/Floating-Point-Adder-Architecture_W640.jpg "Floating Point Adder Architecture - Research Gate - Color Edge Detection Hardware based on Geometric Algebra. https://www.researchgate.net/publication/224698133_Color_Edge_Detection_Hardware_based_on_Geometric_Algebra")<!-- style="width: 100%; max-width: 560px" -->
+
+
 <iframe width="100%" height="60%" src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:2,endLineNumber:22,positionColumn:2,positionLineNumber:22,selectionStartColumn:2,selectionStartLineNumber:22,startColumn:2,startLineNumber:22),source:'%23define+F_CPU+16000000UL%0A%0A%23include+%3Cavr/io.h%3E%0A%0Aint+main+(void)+%7B%0A%0A++char+a+%3D+5%3B%0A++char+b+%3D+6%3B%0A++char+c+%3D+0%3B%0A%0A++//float+a+%3D+5.1%3B%0A++//float+b+%3D+6.3%3B%0A++//float+c+%3D+0%3B%0A%0A++for+(int+i+%3D+1%3B+i+%3C+11%3B+%2B%2Bi)%0A++%7B%0A++++c+%3D+a+%2B+b%3B%0A++++if+(c%3E15)+break%3B%0A++%7D%0A%0A++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:avrg930,deviceViewOpen:'1',filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'0',trim:'1'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+AVR+gcc+9.3.0+(Editor+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
 
 > Ändern Sie die Operation in Zeile 17 von einer Addition in eine Mulitplikation. Was beobachten Sie und warum?
 > Welche Änderungen beobachten Sie, wenn Sie den Datentyp auf `float` setzen?
+
 
 ###  Fehlende Festkommaeinheit
 
@@ -327,7 +331,7 @@ Wie ist das Ganze implementiert? Seit der Version 4.8 integriert der [avr-gcc](h
 | _Fract  | short     | 1             | 0.8   | $\pm$0.7   |
 |         | long      | 4             | 0.32  | $\pm$0.31  |
 |         | long long | 8             | 0.64  | $\pm$0.63  |
-| _Accum  | short     | 1             | 8.8   | $\pm$8.7   |
+| _Accum  | short     | 2             | 8.8   | $\pm$8.7   |
 |         | long      | 4             | 32.32 | $\pm$32.31 |
 |         | long long | 8             | 16.48 | $\pm$16.47 |
 
