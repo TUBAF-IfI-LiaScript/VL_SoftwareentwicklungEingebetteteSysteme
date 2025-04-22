@@ -720,9 +720,8 @@ ISR (TIMER1_COMPA_vect)
 int main(void)
 {
   Serial.begin(9600);
-  TCCR1A = (1 << WGM12);
   // CTC Modus (Fall 4)
-  TCCR1B |= (1 << CS12) | (1 << CS11) | (1 << CS10);
+  TCCR1B |= (1 << CS12) | (1 << CS11) | (1 << CS10) | (1<<WGM12);
   OCR1A = 5;
   TIMSK1 |= (1<<OCIE1A);
   sei();
