@@ -51,7 +51,7 @@ Konzentrieren wir uns auf das letztgenannte Konzept.
 
 ![Bild](../images/exercises/MEMSStruktur.png " [^4]")
 
-Aus der "Integration" der Samples über der Zeit folgt eine mangelnde Langzeitstabilität, daher koppelt man ein INS beispielsweise liefert eine Kombination mit einem Global Positioning System (GPS).
+Aus der "Integration" der Samples über der Zeit folgt eine mangelnde Langzeitstabilität, daher koppelt man ein IMU mit absoluten Positions- und Lagesensoren, beispielsweise mit GPS oder Magnetsensoren.
 
 Welche Schnittstellen bieten diese Sensoren und wie können wir diese über den I2C Bus bedienen?
 
