@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich, Bastian Zötzl
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.4
+version:  1.0.5
 language: de
 narrator: Deutsch Female
 
@@ -22,10 +22,10 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2024`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2025`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Grundlegende Kommunkationskonzepte`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/06_Kommunikation.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/05_Kommunikation.md) |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/05_Kommunikation.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/05_Kommunikation.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
@@ -126,12 +126,14 @@ style=" width: 80%;
         margin-right: auto;"
 -->
 
+> Achtung: Die Signalpegel der Abbildung beziehen sich auf eine Standardkonforme RS-232 Verbindung. Beim AVR sind die Pegel TTL konform. Das bedeutet, dass die logische 0 mit 0V und die logische 1 mit 5V dargestellt wird.
+
 Anmerkungen:
 
 + Aus der Telegrafie erbt UART Kommunikation den "high" Zustand im Leerlauf. Falls die Leitung unterbrochen ist, d.h. am RX-pin der Empfängerseite der Zustand dauerhaft eine logische 0 bzw. GND ist, kann der UART der Empfängerseite das detektieren und dem System melden.
 + Das Start bit und das stop bit definieren den "Data frame". Das Start bit ist immer "0", das stop bit immer "1". Der Beginn der Übertragung wird somit durch den Übergang von 1 auf 0 markiert.
 + Die Größe des Datenwortes kann zwischen 5 und 9 Bit variieren.
-+ Das Paritätsbit ist eine einfache Möglichkeit, EINEN Fehler bei der Übertragung zu prüfen ohne diesen aber korrigieren zu können.
++ Das Paritätsbit ist eine einfache Möglichkeit, EINEN Fehler bei der Übertragung zu prüfen, ohne diesen aber korrigieren zu können.
 + Historisch kommen noch zwei Pins für die Flusskontrolle hinzu - RTS (Ready to send) und CTS (Clear to send). Diese sollen der Synchronisation von Geräten dienen und zeigen an, ob ein Gerät bereit ist die Datenübernahme zu realsieren.
 
 Die Datenrate wird Baud (nach dem französischen Ingenieur und Erfinder [Jean Maurice Émile Baudot](https://de.wikipedia.org/wiki/%C3%89mile_Baudot)) angegeben. Für die UART entspricht dies in _Bit pro Sekunde_ (bps). Dabei werden alle Bits (auch Start- und Stoppbit) gezählt und Lücken zwischen den Bytetransfers ignoriert. Dabei sind die spezifische Datenraten - 150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600 und 115200 Baud - üblich:
@@ -187,7 +189,7 @@ Der UART basiert auf TTL-Pegel mit 0V (logisch 0) und 5V (logisch 1). Im Untersc
 | 2   | `RxD`  oder `Rx` | Receive Data - Empfang an Gerät 1, Sendelinie für Gerät 2, bzw. Empfänger |
 | 3   | `TxD`  oder `Tx` | Transmit Data - Senden für Gerät 1, Empfang für Gerät 2 bzw. Empfänger    |
 | 4   | `DTR`            | Data Terminal Ready                                                       |
-| 5   | `GND`       		 | 0-Potential                                                               |
+| 5   | `GND`            | 0-Potential                                                               |
 | 6   | `DSR`            | Data Set Ready                                                            |
 | 7   | `RTS` oder `RTR` | Gerät 1 ist bereit Daten zu empfangen                                     |
 | 8   | `CTS`            | Clear To Send - Empfänger bzw. Gerät 2 ist bereit Daten zu empfangen      |
@@ -638,6 +640,7 @@ Tritt ein Fehler mehrmals aufeinanderfolgend auf, führt dies zur automatischen 
 
 ## Ausblick und Vergleich
 
+<!-- data-type="none" -->
 |                       | UART        | I2C          | SPI                  | CAN             |
 | --------------------- | ----------- | ------------ | -------------------- | --------------- |
 | Pins                  | RxD, TxD    | SDA, SCL     | SCLK, MOSI, MISO, SS | CANH, CANL      |
@@ -646,6 +649,7 @@ Tritt ein Fehler mehrmals aufeinanderfolgend auf, führt dies zur automatischen 
 | Kommunikationspartner | $=2$        | $2<=x<=127$* | $>=2$                | $2<=x<=128$     |
 | Master                | -           | $>=1$        | $>=1$                | -               |
 | Duplex                | Full Duplex | Half Duplex  | Full Duplex          | Half Duplex     |
+| Kompatibilität        | gut         | gut          | gut                  | gut             |
 
 *I2C hat mittlerweile eine 10 Adressenbit-Version, wobei 7-bit und 10-bit Slaves "mischbar" sind: [I2C-Adressbit-Versionen](https://www.thebackshed.com/forum/uploads/BobD/2015-04-23_130513_I2C_Slave_Addressing.pdf)
 

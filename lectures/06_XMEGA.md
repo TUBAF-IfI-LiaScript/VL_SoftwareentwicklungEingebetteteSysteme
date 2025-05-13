@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.3
+version:  1.0.4
 language: de
 narrator: Deutsch Female
 
@@ -123,6 +123,7 @@ Die 16 Bit Counter des 4809 können in einen 8bit Modus umgeschalten werden.
 Die Interrupt-Erzeugung muss global aktiviert werden, indem eine '1' in das Global Interrupt Enable Bit (I) im CPU-Statusregister `CPU.SREG` geschrieben wird. Dieses Bit wird nicht gelöscht, wenn ein Interrupt quittiert wird.
 
 ![alt-text](../images/09_megaAVR_0/InterruptSequence.png "Ablauf der Interruptverarbeitung [^Microchip4809] Seite 114" )
+
 Wenn ein Interrupt aktiviert ist und die Interrupt-Bedingung eintritt, empfängt die CPUINT die Interrupt-Anforderung. Wenn eine Interrupt-Anforderung von der CPUINT bestätigt wird, wird der Programmzähler so gesetzt, dass er auf den Interrupt-Vektor zeigt. Der Interrupt-Vektor ist ein Sprung zum Interrupt-Handler. Nach der Rückkehr vom Interrupt-Handler wird die Programmausführung an der Stelle fortgesetzt, an der sie vor dem Auftreten der Unterbrechung war.
 
 Standardmäßig haben alle Peripheriegeräte die Prioritätsstufe 0. Es ist möglich, eine Interrupt-Anforderung der Stufe 1 (hohe Priorität) zuzuordnen, indem Sie ihre Interrupt-Vektornummer in das `CPUINT.LVL1VEC`-Register schreibt. Diese Interrupt-Anforderung hat dann eine höhere Priorität als die anderen (normal priorisierten) Interrupt-Anforderungen.
@@ -329,7 +330,16 @@ Diese erweitern wir nun um die Speicherglieder und deren Rückkopplung. Beachten
 
 ![alt-text](../images/09_megaAVR_0/CCL_Logic.png "Konfigurierbare Logikbausteile des 4809 [^Microchip4809] Seite 116" )
 
-Die CCL-Peripherie bietet eine Reihe von Look-up Tables (LUTs). Jede LUT besteht aus drei Eingängen, einer Wahrheitstabelle, einem Synchronisator/Filter und einem Flankendetektor. Jede LUT kann einen Ausgang als anwenderprogrammierbaren logischen Ausdruck erzeugen mit drei Eingängen. Der Ausgang wird aus den Eingängen mit Hilfe der kombinatorischen Logik generiert und kann gefiltert werden, um Spikes zu entfernen. Der CCL kann so konfiguriert werden, dass er bei Änderungen der LUT-Ausgänge eine Interrupt-Anforderung erzeugt.
+Die CCL-Peripherie bietet eine Reihe von Look-up Tables (LUTs). Jede LUT besteht aus
+
++ drei Eingängen, 
++ einer Wahrheitstabelle, 
++ einem Synchronisator/Filter und 
++ einem Flankendetektor. 
+
+> Jede LUT kann einen Ausgang als anwenderprogrammierbaren logischen Ausdruck erzeugen mit drei Eingängen. 
+
+Der Ausgang wird aus den Eingängen mit Hilfe der kombinatorischen Logik generiert und kann gefiltert werden, um Spikes zu entfernen. Der CCL kann so konfiguriert werden, dass er bei Änderungen der LUT-Ausgänge eine Interrupt-Anforderung erzeugt.
 Benachbarte LUTs können kombiniert werden, um bestimmte Operationen durchzuführen.
 
 !?[alt-text](https://www.youtube.com/watch?v=beZXfAUR-PE)
@@ -358,7 +368,6 @@ Welche Inhalte können mit welchen Ausgaben verknüpft werden finden Sie im Hand
 !?[alt-text](https://www.youtube.com/watch?v=WosagCSKdng&t=106s)
 
 Events könnnen auch in Software ausgelöst werden.
-
 
 ### Analog Comparator
 
@@ -414,9 +423,15 @@ wert          ┤│││││╰╮│╰╯│   │          ╰╯    ╰�
 
 ### Analog Converter
 
-Die Analog-Digital-Wandler (ADC)-Peripherie des 4809 liefert 10-Bit-Ergebnisse. Dabei "vergleicht" der ADC entweder analoge Eingangspins, eine interne Spannungsreferenz oder die Ausgabe eines Temperatursensors mit entsprechenden Referenzspannungen `AVDD`, `VREFA` oder einer intern erzeugten Spannung. Der ADC ist mit einem analogen Multiplexer verbunden, der die Auswahl von mehreren unsymmetrischen Spannungseingängen ermöglicht. Der ADC unterstützt die Abtastung in Bursts, wobei eine konfigurierbare Anzahl von Wandlungsergebnissen zu einem einzigen ADC-Ergebnis akkumuliert wird (Sample Accumulation).
+Die Analog-Digital-Wandler (ADC)-Peripherie des 4809 liefert 10-Bit-Ergebnisse. Als Eingang dienen:
 
-Das ADC-Eingangssignal wird durch eine Sample-and-Hold-Schaltung geführt, die sicherstellt, dass die Eingangsspannung zum ADC während der Abtastung auf einem konstanten Pegel gehalten wird.
++ analoge Eingangspins, 
++ eine interne Spannungsreferenz,
++ die Ausgabe eines Temperatursensors 
+
+die mit mit entsprechenden Referenzspannungen `AVDD`, `VREFA` oder einer intern erzeugten Spannung verglichen werden. 
+
+> Der ADC unterstützt die Abtastung in Bursts, wobei eine konfigurierbare Anzahl von Wandlungsergebnissen zu einem einzigen ADC-Ergebnis akkumuliert wird (Sample Accumulation).
 
 Zur Überwachung des Eingangssignals steht eine Fenstervergleichsfunktion mit benutzerdefinierten Schwellenwerten zur Verfügung, die so konfiguriert werden kann, dass sie Interrupts für Messwerte unter, über, innerhalb oder außerhalb des Fensters auslöst, wobei nur minimaler Software-Eingriff erforderlich ist.
 
