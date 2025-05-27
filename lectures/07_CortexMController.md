@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.5
+version:  1.0.6
 language: de
 narrator: Deutsch Female
 
@@ -34,14 +34,14 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 ## Rückblick
 
 <!--data-type="none"-->
-| Arduino Uno Board                                                                                                 | Arduino Uno Wifi Rev. 2    | Nucleo 64                                                                                          |
-| ----------------------------------------------------------------------------------------------------------------- | --- | -------------------------------------------------------------------------------------------------- |
-| ![ArduinoUno](../images/00_Einfuehrung/arduino-uno-rev3.jpg)<!-- style="width: 100%; auto; max-width: 415px;" --> | ![ArduinoUnoWifi](../images/09_megaAVR_0/Arduino_UNO_WIFI.jpg) <!-- style="width: 100%; auto; max-width: 415px;" -->   | ![Nucleo](../images/00_Einfuehrung/Nucleo64.jpg)<!-- style="width: 100%; max-width=315px;" --> |
-| Microchip ATmega 328p                                                                                             | Microchip ATmega 4809    | STM32F401                                                                                          |
-| 8-Bit AVR Familie                                                                                                 |   8-Bit AVR Familie     | 32-Bit Cortex M4 Prozessor                                                                         |
-| Assembler, C, C++                                                                                                       | Assembler, C, C++    | Assembler, C, C++, MicroPython, ...                                                                                              |
-| avrlibc, FreeRTOS                                                                                                 | avrlibc, FreeRTOS      | CMSIS, mbedOS, FreeRTOS                                                                            |
-| 10 Bit Analog-Digital-Wandler, 16 Bit Timer,                                                                      | 10 Bit Analog-Digital-Wandler, 16 Bit Timer, Eventsystem, programmierbare Logik, priorisierbare Interrupts      | 10 timers, 16- and 32-bit (84 MHz), 12-bit ADC                                                     |
+| Arduino Uno Board                                                                                                 | Arduino Uno Wifi Rev. 2                                                                                              | Nucleo 64                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| ![ArduinoUno](../images/00_Einfuehrung/arduino-uno-rev3.jpg)<!-- style="width: 100%; auto; max-width: 415px;" --> | ![ArduinoUnoWifi](../images/09_megaAVR_0/Arduino_UNO_WIFI.jpg) <!-- style="width: 100%; auto; max-width: 415px;" --> | ![Nucleo](../images/00_Einfuehrung/Nucleo64.jpg)<!-- style="width: 100%; max-width=315px;" --> |
+| Microchip ATmega 328p                                                                                             | Microchip ATmega 4809                                                                                                | STM32F401                                                                                      |
+| 8-Bit AVR Familie                                                                                                 | 8-Bit AVR Familie                                                                                                    | 32-Bit Cortex M4 Prozessor                                                                     |
+| Assembler, C, C++                                                                                                 | Assembler, C, C++                                                                                                    | Assembler, C, C++, MicroPython, ...                                                            |
+| avrlibc, FreeRTOS                                                                                                 | avrlibc, FreeRTOS                                                                                                    | CMSIS, mbedOS, FreeRTOS                                                                        |
+| 10 Bit Analog-Digital-Wandler, 16 Bit Timer,                                                                      | 10 Bit Analog-Digital-Wandler, 16 Bit Timer, Eventsystem, programmierbare Logik, priorisierbare Interrupts           | 10 timers, 16- and 32-bit (84 MHz), 12-bit ADC                                                 |
 
 
 ## Was ist eigentlich ein ARM Prozessor?
@@ -476,3 +476,38 @@ Der Quellcode der HAL- und LL-Treiber ist in ANSI-C entwickelt, was ihn unabhän
 !?[](https://www.youtube.com/watch?v=eumKLXNlM0U)
 
 ![alt-text](https://os.mbed.com/docs/mbed-os/v6.16/introduction/images/Mbed_OS_diagram_for_intro.png "mbed OS Architektur - Mbed OS 6 Dokumentation [Link](https://os.mbed.com/docs/mbed-os/v6.16/introduction/architecture.html)")
+
+## Grundsätzliche Fragen
+
+Warum sollte ich umsteigen?
+================================
+
+| Merkmal                             | AVR (z. B. ATmega328)     | ARM Cortex-M (z. B. STM32, RP2040, Teensy) |
+| ----------------------------------- | ------------------------- | ------------------------------------------ |
+| **Taktfrequenz**                    | typ. 16 MHz               | typ. 48–600 MHz                            |
+| **Flash**                           | 32 KB                     | 256 KB – mehrere MB                        |
+| **RAM**                             | 2 KB                      | 32 KB – mehrere MB                         |
+| **ADC-Auflösung**                   | 10 Bit                    | 12–16 Bit                                  |
+| **DMA-Unterstützung**               | Nein                      | Ja (bei vielen ARM-Chips)                  |
+| **USB nativ**                       | Nur über externen Wandler | USB nativ (CDC, HID, MSC, MIDI…)           |
+| **Mehrere Serielle Schnittstellen** | Meist 1–2                 | Viele (UART, I²C, SPI, CAN etc.)           |
+| **Energieeffizienz**                | Gut                       | Oft besser durch Sleep-Modi                |
+| **FPU (Floating Point Unit)**       | Nein                      | Ja (bei Cortex-M4/M7/F7 etc.)              |
+
+Brauche ich den ganzeen Embedded-Kram denn?
+================================
+
+| Aspekt                          | **C / C++**                        | **MicroPython**                          |
+| ------------------------------- | ---------------------------------- | ---------------------------------------- |
+| **Performance**                 | Sehr hoch – direkter Maschinencode | Deutlich langsamer – Interpreter         |
+| **Echtzeitverhalten**           | Deterministisch, präzise Timing    | Schlechtere Latenz, keine harte Echtzeit |
+| **Speicherauslastung**          | Minimal, volle Kontrolle           | Höherer RAM- und Flash-Bedarf            |
+| **Peripheriezugriff**           | Direkt (Register, HAL, LL)         | Eingeschränkt, oft über Wrapper          |
+| **Toolchain**                   | Komplexer (Compiler, Debugger)     | Sehr einfach (REPL, USB-DragDrop)        |
+| **Entwicklungsgeschwindigkeit** | Langsamer (kompilieren, flashen)   | Sehr schnell (live testen, REPL)         |
+| **Debugging**                   | Leistungsstark (SWD, Breakpoints)  | Eingeschränkt (print, rudimentär)        |
+| **Lernkurve**                   | Steil                              | Flach                                    |
+| **Community-Beispiele**         | Viele (STM32 + C)                  | Weniger, aber wachsend                   |
+
+
+
