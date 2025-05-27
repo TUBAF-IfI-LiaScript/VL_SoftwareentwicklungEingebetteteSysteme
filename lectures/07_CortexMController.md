@@ -6,9 +6,7 @@ version:  1.0.5
 language: de
 narrator: Deutsch Female
 
-import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
-         https://github.com/LiaTemplates/AVR8js/main/README.md
-         https://github.com/LiaTemplates/Pyodide
+import:  https://raw.githubusercontent.com/liaScript/mermaid_template/master/README.md
 
 icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 
@@ -48,39 +46,72 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ## Was ist eigentlich ein ARM Prozessor?
 
-ARM - Advanced Risc Maschines
+> ARM-Prozessoren sind Mikroprozessoren, die nach der **ARM-Architektur** arbeiten.  Der Begriff ARM steht ursprünglich für "**Acorn RISC Machine**", später "**Advanced RISC Machines**".
 
-| Jahr    | Architektur | Familie                              |
-| ------- | ----------- | ------------------------------------ |
-| 1985    | ARMv1       | ARM1                                 |
-| 1986    | ARMv2       | ARM2, ARM3                           |
-| 1995    | ARMv4       | ARM7TDMI, ARM8, StrongARM,  ARM9TDMI |
-| 2002    | ARMv5       | ARM7EJ, ARM9E, ARM10E                |
-| 2002    | ARMv6       | ARM11, Arm Cortex-M (M0, M0+, M1)    |
-| ab 2004 | ARMv7       | Arm Cortex-A, M, R                   |
-| ab 2012 | ARMv8       | Arm Cortex-A, M7, R                  |
-| 2021    | ARMv9       | Arm Cortex-A, Arm Neoverse           |
-
+--{{1}}--
 Die Architektur von ARM-Prozessoren erfuhr seit 1985 zahlreiche Veränderungen, zum Beispiel bei der Zahl der Register, der Größe des Adressraumes und dem Umfang des Befehlsatzes. Sie wird daher in Versionen unterteilt, abgekürzt mit ARMv[Versionsnummer]. Beginnend mit ARMv2, wurden die Architekturversionen in mehr als nur einem Prozessordesign implementiert.
+
+| Jahr        | Architektur | Familie                                      | Neuerungen / Features                                                                 |
+|-------------|-------------|----------------------------------------------|----------------------------------------------------------------------------------------|
+| 1985        | ARMv1       | ARM1                                         | Erste ARM-Architektur, 32-Bit RISC, einfacher Befehlssatz                            |
+| 1986        | ARMv2       | ARM2, ARM3                                   | Multiplikationsbefehl, Unterstützung für Co-Prozessoren                              |
+| 1995        | ARMv4       | ARM7TDMI, ARM8, StrongARM, ARM9TDMI          | Unterstützung für Thumb (16-Bit Kompaktmodus), Debugging (JTAG)                      |
+| 2002        | ARMv5       | ARM7EJ, ARM9E, ARM10E                        | DSP-Erweiterungen, Jazelle für Java-Hardware-Beschleunigung                          |
+| 2002        | ARMv6       | ARM11, Cortex-M0/M0+/M1                      | SIMD (Media Processing Engine), verbessertes Cache-System, TrustZone-Sicherheit      |
+| ab 2004     | ARMv7       | Cortex-A, Cortex-R, Cortex-M                 | NEON SIMD, Virtualisierung, Thumb-2, FPU, Low-Power-Cores (Cortex-M)                 |
+| ab 2012     | ARMv8       | Cortex-A, Cortex-R, Cortex-M7                | 64-Bit Unterstützung (AArch64), verbesserte Sicherheit (TrustZone), SVE (optional)   |
+| ab 2021     | ARMv9       | Cortex-A, Neoverse, Cortex-X                 | Verbesserte SVE2 (SIMD für Vektorberechnungen), Confidential Computing, Scalable ML  |
+| ab 2024     | ARMv9.2+    | Cortex-X4, Cortex-A720, Neoverse V2/V3       | Performance-per-Watt optimiert, neue Sicherheits-Features, besseres Branch Prediction|
 
 > In Bezug auf das Instruktionsset werden verschiedene Befehlssätze implementiert - Thumb, Thumb-2, ARM32 und ARM64.
 
+{{2}}
 Ab der Armv7-Architektur werden die sie implementierenden Prozessorkerne drei Anwendungsfeldern zugeteilt:
 
-+ Arm Cortex-A: Der Buchstabe A steht für die Bezeichnung englisch Application (dt. betriebssystembasierte Anwendungen). Diese Prozessorfamilien erreichen durch vielstufige Pipelines und mehrstufige Caches hohe Performance.
-+ Arm Cortex-M: Der Buchstabe M steht für die Bezeichnung englisch Microcontroller (dt. Mikrocontrolleranwendungen). Typische Anwendung in nicht zeitkritischen steuer- und regeltechnischen Aufgaben. Cortex-M Mikrocontroller sind von vielen Herstellern verfügbar und zeichnen sich durch ein umfangreiches Angebot an Ein- und Ausgabeschnittstellen aus.
-+ Arm Cortex-R: Der Buchstabe R steht für die Bezeichnung englisch Realtime (dt. Echtzeitsystem). Diese für harte Echtzeitanforderungen geeigneten Prozessoren finden sich unter anderem als Controller in Festplatten und Solid-State-Drives und in sicherheitskritischen Anwendungen, wie beispielsweise in Fahrzeugen als Teil der Steuereinheit von Antiblockiersystemen oder in der Auslöseelektronik von Airbags.
++ Cortex-A (Application Profile)
+
+  - Für komplexe, betriebssystembasierte Anwendungen (z. B. Linux, Android)
+  - Mehrstufige Pipeline, Out-of-Order Execution, L1/L2-Caches
+  - Unterstützt Memory Management Unit (MMU)
+  - Einsatz in: Smartphones, Tablets, Embedded-Linux-Systemen
+
++ Cortex-M (Microcontroller Profile)
+
+  - Für deterministische, energieeffiziente Steuer- und Regelprozesse
+  - Vereinfachte Pipeline, kein MMU, stattdessen Memory Protection Unit (MPU)
+  - Hohe Peripherieintegration, z. B. ADC, GPIO, Timer
+  - Einsatz in: IoT, Sensorik, Industrieautomation
+
++ Cortex-R (Realtime Profile)
+
+  - Für harte Echtzeitanforderungen mit deterministischem Verhalten
+  - Dual-Core-Optionen mit lock-step Execution, ECC-Speicherunterstützung
+  - Predictable Interrupt Latency & Tightly Coupled Memory (TCM)
+  - Einsatz in: Automotive (ABS, Airbags), Medizintechnik, Speichercontroller
+
+> Aufgabe: Recherchieren Sie die Unterschiede zwischen MMU und MPU - worin unterschieden sich die beiden Konzepte?
 
 ARM entwickelt das Design von RISC-Prozessoren, deren Fertigung von den Lizenznehmern durchgeführt wird, zu denen die Firmen AMD, Apple, Microchip, Freescale, HiSilicon, IBM, Infineon, Intel, MediaTek, Nvidia, NXP, Qualcomm, Renesas, Samsung, Texas Instruments, ... gehören.
 
 ## Cortex M Prozessoren
 
-Die Prozessoren Cortex-M0 und M1 basieren auf einer ARMv6-M Architektur, die Cortex-M3 auf einer Armv7-M Architektur, und die Cortex-M4 sowie Cortex-M7 auf einer Armv7E-M Architektur. Die Unterschiede betreffen primär den Befehlssatz und die zur Verfügung stehenden Maschinenbefehle. Die Linien sind so festgelegt, dass die binären Maschinenbefehle aufwärts kompatibel sind, das heißt, ein Maschinenprogramm von einem Cortex-M0 oder M1 ist ohne Veränderung auch auf einem Cortex-M3, M4 oder M7 lauffähig.
+> Die "Unübersichtlichkeit" geht weiter :-)
 
+| Prozessor      | Architektur   |
+|----------------|---------------|
+| Cortex-M0/M1   | ARMv6-M       |
+| Cortex-M3      | ARMv7-M       |
+| Cortex-M4/M7   | ARMv7E-M      |
+
+Die Unterschiede betreffen primär den Befehlssatz und die zur Verfügung stehenden Maschinenbefehle. Die Linien sind so festgelegt, dass die binären Maschinenbefehle aufwärts kompatibel sind - ein Maschinenprogramm von einem Cortex-M0 oder M1 ist ohne Veränderung auch auf einem Cortex-M3, M4 oder M7 lauffähig.
+
+    --{{1}}--
 Alle Prozessoren aus der Cortex-M-Familie unterstützen die Basisbefehle aus dem so genannten Thumb-Befehlssatz, dem Thumb-2-Befehlssatz, und bieten zusätzlich eine Multipliziereinheit in Hardware. M0 und M1 fehlen allerdings im Thumb-Befehlssatz neuere Erweiterungen. Die Einschränkungen bei M0 und M1 sind Folge der Vorgabe, die Chipfläche möglichst klein zu halten.
 
+    --{{1}}--
 Cortex-M3, mit größerer Chipfläche, umfasst den vollständigen Thumb- und Thumb-2-Befehlssatz, bietet darüber hinaus einige spezielle Instruktionen, eine eigene Divisionseinheit in Hardware und kann mathematische Befehle wie Addition statt mit Überlauf auch mit Sättigung behandeln, was insbesondere im Bereich der Signalverarbeitung von Bedeutung ist. Cortex-M4 erweitert diese Möglichkeiten um einige spezielle Befehle, wie sie bei digitalen Signalprozessoren (DSP) üblich sind, und bietet optional eine Gleitkommaeinheit für die Bearbeitung von Gleitkommazahlen nach der Norm IEEE 754 für einfache Genauigkeit.Der Cortex-M7 erweitert die Gleitkommaeinheit für die Bearbeitung von Gleitkommazahlen für doppelte Genauigkeit.
 
+     {{1}}
 <!-- data-type="none" -->
 | ARM        | Thumb        | Thumb-2     | Hardware Multiplizierer | Hardwaredividierer | DSP--Erweiterung | Sättigungsarithmetik | Gleitkommaeinheit | TrustZone | ARM-Architektur      |
 | ---------- | ------------ | ----------- | ----------------------- | ------------------ | ---------------- | -------------------- | ----------------- | --------- | -------------------- |
@@ -92,6 +123,7 @@ Cortex-M3, mit größerer Chipfläche, umfasst den vollständigen Thumb- und Thu
 | Cortex-M23 | Vollständig  | Vollständig | 1 oder 32 Zyklen        | ja                 | nein             | nein                 | nein              | ja        | Armv8-M Baseline[12] |
 | Cortex-M33 | Vollständig  | Vollständig | 1 Zyklus                | ja                 | ja               | ja                   | Optional          | ja        | Armv8-M[12]          |
 
+    {{2}}
 ```ascii
 +-----------------------------------------+
 |+---------------------------------------+|                                  
@@ -116,14 +148,178 @@ Cortex-M3, mit größerer Chipfläche, umfasst den vollständigen Thumb- und Thu
 +-----------------------------------------+                                    .
 ```
 
-## Architekturelemente
+### Memory Protection Unit (MPU)
 
-Erweiterte Elemente der Architektur:
+Die **Memory Protection Unit (MPU)** ist eine optionale Hardware-Komponente in ARM-Prozessoren, die zur **Speicherverwaltung und zum Schutz** dient. Sie ermöglicht es dem System, bestimmte Bereiche des Speichers mit **Zugriffsrechten und Attributen** zu versehen.
 
-+ Memory Protection Unit (MPU) - Die MPU überwacht Transaktionen, einschließlich Befehlsabrufe und Datenzugriffe des Prozessors, die eine Fehlerausnahme auslösen können, wenn eine Zugriffsverletzung festgestellt wird. Der Hauptzweck des Speicherschutzes besteht darin, einen Prozess daran zu hindern, auf Speicher zuzugreifen, der ihm nicht zugewiesen wurde.
-+ Floating Point Unit (FPU)  - Eine Fließkommaeinheit ist ein Teil eines Computersystems, der speziell für die Durchführung von Operationen mit Fließkommazahlen ausgelegt ist. Typische Operationen sind Addition, Subtraktion, Multiplikation, Division und Quadratwurzel.
-+ Direct memory access (DMA) - Direkter Speicherzugriff (DMA) ist eine Funktion von Computersystemen, die es bestimmten Hardware-Subsystemen ermöglicht, unabhängig von der Zentraleinheit (CPU) auf den Hauptsystemspeicher (Random-Access Memory) zuzugreifen. Ohne DMA ist die CPU bei einer programmierten Ein-/Ausgabe typischerweise für die gesamte Dauer des Lese- oder Schreibvorgangs voll ausgelastet und steht somit für andere Arbeiten nicht zur Verfügung. Mit DMA initiiert die CPU zuerst die Übertragung, dann führt sie andere Operationen aus, während die Übertragung läuft, und schließlich erhält sie einen Interrupt vom DMA-Controller (DMAC), wenn die Operation abgeschlossen ist.
-+ System Timer (SysTick-Timer) - Für die Triggerung eines Betriebssystems stellt jeder Cortex M Kern einen separaten Timer bereit, der den Wechsel zwischen Tasks steuert. Ohne OS kann der System Timer aber auch frei verwendet werden.
+Warum ist die MPU notwendig?
+
+- **Sicherheit:** Verhindert, dass bösartiger oder fehlerhafter Code auf kritische Speicherbereiche zugreift (z.B. durch Stack-Überlauf, unerlaubter Zugriff auf Konfigurationsregister). Dies ist besonders wichtig in Multi-Tasking-Umgebungen.
+- **Robustheit:** Schützt das System vor Abstürzen, die durch unbeabsichtigte Speicherzugriffe verursacht werden könnten.
+- **Betriebssysteme (RTOS):** Ermöglicht die Trennung von Speichern für verschiedene Aufgaben/Threads (z.B. strikte Trennung von User-Space und Kernel-Space).
+- **Fehlererkennung:** Hilft, Programmierfehler, die zu Speicherverletzungen führen, frühzeitig zu erkennen und das System in einen definierten Fehlerzustand zu überführen.
+
+Die MPU arbeitet, indem sie den gesamten adressierbaren Speicher in diskrete **Regionen** unterteilt. Jede dieser Regionen kann unabhängig konfiguriert werden.
+
+Jede MPU-Region wird durch folgende Parameter definiert:
+
+- **Basisadresse:** Die Startadresse der Region im Speicher.
+- **Größe:** Die Größe der Region. Diese muss immer eine Zweierpotenz sein (z.B. 32 Bytes, 64 Bytes, ..., 4GB) und darf die Adressbreite des Systems nicht überschreiten.- - **Zugriffsberechtigungen (Access Permissions - AP):** Legen fest, wer (privilegiert oder unprivilegiert) auf die Region zugreifen darf und wie (lesen, schreiben, ausführen).
+- **Speicherattribute (Memory Attributes - TEX, S, C, B):** Steuern, wie der Speicher von Caches und Puffern behandelt werden soll (z.B. Cacheable, Non-Cacheable, Write-Through, Write-Back, Shareable). Dies ist entscheidend für die Performance und Datenkonsistenz.
+- **Execute Never (XN):** Ein Bit, das die Ausführung von Code aus dieser Region verbietet. Sehr wichtig für Datensegmente, um Code-Injektionen zu verhindern.
+
+
+```c
+// Im TCB (Task Control Block) für jeden Task
+typedef struct {
+    // ... andere Task-spezifische Daten ...
+    MPU_Region_Config_t mpu_regions[MAX_TASK_MPU_REGIONS]; // Array von MPU-Regionen für diesen Task
+    uint32_t num_mpu_regions;
+} Task_TCB_t;
+
+// Im Context-Switcher des RTOS (Ausschnitt)
+void context_switch_to_task(Task_TCB_t *next_task) {
+    // 1. MPU deaktivieren (vor dem Laden neuer Konfigurationen)
+    SCB->MPU_CTRL = 0;
+    __DSB(); // Data Synchronization Barrier
+    __ISB(); // Instruction Synchronization Barrier
+
+    // 2. MPU-Regionen des nächsten Tasks laden
+    for (int i = 0; i < next_task->num_mpu_regions; i++) {
+        SCB->MPU_RNR = next_task->mpu_regions[i].region_number;
+        SCB->MPU_RBAR = next_task->mpu_regions[i].base_address;
+        SCB->MPU_RASR = next_task->mpu_regions[i].attributes_and_size;
+    }
+
+    // Optional: Alle nicht verwendeten Regionen deaktivieren, um Lecks zu verhindern
+    for (int i = next_task->num_mpu_regions; i < MAX_MPU_REGIONS_SUPPORTED; i++) {
+        SCB->MPU_RNR = i;
+        SCB->MPU_RASR = 0; // Region deaktivieren
+    }
+
+
+    // 3. MPU reaktivieren und PRIVDEFENA (falls benötigt)
+    SCB->MPU_CTRL = MPU_CTRL_ENABLE_Msk | MPU_CTRL_PRIVDEFENA_Msk; // MPU aktivieren + Default Map für Privilegiertes
+
+    __DSB(); // Data Synchronization Barrier
+    __ISB(); // Instruction Synchronization Barrier
+
+    // 4. Den Prozessor in den unprivilegierten Modus versetzen (wird oft automatisch vom Exception-Return-Mechanismus des Kernels übernommen)
+    // Beispiel: CONTROL_nPRIV Bit setzen, bevor zum Task zurückgekehrt wird.
+    // __set_CONTROL( __get_CONTROL() | CONTROL_nPRIV_Msk );
+}
+```
+
+### Floating Point Unit (FPU) 
+
+Eine Fließkommaeinheit ist ein Teil eines Computersystems, der speziell für die Durchführung von Operationen mit Fließkommazahlen ausgelegt ist. Typische Operationen sind Addition, Subtraktion, Multiplikation, Division und Quadratwurzel.
+
+
+- Cortex-M4: optionale Single-Precision FPU (IEEE 754)
+- Cortex-M7: erweiterte FPU, optional auch Double-Precision (64-bit)
+- Cortex-M0/M1/M3: keine FPU, Gleitkommaoperationen laufen in Software
+
+| Quelle / Studie              | Beschleunigungsfaktor (ca.) | Kontext                             |
+| ---------------------------- | --------------------------- | ----------------------------------- |
+| ARM Cortex-M4 vs. Soft-Float | 10x – 30x                   | DSP-typische Fließkommaoperationen  |
+| Embedded DSP-Anwendungen     | 20x – 40x                   | Signalverarbeitung (z.B. Filterung) |
+| Wissenschaftliche Benchmarks | bis zu 50x                  | Matrixmultiplikation, FFT etc.      |
+
+
+### Digital Signal Processing (DSP) 
+
+- **SIMD-Instruktionen (Single Instruction Multiple Data):**  
+  Erlauben parallele Verarbeitung von mehreren Datenpunkten in einem einzigen Befehl (z.B. 16-Bit oder 8-Bit Samples).
+
+- **Sättigungsarithmetik:**  
+  Verhindert Überläufe durch Begrenzung von Rechenergebnissen, wichtig bei Audio- und Bildverarbeitung.
+
+- **Hardware-Multiplizierer und MAC (Multiply-Accumulate):**  
+  Ermöglicht schnelle Ausführung von Filteroperationen und Fourier-Transformationen.
+
+- **Barrel Shifter:**  
+  Beschleunigt Bitverschiebungen, häufig benötigt in Signalmanipulationen.
+
+
+```c
+#include <arm_acle.h> // Für ARM Intrinsics
+#include <stdint.h>   // Für int16_t und uint32_t
+
+void add_arrays_simd_safe(const int16_t *a, const int16_t *b, int16_t *result, int length) {
+    int i;
+    // Check einfügen, dass die Länge gerade ist
+    // ...
+    for (i = 0; i < length; i += 2) {
+        // Explizites Packen der 16-Bit-Werte in 32-Bit unsigned int
+        // a[i] geht in die unteren 16 Bits, a[i+1] in die oberen 16 Bits.
+        uint32_t val_a_packed = ((uint32_t)a[i+1] << 16) | (uint16_t)a[i];
+        uint32_t val_b_packed = ((uint32_t)b[i+1] << 16) | (uint16_t)b[i];
+
+        // SIMD Add mit Sättigung
+        uint32_t val_r_packed = __qadd16(val_a_packed, val_b_packed);
+
+        // Explizites Entpacken der 32-Bit-Ergebnisse zurück in 16-Bit-Werte
+        result[i] = (int16_t)(val_r_packed & 0xFFFF);       // Untere 16 Bit
+        result[i+1] = (int16_t)(val_r_packed >> 16);        // Obere 16 Bit
+    }
+}
+```
+
+https://arm-software.github.io/CMSIS_5/Core/html/group__intrinsic__SIMD__gr.html
+
+### Direct memory access (DMA)
+
+Direkter Speicherzugriff (DMA) ist eine Funktion von Computersystemen, die es bestimmten Hardware-Subsystemen ermöglicht, unabhängig von der Zentraleinheit (CPU) auf den Hauptsystemspeicher (Random-Access Memory) zuzugreifen. 
+
+```mermaid @mermaid
+sequenceDiagram
+    participant CPU
+    participant DMA
+    participant RAM
+    participant Peripherie
+
+    Note over CPU,Peripherie: Ohne DMA (CPU übernimmt Datenübertragung)
+    Peripherie->>CPU: Datenanforderung
+    CPU->>RAM: Daten lesen/schreiben
+    CPU->>Peripherie: Daten übertragen
+
+    %% Trennung der Szenarien
+    Note over CPU,DMA: Mit DMA (DMA übernimmt Datenübertragung)
+    Peripherie->>CPU: Übertragungsstart anfragen
+    CPU->>DMA: DMA-Transfer starten
+    DMA->>RAM: Daten lesen/schreiben
+    DMA->>Peripherie: Daten übertragen
+    DMA->>CPU: Interrupt bei Abschluss
+    CPU->>CPU: Andere Aufgaben
+```
+
+> Vorteil: Effizientere CPU-Auslastung und schnellere Datenverarbeitung
+
+### SysTick Timer
+
+Was ist der SysTick?
+
+- Ein **24-bit Zähler**, integriert in jeden **ARM Cortex-M-Kern**
+- Teil der **Cortex-M Systemsteuerungseinheit** (System Control Block)
+- Läuft mit dem **Prozessortakt** oder einem separaten Takt
+- Wird meist im **periodischen Modus** betrieben
+
+Anwendungsfälle
+
+- **Zeitgeber für Echtzeitanwendungen**  
+- **Trigger für Taskwechsel in RTOS** (z. B. FreeRTOS, Zephyr)  
+- **Systemheartbeat / zyklischer Interrupt**  
+- **Benchmarking / Profiling von Codeabschnitten**
+
+Daraus ergeben sich folgende Abläufe
+
+1. SysTick wird mit gewünschtem Intervall (z. B. 1 ms) konfiguriert  
+2. Er erzeugt periodisch einen **SysTick-Interrupt**  
+3. Der RTOS-Kernel nutzt diesen Interrupt für:
+   - Zeitverwaltung (`xTaskIncrementTick`)
+   - Taskwechsel (`vTaskSwitchContext`)
+
+### Bussysteme
 
 Zudem werden die erweiterten Componenten durch ein mehrteiliges Bussystem verknüpft:
 
