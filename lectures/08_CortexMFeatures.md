@@ -7,6 +7,7 @@ language: de
 narrator: Deutsch Female
 
 import:  https://raw.githubusercontent.com/liaScript/mermaid_template/master/README.md
+         https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
 
 icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 
@@ -196,12 +197,54 @@ Cortex-M Controller implementieren mindestens die folgenden Exceptions/Interrupt
 
 ### Beschleunigung der Abarbeitung
 
-| Ansatz                       | Erklärung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Tail-Chaining**            | Üblicherweise muss die Hardware beim Beenden einer ISR mindestens acht vom _caller safe_ Register poppen und wiederherstellen. Wenn jedoch bereits eine neue Exception ansteht, kann dieses POP und das anschließende PUSH übersprungen werden, da genau dieselben Register erst gespeichert und dann wieder entnommen werden würden!                                                                                                                                                                                                                                                                                                                          |
-| **Late-arriving Preemption** | Der ARM-Kern kann ein ISR höherer Priorität erkennen, während er sich in der _Exception-Entry-Phase_ befindet (Sichern der Caller-Register & Abrufen der auszuführenden ISR-Routine). Die Optimierung besteht darin, dass die ISR-Routine mit höherer Priorität geholt und ausgeführt werden kann, statt die ursprünglich geplante. Die bereits erfolgte Speicherung des Registerzustands ist davon ja unabhängig. Dadurch wird die Latenzzeit für den Interrupt mit höherer Priorität reduziert und praktischerweise kann der Prozessor nach Beendigung des spät eintreffenden Exception-Handlers in die ursprüngliche ISR unmittelbar anschließend bedienen. |
-| **Lazy State Preservation**  | ARMv7- & ARMv8-Bausteine können eine optionale Floating Point Unit (FPU) integrieren. Diese kommt mit dem Zusatz von 33 Vier-Byte-Registern (s0-s31 & fpscr). 17 davon sind "caller"-gespeichert und müssen gesichert werden. Da FPU-Register nicht oft in ISRs verwendet werden, kann eine Optimierung `Lazy Context Save` aktiviert werden, die das tatsächliche Speichern der FPU-Register auf dem Stack vermeidet, bis eine Fließkommaanweisung in der Exception verwendet wird.                                                                                                                                                                           |
-|                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Ansatz                       | Erklärung |
+|-----------------------------|-----------|
+| **Tail-Chaining**            | Beim Beenden einer Interrupt-Service-Routine (ISR) muss die CPU normalerweise mindestens acht "caller-saved" Register vom Stack laden und beim nächsten Interrupt wieder speichern. Wenn jedoch direkt eine neue Exception ansteht, kann das erneute Sichern und Wiederherstellen übersprungen werden – die Register bleiben erhalten. Dadurch wird wertvolle Zeit gespart. |
+| **Late-Arriving Preemption** | Während der Prozessor noch mit dem Eintritt in eine ISR (Exception Entry) beschäftigt ist, kann eine höher priorisierte Exception eintreffen. In diesem Fall wird die ursprünglich vorgesehene ISR verworfen, und stattdessen direkt die ISR mit höherer Priorität geladen. Der gesicherte Registerzustand bleibt dabei gültig. Dies reduziert die Latenz für dringende Interrupts erheblich. Nach deren Abarbeitung kann die zuerst erkannte ISR direkt im Anschluss ausgeführt werden. |
+| **Lazy State Preservation**  | ARMv7- und ARMv8-Prozessoren mit FPU verfügen über zusätzliche Register (z. B. `s0–s31` und `fpscr`). Da viele ISRs keine Gleitkommaoperationen nutzen, kann das Betriebssystem die Sicherung dieser Register verzögern, bis tatsächlich eine FP-Instruktion ausgeführt wird. Erst dann werden die FP-Register gesichert – das spart Speicherzugriffe und Zeit bei Interrupts, die keine FPU benötigen. |
+
+
+```text @plantUML
+@startuml
+participant A as "Thread A"
+participant B as "Thread B"
+participant OS
+participant CPU
+participant FPU
+
+== Thread A läuft und nutzt FPU ==
+A -> FPU: FP-Befehl
+FPU --> A: Ergebnis
+
+== Interrupt tritt auf ==
+CPU -> OS: Exception Entry
+OS -> CPU: Save CPU-Register von A (FPU unberührt)
+
+== Kontextwechsel zu Thread B ==
+OS -> CPU: Restore CPU-Register von B
+OS --> B: Kontrolle an Thread B
+
+== Thread B läuft (noch ohne FPU) ==
+B -> CPU: Ausführung normaler Instruktionen
+CPU --> B: Kein FPU-Zugriff → kein Problem
+
+== Erste FP-Instruktion von Thread B ==
+B -> FPU: FP-Befehl
+FPU --> CPU: Exception (FPU nicht aktiviert)
+
+== Lazy FPU-Handling ==
+CPU -> OS: FPU Exception Handling
+OS -> CPU: Save FPU-Kontext von Thread A
+OS -> CPU: Load/Init FPU-Kontext für Thread B
+OS -> FPU: FPU aktivieren
+OS --> B: Rückkehr zur FP-Instruktion
+
+== FP-Instruktion wird wiederholt ==
+B -> FPU: FP-Befehl erneut
+FPU --> B: Ergebnis
+@enduml
+```
+
 
 ### Programmierbeispiel
 
