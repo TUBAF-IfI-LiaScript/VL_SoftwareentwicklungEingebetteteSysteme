@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.6
+version:  1.0.7
 language: de
 narrator: Deutsch Female
 
@@ -17,15 +17,16 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 [![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/10_RTOS_Schedulingalgorithmen.md#1)
 
 
-# Scheduling Algorithmen
+# Scheduling Algorithmen & RTOS
+
 
 | Parameter                | Kursinformationen                                                                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                           |
-| **Semester**             | `Sommersemester 2024`                                                                                                                                                                                              |
+| **Semester**             | `Sommersemester 2025`                                                                                                                                                                                              |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                    |
 | **Inhalte:**             | `Scheduling Algorithmen`                                                                                                                                                             |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/08_RTOS_Schedulingalgorithmen.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/08_RTOS_Schedulingalgorithmen.md) |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/10_RTOS_Schedulingalgorithmen.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/10_RTOS_Schedulingalgorithmen.md) |
 | **Autoren**              | @author                                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
@@ -107,9 +108,9 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
                                            "$d_a$"   "$d_b$"   
 ----------------------------------------------|-------|------------>
                         "$c_b$"       "$c_a$"
-.........+----------------+-------------+..............
+. . . . .+----------------+-------------+. . . . . . .
          |   "$T_b$"      |   "$T_a$"   |               
-.........+----------------+-------------+..............                        .
+. . . . .+----------------+-------------+. . . . . . .                        .
 ```
 
 Die zu erwartende Lateness $L_{max(a,b)}$ ergibt sich damit zu $c_a - d_a$.
@@ -125,14 +126,14 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 ----------------------------------------------|-------|------------>
 
                         "$c_b$"       "$c_a$"
-.........+----------------+-------------+..............
+. . . . .+----------------+-------------+. . . . . . . 
          |   "$T_b$"      |   "$T_a$"   |               
-.........+----------------+-------------+..............     
+. . . . .+----------------+-------------+. . . . . . .      
 
                      "$c'_a$"          "$c'_b=c_a$"
-.........+-------------+----------------+..............
+. . . . .+-------------+----------------+. . . . . . . 
          |   "$T_a$"   |     "$T_b$"    |     "$L'_{max(a,b)} = max(L'_a, L'_b)$"       
-.........+-------------+----------------+..............                        
+. . . . .+-------------+----------------+. . . . . . .                         
                                "$L'_a$"
                         <-------------------->
                                          <---------->
@@ -250,9 +251,21 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
                          "$t_4$"                "$t_{13}$"
 ```
 
+| Kriterium                  | **EDF (Earliest Deadline First)**                 | **LLF (Least Laxity First)**                                               |
+| -------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Priorität basiert auf**  | Nächstliegender **Deadline**                      | **Laxity (Slack Time)** = Zeit bis Deadline – verbleibende Ausführungszeit |
+| **Dynamische Prioritäten** | Ja                                                | Ja                                                                         |
+| **Umschaltverhalten**      | Relativ **stabil**, weil Deadline konstant bleibt | Kann **häufig umschalten**, weil Laxity sich mit Zeit ändert               |
+| **Präzision**              | Gut für regelmäßige Perioden                      | Besser bei **hoher Last** oder **unregelmäßiger Ausführungszeit**          |
+
+
 ### Latest Deadline First
 
-Abhängigkeiten zwischen Tasks lassen sich in den bisher besprochenen Algorithmen noch nicht abbilden. Entsprechend würde ein EDF für folgendes Bespiel auch ein ungültiges Resultat liefern:
+Abhängigkeiten zwischen Tasks lassen sich in den bisher besprochenen Algorithmen noch nicht abbilden. Der Graph der Abhängigkeiten zwischen Tasks ist ein azyklischer gerichteter Graph (DAG). Die Knoten des Graphen sind die Tasks, die Kanten beschreiben die Abhängigkeiten. 
+
+> Der Task $T_4$ kann nur dann ausgeführt werden, wenn Task $T_2$ bereits ausgeführt wurde.
+
+Entsprechend würde ein EDF für folgendes Bespiel auch ein ungültiges Resultat liefern:
 
 ![alt-text](../images/08_Algorithms/LDF_motivation.png "Scheitern von EDD und EDF ohne Berücksichtigung von Abhängigkeiten")
 
@@ -305,6 +318,10 @@ Bedingungen:
 **Beispiel**
 
 ![alt-text](../images/08_Algorithms/EDF_star_example.png "Anwendung des EDF\* Ansatzes")
+
+Erläuterung: Die angepassten Bereitzeiten spiegeln die Abhängigkeiten wieder. Mit Blick auf die Deadlines wurden T6 bis T3 ohne Änderungen durchgeplant. Die Deadline von T4 ist 3, entsprechend muss die Deadline von T2 auf 2 modifiziert werden, um sicherzustellen , dass T2 mit einer Laufzeit von 1 ausgeführt werden kann. Entsprechend muss T1 auch zur Deadline 1 abgeschlossen werden.
+
+Jetzt kann ein EDF Plan erstellt werden, der die modifizierten Bereitzeiten und Deadlines berücksichtigt.
 
 ### Zusammenfassung
 
@@ -368,7 +385,6 @@ Aber RMS ist nicht immer in der Lage eine Lösung zu finden, obwohl eine existie
 
 Ein Echtzeitbetriebssystem (RTOS) ist ein Betriebssystem (OS), das für Echtzeitanwendungen vorgesehen ist.  Ereignisgesteuerte Systeme schalten zwischen Tasks auf der Grundlage ihrer Prioritäten um, während Time-Sharing-Systeme die Tasks auf der Grundlage von Taktinterrupts umschalten. Die meisten RTOSs verwenden einen präemptiven Scheduling-Algorithmus.
 
-
 Vorteile des RTOS vs. Super Loop Design
 
 - Trennung von Funktionalität und Timing - RTOS entlastet den Nutzer und behandelt Timing, Signale und Kommunikation
@@ -378,9 +394,13 @@ Vorteile des RTOS vs. Super Loop Design
 
 ![alt-text](../images/08_Algorithms/RTOS_Vergleich.png "Einordnung von RTOS Umsetzungen - Motivierte nach Präsentation von Richard Berry (Gründer FreeRTOS)")
 
-FreeRTOS ist für leistungsschwache eingebettete Systeme konzipiert. Der Kernel selbst besteht aus nur drei C-Dateien. Um den Code lesbar, einfach zu portieren und wartbar zu machen, ist er größtenteils in C geschrieben, aber es sind einige Assembler-Funktionen (meist in architekturspezifischen Scheduler-Routinen) enthalten.
+> FreeRTOS ist kein vollständiges Betriebssystem, sondern ein hochoptimierter, portabler Echtzeit-Kernel – ideal für bare-metal Systeme, bei denen Timing und Ressourcenverbrauch kritisch sind.
 
-Es gibt keine der erweiterten Funktionen, die typischerweise in Betriebssystemen wie Linux oder Microsoft Windows zu finden sind, wie z. B. Gerätetreiber, erweiterte Speicherverwaltung, Benutzerkonten und Netzwerke. Der Schwerpunkt liegt auf Kompaktheit und Geschwindigkeit der Ausführung. FreeRTOS kann eher als "Thread-Bibliothek" denn als "Betriebssystem" betrachtet werden, obwohl eine Kommandozeilenschnittstelle und POSIX-ähnliche E/A-Abstraktionserweiterungen verfügbar sind.
+FreeRTOS ist für leistungsschwache eingebettete Systeme konzipiert. Der Kernel selbst besteht aus nur drei C-Dateien. Um den Code lesbar, einfach zu portieren und wartbar zu machen, ist er größtenteils in C geschrieben, aber es sind einige Assembler-Funktionen (meist in architekturspezifischen Scheduler-Routinen) enthalten. FreeRTOS kann eher als "Thread-Bibliothek" denn als "Betriebssystem" betrachtet werden, obwohl eine Kommandozeilenschnittstelle und POSIX-ähnliche E/A-Abstraktionserweiterungen verfügbar sind.
+
+
+
+
 
 FreeRTOS implementiert mehrere Threads, indem es das Host-Programm in regelmäßigen kurzen Abständen eine Thread-Tick-Methode aufrufen lässt. Die Thread-Tick-Methode schaltet Tasks abhängig von der Priorität und einem Round-Robin-Schema um. Das übliche Intervall beträgt 1 bis 10 Millisekunden (1/1000 bis 1/100 einer Sekunde), über einen Interrupt von einem Hardware-Timer, aber dieses Intervall wird oft geändert, um einer bestimmten Anwendung zu entsprechen.
 
@@ -501,6 +521,17 @@ typedef struct tskTaskControlBlock
 } tskTCB;
 ```
 
+Zusammenfassung der FreeRTOS Komponenten:
+
+| Komponente               | Aufgabe                                 |
+| ------------------------ | --------------------------------------- |
+| TCB                      | Speichert Task-Informationen            |
+| Task-Listen              | Organisieren Tasks nach Status          |
+| Scheduler                | Wählt aus, welcher Task ausgeführt wird |
+| Kontextwechsel           | Speichert und lädt Task-Kontext         |
+| Synchronisations-Objekte | Koordination und Kommunikation          |
+
+
 ### Implementierung Grundlagen
 
 Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei [FreeRTOSConfig.h](https://github.com/Infineon/freertos/blob/master/Source/portable/COMPONENT_CM33/FreeRTOSConfig.h).
@@ -578,6 +609,9 @@ static void TaskBlinkRedLED(void *pvParameters) // Main LED Flash
 }
 ```
 
+Entsprechend muss aber in `FreeRTOSConfig.h` eine Makrovariable angepasst werden `#define configUSE_PREEMPTION 0`.
+
+
 ```c preemtiveScheduling.c
 static void WorkerTask(void *pvParameters)
 {
@@ -595,6 +629,8 @@ static void WorkerTask(void *pvParameters)
 }
 ```
 
+Das ist die Standardimplementierung, eine Rekonfiguration ist nicht notwendig.
+
 ### Kommunikation / Synchronisation zwischen Tasks
 
          {{0-1}}
@@ -606,6 +642,16 @@ Beispiele:
 
 + Ein Semaphore sperrt bzw. gibt den Zugriff auf ein Display frei.
 + Ein Task wartet auf das Eintreffen des Ergebnisses eines anderen Tasks, das über eine Queue übermittelt wurde.
+
+| Mechanismus       | Zweck / Verwendung                                      | Eigenschaften                                      | Typische Anwendungsfälle                        |
+|-------------------|--------------------------------------------------------|--------------------------------------------------|------------------------------------------------|
+| **Queue**         | Austausch von Daten zwischen Tasks (FIFO-Puffer)       | FIFO, beliebige Daten (z.B. Structs), threadsicher | Nachrichtenübermittlung, Task-Kommunikation     |
+| **Semaphore**     | Synchronisation und Signalisierung                      | Zählend (Counting Semaphore) oder binär (Binary Semaphore) | Ressourcenverwaltung, Ereignis-Signalisierung   |
+| **Mutex**         | Exklusiver Zugriff auf Ressourcen (mit Prioritätsvererbung) | Binärsemaphore mit Prioritätsinversion-Schutz    | Schutz von gemeinsam genutzten Ressourcen       |
+| **Stream Buffer** | Unidirektionaler byte-orientierter Datenpuffer          | FIFO für Bytes, effizient für Datenströme        | Übertragung von kontinuierlichen Daten (z.B. UART) |
+| **Message Buffer**| Unidirektionaler byte-orientierter Datenpuffer mit Nachrichten | Wie Stream Buffer, aber mit Nachrichtenstruktur  | Nachrichtenbasierte Kommunikation mit variabler Länge |
+
+
 
 *****************************************************************************
 
@@ -621,6 +667,73 @@ QueueHandle_t queueName =xQueueCreate(queueLength, elementSize)
 ```
 
 Der Eingabeparameter `queueLength` gibt die Anzahl der Elemente an, die die Warteschlange aufnehmen kann. `elementSize` gibt die Größe der einzelnen Elemente in Bytes an. Alle Elemente in der Warteschlange müssen die gleiche Größe haben. Die Warteschlange hat eine FIFO-Struktur (first in/first out), so dass der Empfänger immer das Element erhält, das als erstes eingefügt wurde.
+
+```c
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include <stdio.h>  // Für printf (je nach Plattform anpassen)
+
+// Globale Queue-Handle
+QueueHandle_t xQueue;
+
+// Sender-Task: Sendet alle 1000 ms einen Wert in die Queue
+void vSenderTask(void *pvParameters)
+{
+    int32_t valueToSend = 0;
+    while(1)
+    {
+        if (xQueueSend(xQueue, &valueToSend, portMAX_DELAY) == pdPASS)
+        {
+            printf("Gesendet: %ld\n", valueToSend);
+            valueToSend++;
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000)); // 1000 ms warten
+    }
+}
+
+// Empfänger-Task: Empfängt Werte aus der Queue und gibt sie aus
+void vReceiverTask(void *pvParameters)
+{
+    int32_t receivedValue;
+    while(1)
+    {
+        if (xQueueReceive(xQueue, &receivedValue, portMAX_DELAY) == pdPASS)
+        {
+            printf("Empfangen: %ld\n", receivedValue);
+        }
+    }
+}
+
+int main(void)
+{
+    // Queue für 5 Integer-Elemente anlegen
+    xQueue = xQueueCreate(5, sizeof(int32_t));
+    if (xQueue == NULL)
+    {
+        // Fehlerbehandlung: Queue konnte nicht erstellt werden
+        while(1);
+    }
+
+    // Tasks erstellen
+    xTaskCreate(vSenderTask, "Sender", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+    xTaskCreate(vReceiverTask, "Receiver", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+
+    // Scheduler starten
+    vTaskStartScheduler();
+
+    // Sollte nie erreicht werden
+    for(;;);
+}
+```
+
+Verhalten beim Warten auf eine Queue
+
++ Task blockiert ...  Der Empfänger-Task wird in den Blocked-Zustand versetzt, solange keine Daten in der Queue sind.
++ Scheduler wählt anderen Task ... Da der Empfänger-Task blockiert ist, kann er keine CPU-Zeit bekommen. Der Scheduler sucht sich einen anderen bereitstehenden Task mit der höchsten Priorität aus.
++ CPU wird anderen Tasks zugewiesen ... Der Sender-Task Priorität 2 und der Empfänger Priorität 1. Wenn der Empfänger wartet, läuft der Sender.
++ Task wird wieder bereit ... Sobald der Sender eine Nachricht in die Queue schreibt, wird der Empfänger-Task automatisch wieder aus dem Blocked-Zustand in die Ready-Liste versetzt.
++ Preemptives Scheduling ... Falls der Empfänger eine niedrigere Priorität hat als den Sender, kann er erst wieder laufen, wenn der Sender sich blockiert oder fertig ist. Wenn Prioritäten gleich oder der Empfänger höher ist, erfolgt ein sofortiger Kontextwechsel.
 
 *****************************************************************************
 
