@@ -33,7 +33,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 > Die Veranstaltung wird mit einer mündliche Prüfung abgeschlossen, die aus zwei Teilen besteht:
 
-1. eigenes Implementierungsbeispiel mit dem ATmega328 oder ATmega4809 mittels avrlibc
+1. eigenes Implementierungsbeispiel (ATmega328, ATmega4809 mittels Assembler oder avrlibc, STM32F4 mittels HAL) ODER Edrys Beispiellabor aus dem Praktikumsteil
 2. einer Diskussion zu den Themenfeldern der Vorlesung
 
 Das konkrete Beispiel können Sie selbst wählen. Melden Sie sich bitte zur Abstimmung eines Termines.
@@ -44,7 +44,7 @@ Das konkrete Beispiel können Sie selbst wählen. Melden Sie sich bitte zur Abst
 
 ## Hardwarevergleich
 
-> Die ATmega Controller haben keine Integrierten digital Analog-Wandler. Welches alternative Konzept wird genutzt und welche Nachteile birgt es?
+> Die ATmega Controller haben keine integrierten digital Analog-Wandler. Welches alternative Konzept wird genutzt und welche Nachteile birgt es?
 
 
 ## Debugging Interface

@@ -5,11 +5,22 @@
 void TaskBlink( void *pvParameters );
 void TaskAnalogRead( void *pvParameters );
 
+// Variablen zur Frequenzmessung 
+static uint32_t task_counter = 0;
+static uint32_t value_sum = 0;
+static TickType_t last_wake_time = 0;
+static TickType_t current_time = 0;
+
 void setup() {
   
 
   Serial.begin(9600);
-
+  while (!Serial) {
+        ; // Warten bis die serielle Verbindung bereit ist (nur relevant für native USB-Ports)
+    }
+    
+  Serial.println(F("FreeRTOS Task Frequency Measurement"));
+  
   // Now set up two tasks to run independently.
   xTaskCreate(
     TaskBlink
@@ -46,12 +57,34 @@ void TaskBlink(void *pvParameters)  // This is a task.
   // initialize digital LED_BUILTIN on pin 13 as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 
+  // Initialisieren der Last Wake Time
+  last_wake_time = xTaskGetTickCount();
+    
   for (;;) // A Task shall never return or exit.
   {
-    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
-    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-    vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
+    // LED umschalten
+        PORTB ^= _BV(PORTB5);
+        
+        // Aktuelle Zeit holen
+        current_time = xTaskGetTickCount();
+        
+        // Alle 10 Ausführungen messen wir die Frequenz
+        if (task_counter % 10 == 0) {
+            // Frequenz berechnen (in Hz) - ticks pro Sekunde geteilt durch vergangene Ticks
+            float frequency = (10.000f * configTICK_RATE_HZ) / (current_time - last_wake_time);
+            
+            // Ausgabe über serielle Schnittstelle
+            Serial.println();
+            Serial.print(current_time);
+            Serial.print(F("Task Blink Frequenz: "));
+            Serial.print(frequency, 4);
+            Serial.print(F(" Hz"));
+            
+            // Zeit zurücksetzen
+            last_wake_time = current_time;
+        }
+        
+    vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
 
@@ -61,10 +94,9 @@ void TaskAnalogRead(void *pvParameters)  // This is a task.
   
   for (;;)
   {
-    // read the input on analog pin 0:
     int sensorValue = analogRead(A0);
-    // print out the value you read:
-    Serial.println(sensorValue);
-    vTaskDelay(1);  // one tick delay (15ms) in between reads for stability
+    value_sum += sensorValue;
+    //Serial.print(value_sum);
+    vTaskDelay( 100 / portTICK_PERIOD_MS ); 
   }
-}
+} 
