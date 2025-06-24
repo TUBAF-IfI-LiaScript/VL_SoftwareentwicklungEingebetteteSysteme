@@ -2,13 +2,13 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.7
+version:  1.0.8
 language: de
 narrator: Deutsch Female
 
 import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/README.md
          https://github.com/LiaTemplates/AVR8js/main/README.md
-         https://github.com/LiaTemplates/Pyodide
+         https://raw.githubusercontent.com/liaScript/mermaid_template/master/README.md
 
 icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 -->
@@ -643,13 +643,17 @@ Beispiele:
 + Ein Semaphore sperrt bzw. gibt den Zugriff auf ein Display frei.
 + Ein Task wartet auf das Eintreffen des Ergebnisses eines anderen Tasks, das über eine Queue übermittelt wurde.
 
-| Mechanismus       | Zweck / Verwendung                                      | Eigenschaften                                      | Typische Anwendungsfälle                        |
-|-------------------|--------------------------------------------------------|--------------------------------------------------|------------------------------------------------|
-| **Queue**         | Austausch von Daten zwischen Tasks (FIFO-Puffer)       | FIFO, beliebige Daten (z.B. Structs), threadsicher | Nachrichtenübermittlung, Task-Kommunikation     |
-| **Semaphore**     | Synchronisation und Signalisierung                      | Zählend (Counting Semaphore) oder binär (Binary Semaphore) | Ressourcenverwaltung, Ereignis-Signalisierung   |
-| **Mutex**         | Exklusiver Zugriff auf Ressourcen (mit Prioritätsvererbung) | Binärsemaphore mit Prioritätsinversion-Schutz    | Schutz von gemeinsam genutzten Ressourcen       |
-| **Stream Buffer** | Unidirektionaler byte-orientierter Datenpuffer          | FIFO für Bytes, effizient für Datenströme        | Übertragung von kontinuierlichen Daten (z.B. UART) |
-| **Message Buffer**| Unidirektionaler byte-orientierter Datenpuffer mit Nachrichten | Wie Stream Buffer, aber mit Nachrichtenstruktur  | Nachrichtenbasierte Kommunikation mit variabler Länge |
+| Konzept                            | Kategorie                       | Zweck / Typischer Anwendungsfall                                                 |
+| ---------------------------------- | ------------------------------- | -------------------------------------------------------------------------------- |
+| **Queue**                          | Kommunikation                   | Daten zwischen Tasks übertragen (z. B. Producer–Consumer)                        |
+| **Semaphore**                      | Synchronisation                 | Ereignissignalisierung oder Ressourcenzugriff koordinieren (z. B. ISR → Task)    |
+| **Mutex**                          | Schutz                          | Kritische Abschnitte schützen (z. B. Zugriff auf globale Variablen)              |
+| **Counting Semaphore**             | Synchronisation                 | Zugriff auf begrenzte Anzahl an Ressourcen (z. B. Pool mit 3 Geräten)            |
+| **Binary Semaphore**               | Synchronisation                 | Ereignissignal (wie ein Flag zwischen ISR ↔ Task oder Task ↔ Task)               |
+| **Recursive Mutex**                | Schutz                          | Reentrant-sichere Mutexes (für Funktionen, die sich selbst rekursiv aufrufen)    |
+| **Task Notification**              | Synchronisation / Kommunikation | Sehr schnelle 1:1-Kommunikation und Ereignissignalisierung zwischen Tasks        |
+| **Event Groups**                   | Synchronisation                 | Bitweise Ereigniskombination (z. B. mehrere Flags zusammen auswerten)            |
+| **Stream Buffer / Message Buffer** | Kommunikation                   | Byteweise oder blockweise Datenübertragung, ideal für z. B. UART oder Protokolle |
 
 
 
@@ -734,6 +738,16 @@ Verhalten beim Warten auf eine Queue
 + CPU wird anderen Tasks zugewiesen ... Der Sender-Task Priorität 2 und der Empfänger Priorität 1. Wenn der Empfänger wartet, läuft der Sender.
 + Task wird wieder bereit ... Sobald der Sender eine Nachricht in die Queue schreibt, wird der Empfänger-Task automatisch wieder aus dem Blocked-Zustand in die Ready-Liste versetzt.
 + Preemptives Scheduling ... Falls der Empfänger eine niedrigere Priorität hat als den Sender, kann er erst wieder laufen, wenn der Sender sich blockiert oder fertig ist. Wenn Prioritäten gleich oder der Empfänger höher ist, erfolgt ein sofortiger Kontextwechsel.
+
+
+| Szenario                                            | Warum?                             |
+| --------------------------------------------------- | ---------------------------------- |
+| Ein Task erzeugt Daten, ein anderer verarbeitet sie | Entkopplung, Synchronisation       |
+| Interrupt soll Daten an Task weitergeben            | ISR bleibt schnell, Task übernimmt |
+| Kommunikation ohne Busy-Waiting                     | Task schläft, bis Daten ankommen   |
+| Unterschiedliche Ausführungsgeschwindigkeit         | Queue puffert Zwischenstände       |
+| Gemeinsame Datenverwaltung zwischen Tasks           | Thread-safe über Queue             |
+
 
 *****************************************************************************
 
@@ -872,7 +886,171 @@ void TaskB( void *pvParameters __attribute__((unused)) )  // This is a Task.
 
 *****************************************************************************
 
+          {{6-7}}
+*****************************************************************************
+
+__Event Groups__
+
+Event Groups in FreeRTOS sind ein Mechanismus zur Synchronisation von Tasks über Bitmuster. Sie ermöglichen es dir, mit einer Gruppe von Bits (Events) komplexe Abhängigkeiten zwischen Tasks auszudrücken.
+
+Eine Event Group besteht intern aus einem 32-Bit-Wert. Jedes Bit steht für ein bestimmtes Ereignis (Event).
+
+Tasks können:
+
+* Bits setzen (xEventGroupSetBits)
+* auf Bits warten (xEventGroupWaitBits)
+* Bits löschen (xEventGroupClearBits)
+
+Event Groups können auf mehrere Bits gleichzeitig warten, und entsprechende UND/ODER-Logik anwenden.
+
+```c 
+#include "FreeRTOS.h"
+#include "task.h"
+#include "event_groups.h"
+#include <stdio.h>
+
+// Bitdefinitionen
+#define BIT_0  (1 << 0)
+#define BIT_1  (1 << 1)
+
+// Globale EventGroup
+EventGroupHandle_t xEventGroup;
+
+void vTaskA(void *pvParameters)
+{
+    // Warten auf beide Bits (BIT_0 und BIT_1)
+    EventBits_t bits = xEventGroupWaitBits(
+        xEventGroup,
+        BIT_0 | BIT_1,
+        pdTRUE,      // Bits nach Empfang löschen
+        pdTRUE,      // Warte auf ALLE gesetzten Bits (AND)
+        portMAX_DELAY
+    );
+
+    printf("Task A: Beide Events empfangen! Bits: %02X\n", bits);
+
+    vTaskDelete(NULL);
+}
+
+void vTaskB(void *pvParameters)
+{
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    printf("Task B: setzt BIT_0\n");
+    xEventGroupSetBits(xEventGroup, BIT_0);
+    vTaskDelete(NULL);
+}
+
+void vTaskC(void *pvParameters)
+{
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    printf("Task C: setzt BIT_1\n");
+    xEventGroupSetBits(xEventGroup, BIT_1);
+    vTaskDelete(NULL);
+}
+
+int main(void)
+{
+    xEventGroup = xEventGroupCreate();
+
+    xTaskCreate(vTaskA, "TaskA", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+    xTaskCreate(vTaskB, "TaskB", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+    xTaskCreate(vTaskC, "TaskC", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+
+    vTaskStartScheduler();
+
+    for(;;);
+}
+
+```
+
+
+*****************************************************************************
+
 ### Denken wie ein RTOS Entwickler
+
+```c
+#define configUSE_TRACE_FACILITY    1    // ermöglicht, dass man Trace-Makros wie traceTASK_SWITCHED_IN nutzen kann.
+#define INCLUDE_pcTaskGetName       1    // erlaubt Zugriff auf pcTaskGetName() für lesbare Tasknamen.
+
+#define traceTASK_SWITCHED_IN()    TaskSwitchedIn(pxCurrentTCB)
+#define traceTASK_SWITCHED_OUT()   TaskSwitchedOut(pxCurrentTCB)
+```
+
+
+```c
+#include <Arduino.h>
+#include <FreeRTOS.h>
+#include <task.h>
+
+// Prototypen der Trace-Funktionen (müssen "C" sein, damit der Linker passt)
+extern "C" void TaskSwitchedIn(TaskHandle_t tcb);
+extern "C" void TaskSwitchedOut(TaskHandle_t tcb);
+
+// Implementierung der Trace-Funktionen
+extern "C" void TaskSwitchedIn(TaskHandle_t tcb) {
+  const char* name = pcTaskGetName(tcb);
+  Serial.print("[IN ]  ");
+  Serial.print(name);
+  Serial.print("  Tick: ");
+  Serial.println(xTaskGetTickCount());
+}
+
+extern "C" void TaskSwitchedOut(TaskHandle_t tcb) {
+  const char* name = pcTaskGetName(tcb);
+  Serial.print("[OUT]  ");
+  Serial.print(name);
+  Serial.print("  Tick: ");
+  Serial.println(xTaskGetTickCount());
+}
+
+// Beispiel-Task 1
+void Task1(void *pvParameters) {
+  (void) pvParameters;
+  while (1) {
+    Serial.println("Task1 läuft...");
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+}
+
+// Beispiel-Task 2
+void Task2(void *pvParameters) {
+  (void) pvParameters;
+  while (1) {
+    Serial.println("Task2 läuft...");
+    vTaskDelay(pdMS_TO_TICKS(1500));
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);  // Warte auf Serial Monitor
+
+  Serial.println("FreeRTOS Task Switch Logging startet");
+
+  xTaskCreate(Task1, "Task1", 128, NULL, 1, NULL);
+  xTaskCreate(Task2, "Task2", 128, NULL, 1, NULL);
+}
+
+void loop() {
+  // FreeRTOS Tasks übernehmen die Kontrolle
+}
+```
+
+
+```
+FreeRTOS Task Switch Logging startet
+[OUT]  IDLE  Tick: 0
+[IN ]  Task1  Tick: 1
+Task1 läuft...
+[OUT]  Task1  Tick: 1001
+[IN ]  Task2  Tick: 1001
+Task2 läuft...
+...
+```
+
++ Die Anpassung der `FreeRTOSConfig.h` sollte lokal erfolgen!
++ Das Logging per Serial ist langsam und kann das Timing beeinflussen, daher nur für Debug-Zwecke geeignet.
+
 
 ![alt-text](../images/08_Algorithms/tracealyzer-for-freertos.png "Darstellung der Analyse-Tools der Firma [perceio](https://percepio.com/tz/freertostrace/)")
 
@@ -880,4 +1058,50 @@ void TaskB( void *pvParameters __attribute__((unused)) )  // This is a Task.
 
 ## Warum das Ganze?
 
-vgl. "What really happened to the software on the Mars Pathfinder spacecraft?"
+> Das Mars Pathfinder Problem ist ein berühmtes realweltliches Beispiel für Priority Inversion, das 1997 während der Mars-Mission der NASA auftrat. Es hat großen Einfluss auf die Entwicklung von Betriebssystemen wie VxWorks und FreeRTOS gehabt – und zeigt eindrucksvoll, warum Priority Inheritance wichtig ist.
+>
+> vgl. "What really happened to the software on the Mars Pathfinder spacecraft?"
+
+Symptome:
+
++ Rover stürzte sporadisch ab (rebootete sich).
++ Analyse: Ein „Watchdog Timer“ wurde nicht rechtzeitig zurückgesetzt → Das System hielt sich für eingefroren.
+
+Situation:
+
+| Taskname (vereinfacht)              | Priorität | Aufgabe                                                                                    |
+| ----------------------------------- | --------- | ------------------------------------------------------------------------------------------ |
+| **1. Meteorological Task** (Sensor) | niedrig   | Sammelte Umweltdaten (z. B. Temperatur, Druck) und speicherte sie in eine Shared Resource. |
+| **2. Communication Task**           | hoch      | Sendete Telemetriedaten zur Erde (zeitkritisch).                                           |
+| **3. System Management Task**       | mittel    | Führte allgemeine Verwaltungs- und Logging-Aufgaben aus.                                   |
+
+Die beiden Tasks – der Low-Priority-Meteorologie-Task und der High-Priority-Kommunikations-Task – verwendeten dieselbe Speicherstruktur, um auf Sensordaten zuzugreifen.
+
+![](../images/07_Scheduling/MarsPathfinder.png "Mars Pathfinder Problem")
+
+```mermaid @mermaid
+sequenceDiagram
+    participant LowTask as Low-Priority Task
+    participant MediumTask as Medium-Priority Task
+    participant HighTask as High-Priority Task
+    participant Mutex as Shared Resource (Mutex)
+
+    Note over LowTask: Startet und sperrt Mutex
+    LowTask->>Mutex: xSemaphoreTake()
+    Note right of LowTask: Hält nun den Mutex
+
+    Note over HighTask: Wird aktiv\nbenötigt Mutex
+    HighTask->>Mutex: xSemaphoreTake() (blockiert)
+    Mutex-->>HighTask: blockiert (von Low gehalten)
+
+    Note over MediumTask: Wird aktiviert\nund läuft durchgehend
+    MediumTask->>MediumTask: Arbeitet kontinuierlich
+
+    Note over LowTask: Kommt nicht mehr zum Zug<br>wird von Medium verdrängt
+
+    Note over HighTask: Kann Mutex nicht erhalten<br>→ blockiert dauerhaft
+
+    Note over System: HighTask verpasst Deadline<br>→ Watchdog löst Reset aus
+```
+
+Nach mehreren ungeklärten Neustarts auf dem Mars fand man in den Logs Hinweise auf genau dieses Timing-Problem. Die NASA aktivierte daraufhin zur Laufzeit die bereits im RTOS (VxWorks) enthaltene Priority Inheritance, wodurch das Problem komplett verschwand.
