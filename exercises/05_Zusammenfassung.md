@@ -29,6 +29,70 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ---
 
+## Fehlertoleranz 
+
+> Wir wollen ein System entwickeln, dass mit dem Entwicklerrechner kommuniziert und Steuergrößen empfängt. Sollte der Datenempfang länger als 100ms ausbleiben, so soll das System in einen fail-Safe Zustand wechseln.
+
+```c
+#include <Arduino.h>
+#include <Arduino_FreeRTOS.h>
+#include <avr/wdt.h>  // Watchdog für echten Reset
+
+TaskHandle_t monitorTaskHandle = NULL;
+
+// 📥 Empfangs-Task: wartet auf serielle Daten
+void SerialReceiver(void *pvParameters) {
+  for (;;) {
+    if (Serial.available()) {
+      uint8_t val = Serial.read();
+      Serial.print("Empfangen: ");
+      Serial.println(val);
+
+      // Sende Signal an MonitorTask
+      xTaskNotifyGive(monitorTaskHandle);
+    }
+    vTaskDelay(pdMS_TO_TICKS(10));  // alle 10 ms prüfen
+  }
+}
+
+// 🕵️ Überwachungs-Task: wartet auf Empfangssignale
+void MonitorTask(void *pvParameters) {
+  for (;;) {
+    uint32_t notified = ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(130));
+
+    if (notified > 0) {
+      Serial.println("Monitor: OK ✅");
+    } else {
+      Serial.println("❌ Timeout!");
+
+      // 🧨 Watchdog aktivieren → Reset in 15 ms
+      wdt_enable(WDTO_15MS);
+      while (1);  // Warten auf Reset
+    }
+  }
+}
+
+void setup() {
+  // 🛑 WDT absichern (falls vorher aktiv war)
+  wdt_disable();
+
+  Serial.begin(9600);
+  while (!Serial);  // optional für Leonardo etc.
+
+  // Tasks starten
+  xTaskCreate(SerialReceiver,"SerialReceiver",128, NULL, 1, NULL);
+  xTaskCreate(MonitorTask,   "Monitor",       128, NULL, 2, &monitorTaskHandle);
+}
+
+void loop() {
+  // bleibt leer unter FreeRTOS
+}
+```
+
+> Frage 1: Warum ist der Watchdog hier notwendig?
+> Frage 2: Warum sind die `xTaskCreate()` Aufrufe problematisch?
+> Frage 3: Warum warten wir 130 ms im `ulTaskNotifyTake()`?
+
 ## Organisation der Prüfungen
 
 > Die Veranstaltung wird mit einer mündliche Prüfung abgeschlossen, die aus zwei Teilen besteht:
@@ -41,16 +105,3 @@ Das konkrete Beispiel können Sie selbst wählen. Melden Sie sich bitte zur Abst
 ## Diskussion des vergangenen Aufgabenblattes
 
 > Hier sind Sie gefragt ...
-
-## Hardwarevergleich
-
-> Die ATmega Controller haben keine integrierten digital Analog-Wandler. Welches alternative Konzept wird genutzt und welche Nachteile birgt es?
-
-
-## Debugging Interface
-
-Hierbei springen wir von der Idee nochmals auf die debugging-Strategien zurück
-
-Im folgenden Beispiel wird das [unity Testframework](https://github.com/ThrowTheSwitch/Unity#unity-test-api) genutzt
-
-https://docs.platformio.org/en/latest/tutorials/ststm32/stm32cube_debugging_unit_testing.html
