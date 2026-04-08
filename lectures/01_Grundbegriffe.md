@@ -17,16 +17,18 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 -->
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/01_Grundbegriffe.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/01_Grundbegriffe.md#1)
 
-# Einführung und Motivation
+# Grundbegriffe des Rechneraufbaus
 
-| Parameter          | Kursinformationen                                                           |
-| ------------------ | --------------------------------------------------------------------------- |
-| **Veranstaltung:** | `Vorlesung Digitale Systeme / Softwareentwicklung für eingebettete Systeme` |
-| **Semester**       | `Sommersemester 2025`                                                       |
-| **Hochschule:**    | `Technische Universität Freiberg`                                           |
-| **Inhalte:**       | Wiederholung Grundbegriffe                                                  |
+| Parameter                | Kursinformationen                                                                                                                                                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                                                     |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                                                                        |
+| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                                                            |
+| **Inhalte:**             | `Wiederholung Grundbegriffe der Rechnerarchitektur`                                                                                                                                                                                          |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/01_Grundbegriffe.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/01_Grundbegriffe.md) |
+| **Autoren**              | @author                                                                                                                                                                                                                                      |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
 
@@ -34,7 +36,7 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 # Grundbegriffe des Rechneraufbaus
 
-Die interaktive Version des Kurses ist unter diesem [Link](https://liascript.github.io/course/?https://raw.githubusercontent.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/01_Grundbegriffe.md#1) zu finden.
+Die interaktive Version des Kurses ist unter diesem [Link](https://liascript.github.io/course/?https://raw.githubusercontent.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/01_Grundbegriffe.md#1) zu finden.
 
 **Lernziele**
 
@@ -148,7 +150,7 @@ Grundlegende Designvorgaben:
 + Der Adressraum wird maximal ausgenutzt, jedes Bauteil sollte nur unter einer Adresse zu erreichen sein.
 + Der Speicher sollte kontinuierlich besetzt sein und keine Lücken aufweisen.
 
-<!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
+<!--style="width: 60%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
   Speicherbaustein
     +----------+
@@ -167,13 +169,13 @@ Wie verzahnen wir die Speicherkomponenten, wenn wir einen größeren Speicher in
 
 Versuchen wir also einen zusammenhängenden Speicher von 16MByte zu entwerfen, der aus 4MByte Speicherelementen besteht. Daraus ergeben sich folgende Grundüberlegungen:
 
-+ 1 MegaByte entspricht $2^{10} KB$ ($1024 KB$). Für die Adressierung von 4MByte benötigen wir also $2^{20} \cdot 4$ Adressen $2^{22} = 4194304$ referenzieren.
-+ Wir benötigen 4 der 4MByte Chips, die neben den eigentlichen Adressleitungen individuell angesprochen werden müssen
-+ Die Implmentierung soll erweiterbar sein, so dass wir als Chiphersteller unterschiedliche Speicherdimensionen anbieten können.
++ 1 MByte $= 2^{20}$ Byte $= 1.048.576$ Byte, adressierbar mit 20 Adressleitungen. Für 4 MByte benötigen wir $4 \cdot 2^{20} = 2^{22} = 4.194.304$ Adressen, also 22 Adressleitungen pro Chip.
++ Wir benötigen 4 dieser 4-MByte-Chips, die neben den eigentlichen Adressleitungen individuell per Chip-Select angesprochen werden müssen.
++ Die Implementierung soll erweiterbar sein, so dass wir als Chiphersteller unterschiedliche Speicherdimensionen anbieten können.
 
 <!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
-Moduladresse                                                                8 Datenbus
+Moduladresse (hard codiert)                                              8 Datenbus
       |                 +---------------+---------------+---------------+---/------      
       /8                |               |               |               |      
 +-----+-----+     +-----+------+  +-----+------+  +-----+------+  +-----+------+
@@ -181,7 +183,7 @@ Moduladresse                                                                8 Da
 |  Adress-  |     | block 0    |  | block 1    |  | block 2    |  | block 3    |
 |vergleicher+-+   |            |  |            |  |            |  |            |
 |     P     | |   |"@CS @AA   "|  |"@CS @AA   "|  |"@CS @AA   "|  |"@CS @AA   "|
-+-----+-----+ |   +--+-----+--+   +--+-----+---+  +--+-----+---+  +--+-----+---+
++-----+-----+ |   +--+-----+---+  +--+-----+---+  +--+-----+---+  +--+-----+---+
       |       |      |     |         |     |         |     |         |     |   
       |   +---+---+  |     |         |     |         |     |         |     |
       |   |       +--+     |         |     |         |     |         |     |
@@ -230,7 +232,7 @@ Diese Komponente übernimmt die unmittelbare Erfassung von externen Informatione
 
 Wie kann die Adresskodierung der I/O Komponenten vorgenommen werden?
 
-<!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
+<!--style="width: 70%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
 
         A0   ---------------------------------------*--------------------
@@ -262,7 +264,7 @@ baustein         |       |   |                        |  z.B. SN54HC688
                  +---+---+   +-+--+--+--+--+--+--+--+-+
                      |         |  |  |  |  |  |  |  |
             Activate |       --+--*--+--*--*--+--+--*------ High    
-                     |         |     |        |  | 
+                     |         |     |        |  |   beispielhafte Adresse 0x59 (binär: 01011001)
                              --*-----*--------*--*--------- Low
 
             interne Adresse       Bausteinadresse
@@ -280,12 +282,11 @@ Vorteile:
 
 + Flexibilität bei der Integration neuer Geräte
 + Niedrige Kosten durch Mehrfachnutzung eines Kommunikationsmediums
-Harvard nem Aufbau (was ebenfalls mit 'Rechnerarchitektur' bezeichnet wird) beschäftigt.
+Harvard-Aufbau beschäftigt.
 
 > Die **Architektur** eines Rechners beschreibt dessen grundsätzlichen Aufbau (Hardwarestruktur) und das Zusammenspiel der Komponenten (Organisationsstruktur).
 
-
-Unterschied  Harvard und die von Neumann-Architektur?**
+**Was ist der Unterschied zwischen Harvard- und von-Neumann-Architektur?**
 
 ## Umsetzung
 
@@ -296,9 +297,7 @@ Und wie sieht das Ganze in einem realen System aus? Der Intel 4004 ist ein 4-Bit
 + 4003: I/O-Erweiterungs-Chip, bestehend aus einem statischen Schieberegister
 + 4004: die eigentliche CPU
 
-![intel](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png "Architektur des 4004 [^1]")
-
-[^1]: [Intel 4004 (Autor Appaloosa)](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png)
+![intel](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/960px-4004_arch.svg.png?_=20071021222758 "Architektur des 4004 - Autor Appaloosa https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/4004_arch.svg/1190px-4004_arch.svg.png")
 
 <!--data-type="none"-->
 | Element         | Bestandteile                                                                          |
@@ -359,13 +358,14 @@ Instruktionen durch den Compiler einfach und überschaubar ist.
 ## Umsetzung in verschiedenen Controllern
 
 <!--data-type="none"-->
-| Aspekt          | Intel 4004 | Microchip Atmega | Texas Instruments MSP 430 | STM 32  |
-| --------------- | ---------- | ---------------- | ------------------------- | ------- |
-| Architektur     | Harvard    | Harvard          | von-Neumann               | Harvard |
-| Busbreite       | 4          | 8                | 16                        | 32      |
-| Registeranzahl  | 16         | 32               | 16                        | 16      |
-| Befehlssatz     | 45         | 131              | 51                        |         |
-| Geschwindigkeit | 740 kHz    | 16 MHz           | 25 MHz                    | 480 MHz |
+| Aspekt          | Intel 4004 | Microchip ATmega | Texas Instruments MSP 430 | STM32 (Cortex-M4) | ESP32-S3 (Xtensa LX7) |
+| --------------- | ---------- | ---------------- | ------------------------- | ------------------ | ---------------------- |
+| Architektur     | Harvard    | Harvard          | von-Neumann               | Harvard            | Harvard                |
+| Busbreite       | 4          | 8                | 16                        | 32                 | 32                     |
+| Kerne           | 1          | 1                | 1                         | 1                  | 2 (SMP)                |
+| Registeranzahl  | 16         | 32               | 16                        | 16                 | 64 (Registerfenster)   |
+| Befehlssatz     | 45         | 131              | 51                        | Thumb-2            | Xtensa ISA + PIE       |
+| Geschwindigkeit | 740 kHz    | 16 MHz           | 25 MHz                    | 84 MHz             | 240 MHz                |
 
 
 ## Vom C Programm zum ausführbaren Code

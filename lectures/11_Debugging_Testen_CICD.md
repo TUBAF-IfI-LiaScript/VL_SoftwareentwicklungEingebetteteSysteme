@@ -11,18 +11,18 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 -->
 
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/11_Debugging.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/11_Debugging_Testen_CICD.md#1)
 
 
-# Debugging von eingebetteten Systemen
+# Debugging, Testen & CI/CD
 
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2025`                                                                                                                                                                |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                      |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
-| **Inhalte:**             | `Debuggingtechniken und Anwendungsbeispiel`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/10_XMEGA_Abgrenzung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/11_Debugging.md) |
+| **Inhalte:**             | `Debugging-Techniken, Testmethodik, Build-Systeme und CI/CD für eingebettete Systeme`                                                                                            |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/11_Debugging_Testen_CICD.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/11_Debugging_Testen_CICD.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
@@ -187,7 +187,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"-->
 | Test Reset (TRST)      | Reset der Testlogik (optional)                       |
 
 
-Der TAP-Controller ist ein von TCK getakteter und von der TMS-Leitung gesteuerter Zustandsautomat. Die TMS-Leitung bestimmt dabei, in welchen Folgezustand beim nächsten Takt gesprungen wird. Der TAP-Controller hat sechs stabile Zustände, das heißt Zustände, in denen mehrere Takte lang verblieben werden kann. Diese sechs Zustände sind „Test Logic Reset“, „Run Test / Idle“, „Shift-DR“ und „Shift-IR“ sowie „Pause-DR“ und „Pause-IR“. Im Zustand „Test Logic Reset“ wird die Testlogik zurückgesetzt, „Run Test / Idle“ wird als Ruhezustand oder für Wartezeiten benutzt. Die beiden „Shift“-Zustände schieben jeweils das DR- oder IR-Schieberegister. Die beiden „Pause“-Zustände dienen der Unterbrechung von Schiebeoperationen. Aus allen anderen Zuständen wird beim folgenden Takt in einen anderen Zustand gesprungen. Beim Durchlaufen werden jeweils bestimmte Steuerfunktionen ausgelöst.
+Der TAP-Controller ist ein von TCK getakteter und von der TMS-Leitung gesteuerter Zustandsautomat. Die TMS-Leitung bestimmt dabei, in welchen Folgezustand beim nächsten Takt gesprungen wird. Der TAP-Controller hat sechs stabile Zustände, das heißt Zustände, in denen mehrere Takte lang verblieben werden kann. Diese sechs Zustände sind „Test Logic Reset", „Run Test / Idle", „Shift-DR" und „Shift-IR" sowie „Pause-DR" und „Pause-IR". Im Zustand „Test Logic Reset" wird die Testlogik zurückgesetzt, „Run Test / Idle" wird als Ruhezustand oder für Wartezeiten benutzt. Die beiden „Shift"-Zustände schieben jeweils das DR- oder IR-Schieberegister. Die beiden „Pause"-Zustände dienen der Unterbrechung von Schiebeoperationen. Aus allen anderen Zuständen wird beim folgenden Takt in einen anderen Zustand gesprungen. Beim Durchlaufen werden jeweils bestimmte Steuerfunktionen ausgelöst.
 
 ![alt-text](../images/10_megaAVR_0/JTAG_Register.svg.png "Schema der Einbettung einer JTAG Implementierung in einen Controller. [^JTAG_Schema] ")
 
@@ -523,10 +523,82 @@ void loop()
 
 | Testart                   | Ziel / Beschreibung                                            |
 | ------------------------- | -------------------------------------------------------------- |
-| **Funktionale Tests**     | Prüfen, ob Funktionen korrekt arbeiten (z. B. Steuerungslogik) |
-| **Grenzwert-Tests**       | Eingaben an den Rändern (z. B. Min/Max Sensorwerte)            |
+| **Funktionale Tests**     | Prüfen, ob Funktionen korrekt arbeiten (z. B. Steuerungslogik) |
+| **Grenzwert-Tests**       | Eingaben an den Rändern (z. B. Min/Max Sensorwerte)            |
 | **Robustheitstests**      | Verhalten bei ungültigen Eingaben oder Störungen               |
 | **Timing-Tests**          | Echtzeitanforderungen prüfen (Reaktionszeiten, Deadlines)      |
 | **Hardware-nahe Tests**   | Peripheriegeräte (ADC, UART, GPIO) und deren Verhalten         |
 | **Stress-/Langzeittests** | Dauerbetrieb, Speicherverbrauch, Ressourcenverbrauch           |
-| **Integrationstests**     | Zusammenspiel verschiedener Module (z. B. Sensoren, Aktoren)   |
+| **Integrationstests**     | Zusammenspiel verschiedener Module (z. B. Sensoren, Aktoren)   |
+
+## Testmethodik
+
+> In diesem Abschnitt werden weiterführende Testmethoden für eingebettete Systeme behandelt, die über einfaches Unit-Testing hinausgehen.
+
+### Unit Testing mit Unity
+
+> Grundlagen zum Unit Testing mit Unity wurden bereits im Abschnitt [STM32 Unit-Testing](#stm32-unit-testing) eingeführt. Hier werden weiterführende Konzepte und Best Practices behandelt.
+
+<!-- TODO: Inhalt ergänzen -->
+
+### MC/DC Coverage: Bedeutung für sicherheitskritische Systeme (DO-178C)
+
+Modified Condition/Decision Coverage (MC/DC) ist ein Testabdeckungskriterium, das in sicherheitskritischen Systemen (z. B. Luftfahrt nach DO-178C, Automobil nach ISO 26262) gefordert wird. Es stellt sicher, dass jede Bedingung in einer Entscheidung unabhängig das Ergebnis beeinflussen kann.
+
+<!-- TODO: Inhalt ergänzen -->
+
+### HIL-Testing: Konzept und einfacher Aufbau
+
+Hardware-in-the-Loop (HIL) Testing ersetzt reale Systemkomponenten durch Simulationen, um die eingebettete Software unter realistischen Bedingungen zu testen, ohne die vollständige physische Umgebung aufbauen zu müssen.
+
+<!-- TODO: Inhalt ergänzen -->
+
+## Build-Systeme & Toolchains
+
+> Für professionelle Embedded-Entwicklung ist die Beherrschung von Build-Systemen und Toolchains essenziell, um reproduzierbare und portable Builds zu gewährleisten.
+
+### CMake für STM32 (statt IDE-Abhängigkeit)
+
+CMake ermöglicht die IDE-unabhängige Konfiguration von Embedded-Projekten und erleichtert die Integration in CI/CD-Pipelines.
+
+<!-- TODO: Inhalt ergänzen -->
+
+### PlatformIO als plattformübergreifende Alternative
+
+PlatformIO bietet eine einheitliche Entwicklungsumgebung für verschiedene Embedded-Plattformen und vereinfacht das Dependency-Management.
+
+<!-- TODO: Inhalt ergänzen -->
+
+### Linker-Skripte: Memory Layout verstehen
+
+Linker-Skripte definieren das Speicherlayout eines eingebetteten Systems und bestimmen, wo Code, Daten und Stack im Speicher abgelegt werden.
+
+<!-- TODO: Inhalt ergänzen -->
+
+## CI/CD für Embedded
+
+> Continuous Integration und Continuous Deployment (CI/CD) ermöglichen automatisierte Build-, Test- und Deployment-Prozesse auch für eingebettete Systeme.
+
+### GitHub Actions / GitLab CI mit Cross-Compilation
+
+CI/CD-Systeme können mit Cross-Compilern konfiguriert werden, um Embedded-Firmware automatisch für Zielplattformen zu bauen.
+
+<!-- TODO: Inhalt ergänzen -->
+
+### Automatisiertes Unit-Testing in der Pipeline (QEMU, Renode)
+
+Emulatoren wie QEMU und Renode ermöglichen das Ausführen und Testen von Embedded-Firmware ohne physische Hardware in der CI/CD-Pipeline.
+
+<!-- TODO: Inhalt ergänzen -->
+
+### OTA-Firmware-Updates: Versionierung und Rollback
+
+Over-the-Air (OTA) Updates erfordern eine durchdachte Versionierungsstrategie und Rollback-Mechanismen, um die Zuverlässigkeit im Feld sicherzustellen.
+
+<!-- TODO: Inhalt ergänzen -->
+
+### Praxisbeispiel: Push → Build → Test → Flash
+
+Ein vollständiges Beispiel einer CI/CD-Pipeline für eingebettete Systeme, die vom Code-Push bis zum Firmware-Flash alle Schritte automatisiert.
+
+<!-- TODO: Inhalt ergänzen -->

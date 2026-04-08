@@ -32,10 +32,9 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ## Organisation der Übungen
 
-| Tag      | Termin        | Woche          |
-| -------- | ------------- | -------------- |
-| Dienstag | 18:00 - 19:30 | ungerade Woche |
-| Freitag  | 8:00 -  9:30  | gerade Woche   |
+| Tag        | Termin        | Woche             |
+| ---------- | ------------- | ----------------- |
+| Donnerstag | 11:30 - 13:00 | Übung / Praktikum |
 
 Die Übungen dienen der praktischen Vertiefung der Vorlesungsinhalte. Das Praktikum ist eine alleinverantwortliche Arbeit an einem Mini-Projekt. Im Kontext eines Forschungsvorhabens sollen dabei Remote-Labore mit Bezug zu Eingebetteten Systemen entstehen. 
 

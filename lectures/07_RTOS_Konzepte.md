@@ -14,18 +14,18 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 -->
 
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/09_RTOS_Konzepte.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/07_RTOS_Konzepte.md#1)
 
 
-# Scheduling
+# RTOS-Konzepte & Task-Modell
 
 | Parameter                | Kursinformationen                                                                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                           |
-| **Semester**             | `Sommersemester 2025`                                                                                                                                                                                              |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                             |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                    |
-| **Inhalte:**             | `Konzepte eingebetteter Betriebssysteme`                                                                                                                                                             |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/07_RTOS_Konzepte.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/07_RTOS_Konzepte.md) |
+| **Inhalte:**             | `RTOS-Konzepte: Task-Modell, Zustände, WCET/BCET-Analyse, Schedulability`                                                                                                                           |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/07_RTOS_Konzepte.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/07_RTOS_Konzepte.md) |
 | **Autoren**              | @author                                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)

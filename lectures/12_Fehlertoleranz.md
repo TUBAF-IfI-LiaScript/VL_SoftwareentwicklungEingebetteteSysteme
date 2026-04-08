@@ -13,18 +13,18 @@ import: https://raw.githubusercontent.com/liascript-templates/plantUML/master/RE
 -->
 
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/12_Fehlertoleranz.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/12_Fehlertoleranz.md#1)
 
 
-# Fehlertoleranz
+# Fehlertoleranz & Zuverlässigkeit
 
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2025`                                                                                                                                                                |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                             |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
-| **Inhalte:**             | `Fehlertoleranz in Eingebetteten Systemen`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/10_XMEGA_Abgrenzung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/11_Debugging.md) |
+| **Inhalte:**             | `Fehlertoleranz und Zuverlässigkeit in eingebetteten Systemen`                                                                                            |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/12_Fehlertoleranz.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/12_Fehlertoleranz.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)

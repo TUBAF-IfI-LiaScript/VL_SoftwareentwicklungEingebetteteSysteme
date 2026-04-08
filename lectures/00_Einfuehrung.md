@@ -13,18 +13,18 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 
 -->
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/00_Einfuehrung.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/00_Einfuehrung.md#1)
 
 # Einführung und Motivation
 
-| Parameter                | Kursinformationen                                                                                                                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme / Softwareentwicklung für eingebettete Systeme`                                                                                                                      |
-| **Semester**             | `Sommersemester 2025`                                                                                                                                                                            |
-| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                |
-| **Inhalte:**             | `Motiviation und Organisation der Veranstaltung `                                                                                                                                                |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
-| **Autoren**              | @author                                                                                                                                                                                          |
+| Parameter                | Kursinformationen                                                                                                                                                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                                                     |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                                                                        |
+| **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                                                            |
+| **Inhalte:**             | `Motivation und Organisation der Veranstaltung`                                                                                                                                                                                              |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/00_Einfuehrung.md) |
+| **Autoren**              | @author                                                                                                                                                                                                                                      |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
 
@@ -71,9 +71,10 @@ int main (void) {
 
 **Inhalte**
 
-+ Auffrischung und Erweiterung der Architekturbegriffe von Mikrocontrollern
-+ Diskussion von Echtzeitbetriebssystemen
-+ Methodische Softwareentwicklung 
++ Auffrischung und Erweiterung der Architekturbegriffe von Mikrocontrollern (ATmega → XMEGA → Cortex-M4)
++ Diskussion von Echtzeitbetriebssystemen (Konzepte, Scheduling, FreeRTOS)
++ Methodische Softwareentwicklung für eingebettete Systeme (Architektur, Testen, CI/CD, Fehlertoleranz)
++ Ausblick auf Embedded Linux, Multicore und Edge AI (ESP32-S3)
 
 
 ********************************************************************************
@@ -86,14 +87,14 @@ int main (void) {
 **Hardware-Plattformen**
 
 <!--data-type="none"-->
-| Arduino Uno Board                                                                                                 | Nucleo 64                                                                                          |
-| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| ![ArduinoUno](../images/00_Einfuehrung/arduino-uno-rev3.jpg)<!-- style="width: 100%; auto; max-width: 415px;" --> | ![ArduinoUno](../images/00_Einfuehrung/Nucleo64.jpg)<!-- style="width: 100%; max-width=315px;" --> |
-| Microchip ATmega 328p                                                                                             | STM32F401                                                                                          |
-| 8-Bit AVR Familie                                                                                                 | 32-Bit Cortex M4 Prozessor                                                                         |
-| C, Assembler                                                                                                      | C, C++                                                                                             |
-| avrlibc, FreeRTOS                                                                                                 | CMSIS, mbedOS, FreeRTOS                                                                            |
-| 10 Bit Analog-Digital-Wandler, 16 Bit Timer,                                                                      | 10 Timer, 16- and 32-bit (84 MHz), 12-bit ADC                                                     |
+| Arduino Uno Board                                                                                                 | Nucleo 64                                                                                          | Arduino Nano ESP32                                                                                                    |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| ![ArduinoUno](../images/00_Einfuehrung/arduino-uno-rev3.jpg)<!-- style="width: 100%; auto; max-width: 415px;" --> | ![Nucleo64](../images/00_Einfuehrung/Nucleo64.jpg)<!-- style="width: 100%; max-width=315px;" -->   | ![NanoESP32](../images/00_Einfuehrung/arduino-nano-esp32.jpg)<!-- style="width: 100%; max-width: 415px;" -->           |
+| Microchip ATmega 328p                                                                                             | STM32F401                                                                                          | Espressif ESP32-S3                                                                                                    |
+| 8-Bit AVR Familie                                                                                                 | 32-Bit Cortex M4 Prozessor                                                                         | Dual-Core Xtensa LX7, 240 MHz                                                                      |
+| C, Assembler                                                                                                      | C, C++                                                                                             | C, C++, MicroPython                                                                                 |
+| avrlibc, FreeRTOS                                                                                                 | CMSIS, mbedOS, FreeRTOS                                                                            | FreeRTOS SMP, Arduino                                                                      |
+| 10 Bit Analog-Digital-Wandler, 16 Bit Timer                                                                       | 10 Timer, 16- and 32-bit (84 MHz), 12-bit ADC                                                     | Wi-Fi, BLE, Vektor-Erweiterungen (PIE), 12-bit ADC                                                  |
 
 
 ********************************************************************************
@@ -103,23 +104,24 @@ int main (void) {
 
 **Inhalte der Vorlesung**
 
-| VL  | Tag    | Inhalt der Vorlesung                           | Bemerkung                          |
-| --- | ------ | :--------------------------------------------- | ---------------------------------- |
-| 0   | 01.04. | Einführung und Motivation / Grundbegriffe      | Wiederholung                       |
-| 1   | 08.04. | ATmega Familien                                |                                    |
-| 2   | 15.04. | Analog Digitalwandler / Interrupts             |                                    |
-| 3   | 22.04. | Performancebeschränkungen von 8Bit Controllern |                                    |
-| 4   | 29.04. | Kommunikationsprotokolle                       | Grundlagen abgeschlossen           |
-| 5   | 06.05. | XMEGA Architektur (AtMega4809)                 |                                    |
-| 6   | 13.05. | CortexM Architektur                            |                                    |
-| 7   | 20.05. | _Konferenzreise_                               | Architekturüberblick abgeschlossen |
-| 8   | 27.05. | CortexM Peripherie                             |                                    |
-| 9   | 03.06. | RTOS Konzepte                                  |                                    |
-| 10  | 10.06. | RTOS Implementierungen                         | Echtzeitdiskussion abgeschlossen   |
-| 11  | 17.06. | Anforderungsanalyse                            |                                    |
-| 12  | 24.06. | Systementwurf                                  |                                    |
-| 13  | 01.07. | Testen / Wartungsphase                         |                                    |
-| 14  | 08.07. | Vorstellung der Praktikumsergebnisse           |                                    |
+| VL  | Tag    | Inhalt der Vorlesung                           | Block                            |
+| --- | ------ | :--------------------------------------------- | -------------------------------- |
+| 0   | 01.04. | Einführung, Motivation, Grundbegriffe          | **I: Hardware-Progression**      |
+| 1   | 08.04. | ATmega-Architektur                             |                                  |
+| 2   | 15.04. | Interrupts, Timer, ADC, 8-Bit-Limitierungen    |                                  |
+| 3   | 22.04. | Kommunikationsprotokolle (UART, I2C, SPI, CAN) |                                  |
+| 4   | 29.04. | XMEGA-Erweiterungen (ATmega4809)               |                                  |
+| 5   | 06.05. | Cortex-M Architektur & Peripherie              | Hardware abgeschlossen           |
+| 6   | 13.05. | RTOS-Konzepte & Task-Modell                    | **II: Echtzeitbetriebssysteme**  |
+| 7   | 20.05. | Scheduling-Algorithmen & Synchronisation       |                                  |
+| 8   | 27.05. | FreeRTOS in der Praxis                         | Echtzeitdiskussion abgeschlossen |
+| 9   | 03.06. | SW-Architektur für eingebettete Systeme        | **III: SW-Methodik**             |
+| 10  | 10.06. | Debugging, Testen & CI/CD                      |                                  |
+| 11  | 17.06. | Fehlertoleranz & Zuverlässigkeit               |                                  |
+| 12  | 24.06. | Embedded Linux vs. Bare Metal / RTOS           | SW-Methodik abgeschlossen        |
+| 13  | 01.07. | Multicore & Edge AI: ESP32-S3                  | **IV: Ausblick & Abschluss**     |
+| 14  | 08.07. | Vorstellung der Praktikumsergebnisse           |                                  |
+| 15  | 15.07. | _Reserve_                                      |                                  |
 
 
 ********************************************************************************
@@ -173,17 +175,17 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 |:----------------------- |:--------------------------------------- |
 | Prof. Dr. Sebastian Zug | sebastian.zug@informatik.tu-freiberg.de |
 
-> Bitte melden Sie sich im OPAL unter [Digitale Systeme/Softewareentwicklung für eingebettete Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/19949355008/CourseNode/99400814778000) für die Veranstaltung an. 
+> Bitte melden Sie sich im OPAL unter [Softwareentwicklung für eingebettete Systeme](https://bildungsportal.sachsen.de/opal/auth/RepositoryEntry/19949355008/CourseNode/99400814778000) für die Veranstaltung an. 
 
 ### Zeitplan
 
 Die Veranstaltung wird sowohl für die Vorlesung als auch die Übung in Präsenz durchgeführt.
 
-| Veranstaltungen | Tag      | Zeitslot    | Bemerkung      |
-| --------------- | -------- | ----------- | -------------- |
-| Vorlesung       | Dienstag | 09:45-11:15 |                |
-| Praktikum       | Dienstag | 18:00-19:30 | ungerade Woche |
-| Übungen         | Freitag  | 08:00-09:30 | gerade Woche   |
+| Veranstaltungen | Tag        | Zeitslot    | Bemerkung      |
+| --------------- | ---------- | ----------- | -------------- |
+| Vorlesung       | Mittwoch   | 11:30-13:00 |                |
+| Praktikum       | Donnerstag | 11:30-13:00 | ungerade Woche |
+| Übungen         | Donnerstag | 11:30-13:00 | gerade Woche   |
 
 
 ### Prüfungsmodalitäten
@@ -288,12 +290,13 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 + Überlegen Sie sich, zu welches Thema Sie im Praktikum vorstellen wollen:
 
   + microROS / micro DDS
-  + DSP Implementierung im STM32F4    
+  + TinyML auf dem ESP32-S3 (Gestenerkennung, Keyword Spotting)
+  + Embedded Linux mit Buildroot/Yocto auf Raspberry Pi oder STM32MP1
   + mbedOS vs FreeRTOS
   + CAN Bus - Theorie und Anwendung
-  + Schlafmodi von Controllern (elektrische Vermessung)
-  + virtuelle Maschinen auf eingebetteten Systemen (MicroPython, WASM-Interpreter)
-  + Echtzeitfähigkeit des Raspberry Pi 
+  + Schlafmodi und Power Management (ATmega bis ESP32-S3, elektrische Vermessung)
+  + CI/CD Pipeline für eingebettete Systeme (GitHub Actions, QEMU)
+  + Echtzeitfähigkeit des Raspberry Pi (PREEMPT_RT)
   + ... eigene Ideen
 
   Die Präsentationen sollten 30 Minuten einnehmen und mit einer praktischen Demonstration kombiniert werden.

@@ -14,18 +14,18 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 -->
 
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/02_ATmegaFamilie.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/02_ATmegaArchitektur.md#1)
 
 
-# ATmega Controller
+# ATmega-Architektur
 
 | Parameter                | Kursinformationen                                                                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme / Softwareentwicklung für eingebettete Systeme`                                                                                                                          |
-| **Semester**             | `Sommersemester 2025`                                                                                                                                                                                |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                             |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                    |
-| **Inhalte:**             | `Überblick zur ATmega Familie`                                                                                                                                                                       |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/02_ATmegaFamilie.md) |
+| **Inhalte:**             | `ATmega-Architektur: Speicher, GPIO, Clock, Sleep-Modes, Programmierabstraktionen`                                                                                                                   |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/02_ATmegaArchitektur.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/02_ATmegaArchitektur.md) |
 | **Autoren**              | @author                                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)

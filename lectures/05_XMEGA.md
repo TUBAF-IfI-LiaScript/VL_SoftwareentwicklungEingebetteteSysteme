@@ -25,18 +25,18 @@ gray: @mark(gray,@0)
 -->
 
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/lectures/06_XMEGA.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/05_XMEGA.md#1)
 
 
 # Erweiterte AVR Architekturen
 
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Vorlesung Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2025`                                                                                                                                                                |
+| **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                             |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
-| **Inhalte:**             | `Erweiternde Architekturkonzepte der XMEGA Architektur`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/09_XMEGA.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/09_XMEGA.md) |
+| **Inhalte:**             | `XMEGA-Erweiterungen: Event System, CCL, erweiterter ADC, ATmega4809`                                                                                            |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/05_XMEGA.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/05_XMEGA.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
