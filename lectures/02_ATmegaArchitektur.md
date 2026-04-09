@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.4
+version:  0.0.5
 language: de
 narrator: Deutsch Female 
 
@@ -69,6 +69,22 @@ ditaa
 @enduml
 ```
 
+## Einordnung: Architekturprogression
+
+In dieser Vorlesung arbeiten wir uns schrittweise von einfachen zu komplexen Architekturen vor. Der ATmega328 ist dabei bewusst der Ausgangspunkt — seine Einfachheit macht die grundlegenden Konzepte sichtbar, die bei leistungsfähigeren Controllern hinter Abstraktionsschichten verschwinden.
+
+<!-- data-type="none" -->
+| Aspekt              | ATmega328 (VL 1–3)  | XMEGA / ATmega4809 (VL 4) | Cortex-M4 / STM32F401 (VL 5) | ESP32-S3 (VL 13)          |
+| ------------------- | -------------------- | -------------------------- | ----------------------------- | ------------------------- |
+| Architektur         | 8-Bit Harvard, RISC  | 8-Bit Harvard, erweitert   | 32-Bit Harvard, ARMv7-M      | 32-Bit Harvard, Xtensa    |
+| Kerne               | 1                    | 1                          | 1                             | 2 (SMP)                   |
+| RAM                 | 2 KB                 | 6 KB                       | 96 KB                         | 512 KB                    |
+| Takt                | 16 MHz               | 20 MHz                     | 84 MHz                        | 240 MHz                   |
+| Neues Konzept       | Basisarchitektur     | Event System, CCL           | DMA, NVIC, FPU, MPU           | Registerfenster, TinyML   |
+| Programmierung      | Register direkt      | Struct-basierte Register   | HAL / CMSIS                   | ESP-IDF / FreeRTOS SMP    |
+
+> **Warum starten wir mit einem 8-Bit-Controller?** Weil man an 32 Registern, 2 KB RAM und einem überschaubaren Datenblatt die Grundprinzipien (Memory-Mapped I/O, Interrupts, Timer, Sleep-Modes) direkt am Silizium verstehen kann — bevor Abstraktionsschichten wie HAL oder CMSIS diese Details verbergen.
+
 ## Mikrocontroller Familie
 
 > Von einer Familie spricht man in Bezug auf einen Mikrocontroller, wenn um einen Mikroprozessor unterschiedlichen Peripherie angeordnet wird. Damit verändert sich die Funktionalität von Familienmitglied zu Familienmitglied, der grundlegende Kern ist aber identisch.
@@ -81,8 +97,8 @@ Die vormalige Firma AVR (jetzt Microchip) macht das anhand einer Grafik deutlich
 
 Der Tiny Controller findet sich im unteren Teil der Leistungsklasse wieder, der in AtMega32U4 repräsentiert eine besondere Ausprägung der 32KByte Flash Systeme (zu der auch der auf dem Arduino Uno verbaute Atmega328 gehört).
 
-![Bild](../images/02_ATmegaFamilie/AtTiny.png "ATtiny Architektur [^AtTinyArchitecture]")
-![Bild](../images/02_ATmegaFamilie/AtMega32U4.png "ATMega32U4 Architektur [^AtMega32U4Architecture]")
+![Bild](../images/02_ATmegaFamilie/AtTiny.png "ATtiny Architektur, Firma Microchip, Handbuch AtTiny Family, https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-2586-AVR-8-bit-Microcontroller-ATtiny25-ATtiny45-ATtiny85_Datasheet.pdf")
+![Bild](../images/02_ATmegaFamilie/AtMega32U4.png "ATMega32U4 Architektur, Firma Microchip, Handbuch ATmega32U4, https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7766-8-bit-AVR-ATmega16U4-32U4_Datasheet.pdf")
 
 ### Atmega Vergleich
 
@@ -103,15 +119,10 @@ Die Namensgebung ergibt sich dabei aus der Speichergröße des verwendeten Typs:
 | ATmega328   | 32KBytes |  1KBytes |  2KBytes | 2 instruction words/vector |
 | ATmega328P  | 32KBytes |  1KBytes |  2KBytes | 2 instruction words/vector |
 
-[^AtTinyArchitecture]: Firma Microchip, Handbuch AtTiny Family, https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-2586-AVR-8-bit-Microcontroller-ATtiny25-ATtiny45-ATtiny85_Datasheet.pdf
-
-[^AtMega32U4Architecture]: Firma Microchip, Handbuch ATmega32U4, https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7766-8-bit-AVR-ATmega16U4-32U4_Datasheet.pdf
-
-[^Atmel]: Werbematerial der Firma AVR
 
 ## Inbetriebnahme
 
-![Bild](../images/02_ATmegaFamilie/PINBelegung.png "ATmega328 Pinbelegung [^AtMega328]")
+![Bild](../images/02_ATmegaFamilie/PINBelegung.png "ATmega328 Pinbelegung - Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf")
 
 > Wir nehmen nun an, dass wir uns für den Controller entschieden haben, um ein Problem zu lösen ... wie kommen wir von einen Chip zu einem funktionsfähigen System?
 
@@ -144,8 +155,6 @@ ditaa
 +---------------------------------+     +---------------------------------+
 @enduml
 ```
-
-[^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
 
 ### Energieversorgung
@@ -241,9 +250,59 @@ Die **I/O Register** dienen der Konfiguration des Controllers bzw. der Interakti
 | - der Speicheradressraum wird nicht durch Ein-/Ausgabe-Einheiten reduziert  |                                           |
 | - Ein-/Ausgabeadressen können schmaler gehalten werden als Speicheradressen |                                           |
 
-Der EEPROM ist beim AVR nicht Bestandteil des _Mapped Memory IO_ Konzepts! Vielmehr existiert für diesen ein eigener Zugriffsmechanismus, der über die zugehörigen IO-Register realsiert wird.
+**Konkretes Beispiel: Was passiert bei `PORTB = 0x20`?**
+
+Der Compiler löst das Makro `PORTB` zu einer Speicheradresse auf. Im Memory-Mapped I/O des ATmega328 liegt PORTB auf Adresse `0x25`:
+
+```
+  Memory Map (Ausschnitt)              Was passiert?
+  ┌────────────┬──────────┐
+  │ 0x00–0x1F  │ Register │            1. Compiler erzeugt: out 0x05, r24
+  ├────────────┼──────────┤               (0x05 = I/O-Adresse, entspricht
+  │ 0x20       │ PINB     │                Speicheradresse 0x25)
+  │ 0x21       │ DDRB     │
+  │ 0x22       │ PINC     │            2. CPU schreibt 0x20 an I/O-Adresse 0x05
+  │ 0x23       │ DDRC     │
+  │ 0x24       │ PIND     │            3. Das I/O-Register leitet den Wert
+  │ 0x25       │ PORTB ◄──┼── 0x20        an die GPIO-Hardware weiter
+  │ ...        │          │
+  ├────────────┼──────────┤            4. Pin PB5 geht auf High
+  │ 0x60–0xFF  │ Ext. I/O │               (Bit 5 von 0x20 = 0b00100000)
+  ├────────────┼──────────┤
+  │ 0x100–     │ SRAM     │
+  └────────────┴──────────┘
+```
+
+> **Wichtig:** Es gibt zwei Adressierungen — die **I/O-Adresse** (0x05, für `in`/`out`-Befehle, Offset 0x20) und die **Speicheradresse** (0x25, für `lds`/`sts`-Befehle). Die avrlibc-Makros wie `PORTB` verwenden die Speicheradresse; die `_SFR_IO_ADDR()`-Makros wandeln zurück in die I/O-Adresse.
+
+Der EEPROM ist beim AVR nicht Bestandteil des _Mapped Memory IO_ Konzepts! Vielmehr existiert für diesen ein eigener Zugriffsmechanismus, der über die zugehörigen IO-Register realisiert wird.
 
 ![Bild](../images/02_ATmegaFamilie/EEPROM.png)<!-- style="width: 75%; max-width: 700px" -->
+
+**EEPROM-Zugriff in der Praxis:**
+
+Im Gegensatz zum RAM (direkter Zugriff über Adressen) erfordert der EEPROM einen mehrstufigen Zugriff über die I/O-Register EEARH/EEARL (Adresse), EEDR (Daten) und EECR (Kontrollregister). Die avrlibc abstrahiert dies:
+
+```c
+#include <avr/eeprom.h>
+
+// Kalibrierungswert im EEPROM ablegen (Adresse 0x00)
+uint8_t EEMEM calibration_value = 42;
+
+int main(void) {
+    // Lesen: ~3.4 ms pro Byte
+    uint8_t cal = eeprom_read_byte(&calibration_value);
+
+    // Schreiben: ~3.4 ms pro Byte, max. 100.000 Zyklen!
+    eeprom_write_byte(&calibration_value, cal + 1);
+
+    // Blockweise: 4 Bytes ab Adresse 0x10
+    uint8_t buffer[4];
+    eeprom_read_block(buffer, (const void*)0x10, 4);
+}
+```
+
+> **Vergleich der Zugriffszeiten:** RAM-Zugriff dauert 1 Taktzyklus (62.5 ns bei 16 MHz), ein EEPROM-Zugriff ca. 3.4 ms — also rund **54.000× langsamer**. EEPROM ist für Konfigurationsdaten gedacht, nicht für häufig wechselnde Werte.
 
 [^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
@@ -267,6 +326,34 @@ Quellen für Reset
 + Prozessorstart  an der Adresse 0000. An dieser Adresse MUSS ein Sprungbefehl an die Adresse des Hauptprogrammes stehen (RJMP, JMP)
 + Initialisieren des Stacks
 + Beginn der Programmabarbeitung
+
+### Fuse-Bits
+
+Fuse-Bits sind **nichtflüchtige Konfigurationsbits**, die das grundlegende Verhalten des Controllers festlegen — noch bevor das eigentliche Programm startet. Sie werden nicht über den Programmcode gesetzt, sondern über den **Programmer** (z.B. via `avrdude`).
+
+Der ATmega328P hat drei Fuse-Bytes:
+
+<!-- data-type="none" -->
+| Fuse-Byte | Konfiguriert                         | Wichtige Bits                                   |
+| --------- | ------------------------------------ | ----------------------------------------------- |
+| **Low**   | Taktquelle und Startup-Zeit         | `CKSEL[3:0]` — interner RC (8 MHz) oder externer Quarz (16 MHz)  |
+| **High**  | Bootloader, EEPROM-Erhalt, Watchdog | `BOOTSZ` — Bootloader-Bereich, `EESAVE` — EEPROM bei Chip-Erase erhalten |
+| **Extended** | Brown-Out Detection Level         | `BODLEVEL` — Schwelle für Unterspannungs-Reset  |
+
+> **Vorsicht:** Falsche Fuse-Bits können den Controller **unbrauchbar** machen! Wenn z.B. `CKSEL` auf einen externen Quarz gesetzt wird, der nicht vorhanden ist, startet der Controller nicht mehr. Eine Rettung ist dann nur über einen externen Taktgenerator oder High-Voltage-Programmer möglich.
+
+**Auslesen und Setzen mit avrdude:**
+
+```bash
+# Fuse-Bits auslesen
+avrdude -c arduino -p m328p -P /dev/ttyACM0 -U lfuse:r:-:h
+
+# Arduino Uno Standardwerte setzen (externer 16 MHz Quarz, 65ms Startup)
+avrdude -c arduino -p m328p -P /dev/ttyACM0 \
+        -U lfuse:w:0xFF:m -U hfuse:w:0xDE:m -U efuse:w:0xFD:m
+```
+
+> **Tipp:** Der [AVR Fuse Calculator](https://www.engbedded.com/fusecalc/) hilft beim Zusammenstellen der korrekten Fuse-Werte und visualisiert die Bedeutung jedes einzelnen Bits.
 
 ### Digitale Ein/Ausgaben
 
@@ -506,6 +593,6 @@ Im Programmspeicher steht auf den ersten 8 Byte `jmp 0xe4`
 
 - [ ] Machen Sie sich mit den Struktur des Handbuches des Controllers vertraut.
 - [ ] Ermitteln Sie die Abläufe bei der Generierung von Atmega Code. Evaluieren Sie Assembler-Dateien und experimentieren Sie mit verschiedenen Optimierungsstufen.
-- [ ] Suchen Sie eine noch kürzere Implementierung für die Umsetzung des Hello World Beispiels.
+- [ ] Beteiligen Sie sich an unserem _Wir suchen das kürzeste Hello World Beispiel_ Wettbewerb.
 
 !?[](https://www.youtube.com/watch?v=Kv8hT1IVOxQ&t=243s)

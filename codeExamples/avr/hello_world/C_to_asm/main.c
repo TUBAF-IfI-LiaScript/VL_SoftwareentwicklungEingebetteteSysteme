@@ -4,8 +4,10 @@
 #include <util/delay.h>
 
 int main (void) {
-
+   
    DDRB |= (1 << PB0);
+   // Equivalent to
+   // (*(volatile uint8_t *)(0x24)) |= 1; 
 
    while(1) {
        PORTB ^= (1 << PB0);
