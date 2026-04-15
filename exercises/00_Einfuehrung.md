@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.4
+version:  0.0.5
 language: de
 narrator: Deutsch Female
 
@@ -20,7 +20,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2025`                                                                                                                                                                |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Einarbeitung und digitale Input/Output Operationen`                                                                                            |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/00_Einfuehrung.md) |
@@ -35,6 +35,8 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | Tag        | Termin        | Woche             |
 | ---------- | ------------- | ----------------- |
 | Donnerstag | 11:30 - 13:00 | Übung / Praktikum |
+
+> In dieser Woche nutzen wir beide Termine für den Übungsbetrieb.
 
 Die Übungen dienen der praktischen Vertiefung der Vorlesungsinhalte. Das Praktikum ist eine alleinverantwortliche Arbeit an einem Mini-Projekt. Im Kontext eines Forschungsvorhabens sollen dabei Remote-Labore mit Bezug zu Eingebetteten Systemen entstehen. 
 
@@ -184,7 +186,7 @@ int main()
 ```
 @LIA.eval(`["main.c"]`, `g++ -Wall main.c -o a.out`, `./a.out`)
 
-## Aufgaben
+## Theoretische Fragen
 
 ![Bild](../images/exercises/Active_High.png)
 ![Bild](../images/exercises/Active_Low.png)
@@ -197,9 +199,11 @@ int main()
 
 ![Bild](../images/exercises/Aufbau.png)
 
+## Übungsaufgaben
+
 - [ ] Schreiben Sie ein C-Programm, welches beim Drücken eines angeschlossenen Schalters an Pin 12 die eingebaute LED an Pin 13 schnell blinken lässt. 
 
-- [ ] Schreiben Sie ein Programm, welches einen String mittels Morse-Code über die eingebaute LED ausgibt, sobald der Taster gedrückt wird. Gehen Sie davon aus, das das Programm möglichst variabel parameterisierbar sein soll (Timings, Codes). 
+- [ ] Schreiben Sie ein Programm, welches einen String mittels Morse-Code über die eingebaute LED ausgibt, sobald der Taster gedrückt wird. Gehen Sie davon aus, das das Programm möglichst variabel parameterisierbar sein soll (variable Timings, alternative Codes). Entwerfen Sie sinnvolle Funktionen und Datenstrukturen, um die Morse-Codes zu repräsentieren. Sie können dabei von der folgenden Codierung ausgehen:
 
 ```c
 //For letters
@@ -215,5 +219,19 @@ const char *numbers[] = {
   "-....", "--...", "---..", "----."
 };
 ```
+
+- [ ] Bauen Sie Methoden ein, die nicht codierbare Zeichen (z.B. Satzzeichen, Leerzeichen) erkennen und entsprechend behandeln (z.B. ignorieren, Fehlersignal, Ersatzzeichen).
+
+- [ ] Erweitern Sie das Programm um die Möglichkeit, die Morse-Codes über die serielle Schnittstelle zu empfangen. Sobald ein String empfangen wird, soll dieser in Morse-Code übersetzt und über die LED ausgegeben werden.
+
+### Zusatzaufgabe (für Fortgeschrittene)
+
+> Die Zusatzaufgabe richtet sich an Studierende, die bereits Erfahrung mit C und eingebetteten Systemen haben. 
+
+- [ ] Schreiben Sie ein Programm das Morsecode Eingaben vom Taster in Zeichen übersetzt und auf der seriellen Schnittstelle ausgibt. Wie gehen Sie mit Fehlern um (z.B. ungültige Morse-Codes, Zeitüberschreitungen)?
+
+- [ ] Die naheliegende Morse-Implementierung beruht auf `delay()` und blockiert damit den Controller für die gesamte Dauer der Ausgabe — UART-Empfang, Tasterabfragen und andere Aufgaben stehen still. Überführen Sie Ihre Lösung in eine nicht-blockierende Zustandsmaschine, deren Fortschritt ausschließlich durch einen Timer-Interrupt (oder zumindest durch Vergleich gegen `millis()` in der Hauptschleife) getrieben wird.
+
+## Hausaufgaben
 
 - [ ] Schreiben Sie ein Assembler Programm, dass die LED an Pin 13 blinken lässt. Versuchen Sie diese Aufgabe mit einem möglichst mininalen Code zu lösen.
