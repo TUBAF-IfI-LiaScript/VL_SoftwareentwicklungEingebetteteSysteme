@@ -9,21 +9,27 @@ CPFLAGS = -nostartfiles
 LDFLAGS = -j .text -j .data
 
 AVRDUDE = avrdude
-AVRDUDE_FLAGS = -P /dev/ttyUSB0
+AVRDUDE_FLAGS = -P /dev/ttyACM1
 AVRDUDE_FLAGS += -B 57600
 AVRDUDE_FLAGS += -c $(STK)
 AVRDUDE_FLAGS += -p m328p
 AVRDUDE_FLAGS += -v -D -U flash:w:$(TARGET).hex:i
 
-.PHONY: all
+.PHONY: all program asm clean com
 
-all:
+all: $(TARGET).hex
+
+$(TARGET).o: $(TARGET).c
 	@echo "compiling"
-	$(CC) -Os -c -o $(TARGET).o  $(CPFLAGS) -mmcu=$(CTRL) $(TARGET).c
+	$(CC) -Os -c -o $@ $(CPFLAGS) -mmcu=$(CTRL) $<
+
+$(TARGET).elf: $(TARGET).o
 	@echo "linking"
-	@$(CC) -mmcu=$(CTRL) $(TARGET).o -o $(TARGET).elf
+	@$(CC) -mmcu=$(CTRL) $< -o $@
+
+$(TARGET).hex: $(TARGET).elf
 	@echo "generate properly output format"
-	@$(OC) $(LDFLAGS) -O ihex $(TARGET).elf $(TARGET).hex
+	@$(OC) $(LDFLAGS) -O ihex $< $@
 	avr-size --mcu=$(CTRL) $(TARGET).elf
 
 program: all
@@ -31,14 +37,12 @@ program: all
 	@echo  $(AVRDUDE_FLAGS)
 	$(AVRDUDE) $(AVRDUDE_FLAGS)
 
-asm:	all
+asm: $(TARGET).asm
+
+$(TARGET).asm: $(TARGET).elf
 	@echo "Generating assembler code"
-	avr-objdump -d -S $(TARGET).elf >  $(TARGET).asm
+	avr-objdump -d -S $< > $@
 
 clean:
 	@echo "Cleaning"
-	@rm -rf $(TARGET).hex $(TARGET).o $(TARGET).elf *~
-
-com:    program
-	@echo "Opening Serial connection"
-	gtkterm -p /dev/ttyACM0 -s 9600 -r "-"
+	@rm -rf $(TARGET).hex $(TARGET).o $(TARGET).elf $(TARGET).asm *~

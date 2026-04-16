@@ -9,7 +9,7 @@ CPFLAGS = -nostdlib               # no standard library
 LDFLAGS = -j .text -j .data
 
 AVRDUDE = avrdude
-AVRDUDE_FLAGS = -P /dev/ttyACM0
+AVRDUDE_FLAGS = -P /dev/ttyACM1
 AVRDUDE_FLAGS += -B 57600
 AVRDUDE_FLAGS += -c $(STK)
 AVRDUDE_FLAGS += -p m328p
