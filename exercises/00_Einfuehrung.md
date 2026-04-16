@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.5
+version:  0.0.6
 language: de
 narrator: Deutsch Female
 
@@ -224,7 +224,7 @@ const char *numbers[] = {
 
 - [ ] Erweitern Sie das Programm um die Möglichkeit, die Morse-Codes über die serielle Schnittstelle zu empfangen. Sobald ein String empfangen wird, soll dieser in Morse-Code übersetzt und über die LED ausgegeben werden.
 
-### Zusatzaufgabe (für Fortgeschrittene)
+## Zusatzaufgabe (für Fortgeschrittene)
 
 > Die Zusatzaufgabe richtet sich an Studierende, die bereits Erfahrung mit C und eingebetteten Systemen haben. 
 
