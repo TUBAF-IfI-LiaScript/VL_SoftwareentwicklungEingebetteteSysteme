@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.0
+version:  1.0.1
 language: de
 narrator: Deutsch Female
 comment:  Darstellung der grundlegenden Eigenschaften der atmega Mikroncontroler-Familie, Abstraktionsebenen der Programmierung
@@ -33,6 +33,222 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ---
 
+## Analog-Digital-Wandlung
+
+> **Hinweis:** Die allgemeinen Grundlagen (Abtasttheorem, Wandlerprinzipien, Quantisierung) werden in der Messtechnik-Vorlesung behandelt. Wir fokussieren hier auf die Nutzung des AD-Wandlers aus Sicht eines Mikrocontroller-Programms.
+
+![Bild](../images/04_ADC/Herausforderung.png)
+
+Dabei wird das zeit- und wertkontinuierliche Eingangssignal in eine zeit- und wertdiskrete Darstellung überführt.
+
+!?[Wandlerprinzipien im Überblick](https://www.youtube.com/watch?v=IkPOZXeW_CM)
+
+### Analog-Komparator als Einstieg
+
+Ein Komparator ist eine elektronische Schaltung, die zwei Spannungen vergleicht. Der Ausgang zeigt in binärer/digitaler Form an, welche der beiden Eingangsspannungen höher ist. Damit handelt es sich praktisch um einen 1-Bit-Analog-Digital-Umsetzer.
+
+!?[Funktionsweise eines Komparators](https://www.youtube.com/watch?v=A2E72-dxeqY)
+
+![Bild](../images/04_ADC/Op-amp_symbol.svg.png "Symbol eines Operationsverstärkers")<!-- style="width: 35%; max-width: 600px" -->
+
+![Bild](../images/04_ADC/Komparator.png "Grundsätzliche Beschaltung eines Operationsverstärkers bei der Verwendung als ADC [^WikipediaOmegatron]" )<!-- style="width: 55%; max-width: 600px" -->
+
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
+```ascii
+                   ^
+ Ideales       U_a |------------+
+ Verhalten         |            |
+                   |            |
+                   |            |             U_i
+                   +------------+------------->
+                   |            | U_ref
+                   |            |
+                   |            |
+                   |............+------------                                                .
+
+                   ^
+ Reales        U_a |--------+
+ Verhalten         |        !\  
+                   |        ! \  
+                   |        !  \ U_ref        U_i
+                   +--------!---+------------->
+                   |        !    \  !
+                   |        !     \ !  
+                   |        !      \!
+                   |........!.......+-----------                                                .
+
+                            Hysterese
+```
+
+Im AVR findet sich ein Komparator, der unterschiedliche Eingänge miteinander vergleichen kann:
+Für "+" sind dies die `BANDGAP Reference` und der Eingang `AIN0` und für "-" der Pin `AIN1` sowie alle analogen Eingänge.  
+
+![Bild](../images/04_ADC/AnalogCompAVR.png "Komparator-Konfiguration im ATmega [^AtmelHandbuch]")<!-- style="width: 85%; max-width: 1000px" -->
+
+Die grundlegende Konfiguration erfolgt über die Konfiguration der Bits / Register :
+
+| Bits                   | Register | Bedeutung                                              |
+| ---------------------- | -------- | ------------------------------------------------------ |
+| `ACBG`                 | `ACSR`   | Analog Comparator Bandgap Select                       |
+| `ACME`                 | `ADCSRB` | Analog Comparator Multiplexer Enable - Bit im Register |
+| `ADEN`                 | `ADCSRA` | Analog Digital Enable                                  |
+| `MUX2`, `MUX1`, `MUX0` | `ADMUX`  | Mulitiplexer Analog input                              |
+
+Dazu kommen noch weitere Parameterisierungen bezüglich der Interrupts, der Aktivitierung von Timerfunktionalität oder der Synchronisierung.
+
+> **Aufgabe:** An welchen Pins eines Arduino Uno Boards müssen Analoge Eingänge angeschlossen werden, um die zwei Signale mit dem Komparator zu vergleichen. Nutzen Sie den Belegungsplan (Schematics) des Kontrollers, der unter [Link](https://store.arduino.cc/arduino-uno-rev3) zu finden ist.
+
+Ein Beispiel für den Vergleich eines Infrarot Distanzsensors mit einem fest vorgegebenen Spannungswert findet sich im _Example_ Ordner der Veranstaltung.
+
+![Bild](../images/04_ADC/KomparatorBeispiel.png)<!-- style="width: 85%; max-width: 1000px" -->
+
+```cpp
+#define F_CPU 16000000UL
+#include <avr/io.h>
+
+int main()
+{
+  ADCSRB = (1<<ACME);
+  DDRB = (1<<PB5);
+
+  while(1)
+  {
+    if (ACSR & (1<<ACO))/* Check ACO bit of ACSR register */
+       PORTB &= ~(1 << PB5); /* Then turn OFF PB5 pin */
+    else    /* If ACO bit is zero */
+        PORTB = (1<<PB5); /* Turn ON PB5 pin */
+  }
+}
+```
+
+### Vom Komparator zum 10-Bit-ADC
+
+Erweitert man das Prinzip des 1-Bit-Komparators auf höhere Auflösung, landet man bei einem echten Analog-Digital-Wandler. Der ATmega328 bringt einen 10-Bit-ADC mit, der intern nach dem Prinzip der sukzessiven Approximation arbeitet.
+
+| Handbuch des Atmega328p                             | Bedeutung                                                                                       |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 10-Bit Auflösung                                    |                                                                                                 |
+| 0.5 LSB Integral Non-Linearity                      | maximale Abweichung zwischen der idealen und der eigentlichen analogen Signalverlauf am Wandler |
+| +/- 2 LSB Absolute Genauigkeit                      | Summe der Fehler inklusive Quantisierungsfehler, Offset Fehler etc.  (worst case Situation)     |
+| 13 - 260μs Conversion Time                          | Die Dauer der Wandlung hängt von der Auflösung und der der vorgegebenen Taktrate  ab.           |
+| Up to 76.9kSPS (Up to 15kSPS at Maximum Resolution) |                                                                                                 |
+| 0 - V CC ADC Input Voltage Range                    |  Es sind keine negativen Spannungen möglich.                                                    |
+| Temperature Sensor Input Channel                    |                                                                                                 |
+| Sleep Mode Noise Canceler                           |    Reduzierung des Steuquellen durch einen "Sleepmode" für die CPU                              |
+
+![Bild](../images/04_ADC/AVR_ADC.png "Strukturdarstellung des AD-Wandlers im ATmega [^HandbuchAtmega]")
+
+**Trigger für die Wandlung**
+
+Grundsätzlich sind 3 Modi für die Wandlung möglich:
+
++ Programmgetriggerte Ausführung der Wandlung
++ Kontinuierliche Wandlung
++ ereignisgetriebener Start
+
+![Bild](../images/04_ADC/ADCTrigger.png "Trigger des AD-Wandlers im ATmega [^HandbuchAtmega](Seite 247)")
+
+![Bild](../images/04_ADC/TimeLineADC.png "Zeitlicher Verlauf einer AD-Wandlung  [^HandbuchAtmega](Seite 250)")
+
+**Ergebnisregister**
+
+Die Atmega Prozessoren bieten eine Auflösung von 10Bit oder 8Bit für die analogen Wandlungen. Entsprechend stehen zwei Register `ADCL` und `ADCH` für die Speicherung bereit. Standardmäßig (d.h. `ADLAR == 0`) werden die niederwertigsten 8 im Register `ADCL` bereitgehalten und die zwei höherwertigsten im Register `ADCH`.
+
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
+```ascii
+             ADCH                                   ADCL
+  +---+---+---+---+---+---+---+---+   +---+---+---+---+---+---+---+---+
+  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+  +---+---+---+---+---+---+---+---+   +---+---+---+---+---+---+---+---+
+                            9   8       7   6   5   4   3   2   1   0
+```
+
+Das Ergebnis ergibt sich dann zu
+
+```c
+uint8_t theLowADC = ADCL
+uint16_t theTenBitResults = ADCH<<8 | theLowADC;
+```
+
+Ist keine 10-bit Genauigkeit erforderlich, wird diese Zuordnung durch das Setzen des `ADLAR` Bits im `ADMUX` Register angepasst. Auf diese Weise kann das ADC Ergebnis direkt als 8 Bit Zahl aus `ADCH` ausgelesen werden.
+
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
+```ascii
+             ADCH                                   ADCL
+  +---+---+---+---+---+---+---+---+   +---+---+---+---+---+---+---+---+
+  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+  +---+---+---+---+---+---+---+---+   +---+---+---+---+---+---+---+---+
+    9   8   7   6   5   4   3   2       1   0
+```
+
+> **Merke: ** Immer zuerst ADCL und erst dann ADCH auslesen.
+
+Beim Zugriff auf ADCL wird das ADCH Register gegenüber Veränderungen vom ADC gesperrt. Erst beim nächsten Auslesen des ADCH-Registers wird diese Sperre wieder aufgehoben. Dadurch ist sichergestellt, dass die Inhalte von ADCL und ADCH immer aus demselben Wandlungsergebnis stammen, selbst wenn der ADC im Hintergrund im Free-Conversion-Mode arbeitet.
+
+### Beispiel: Analoger Distanzsensor
+
+Für das Beispiel wird der AtMega2560 verwendet, der eine interne Referenzspannung von 2.56 V anstatt der des AtMega328 von 1.1 V bereit stellt.
+
+![Bild](../images/04_ADC/AtMega2560Refs.png "Referenzsystem des Analog-Digitalwandlers [^HandbuchAtmega](Seite 281)")
+
+Die Bedeutung ergibt sich beim Blick ins Datenblatt des Sensors GP2D, dessen Maximalwertausgabewert liegt bei etwa 2.55V
+
+```c
+#ifndef F_CPU
+#define F_CPU 16000000UL // 16 MHz clock speed
+#endif
+
+#include <avr/io.h>
+#include <util/delay.h>
+
+int readADC(int channel) {
+  int i; int result = 0;
+  // Den ADC aktivieren und Teilungsfaktor auf 64 stellen
+  ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS1);
+  // Kanal des Multiplexers & Interne Referenzspannung (2,56 V)
+  ADMUX = channel | (1<<REFS1) | (1<<REFS0);
+  // Den ADC initialisieren und einen sog. Dummyreadout machen
+  ADCSRA |= (1<<ADSC);
+  while(ADCSRA & (1<<ADSC));
+  ADCSRA |= (1<<ADSC);
+  while(ADCSRA & (1<<ADSC)); // Auf Ergebnis warten...
+  // Lesen des Registers "ADCW" takes care of how to read ADCL and ADCH.
+  result = ADCW;
+  // ADC wieder deaktivieren
+  ADCSRA = 0;
+  return result;
+}
+
+int main(void)
+{
+  Serial.begin(9600);
+  while (1) //infinite loop
+  {
+    int result_individual = readADC(0);
+    Serial.println(result_individual);
+    Serial.flush();
+    _delay_ms(10); //1 second delay
+  }
+  return  0; // wird nie erreicht
+}
+```
+
+> _The first ADC conversion result after switching reference voltage source may be inaccurate, and the user is advised to discard this result._ Handbuch Seite 252
+
+[^AtmelHandbuch]: Firma Microchip, megaAVR® Data Sheet, Seite 243, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+
+[^WikipediaOmegatron]: Wikipedia, Autor Omegatron - Eigenes Werk, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=983276
+
+[^HandbuchAtmega]: Firma Microchip, megaAVR® Data Sheet, Seite 247, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
+
+---
+
 ## Interrupts
 
 Ein Interrupt beschreibt die kurzfristige Unterbrechung der normalen Programmausführung, um einen, in der Regel kurzen, aber zeitlich kritischen, Vorgang abzuarbeiten.
@@ -44,7 +260,7 @@ Beispiele
 | --------------------------- | ------------------------------------------------- |
 | Pin Zustandswechsel         | Drücken des Notausbuttons                         |
 | Kommunikationsschnittstelle | Eintreffen eines Bytes                            |
-| Analog Comperator           | Resultat einer Analog-Comperator Auswertung       |
+| Analog-Komparator           | Resultat einer Analog-Komparator-Auswertung       |
 | Analog-Digital-Wandler      | Abschluss einer Wandlung                          |
 | Timer                       | Übereinstimmung von Vergleichswert und Zählerwert |
 
@@ -103,7 +319,7 @@ Im Anschluss wird die Integration der Interrupt-Vektortabelle im Speicher darges
 
 Der AVR deaktiviert die Ausführung von Interrupts, wenn er eine ISR aktiv ist. Dies kann aber manuell überschrieben werden.
 
-![Bild](../images/05_Timer/ADCSRA.png "Controllregister ADCSR des Analog-Digital-Wandlers [^AVR328] Seite 258")
+![Bild](../images/05_Timer/ADCSRA.png "Kontrollregister ADCSR des Analog-Digital-Wandlers [^AVR328] Seite 258")
 
 _ADIF is cleared by hardware when executing the corresponding interrupt handling vector. Alternatively, ADIF is cleared by writing a logical one to the flag. Beware that if doing a Read-Modify-Write on ADCSRA, a pending interrupt can be disabled._
 
@@ -196,7 +412,7 @@ int main (void) {
 
 > **Merke:** Der AtMega328 unterscheidet zwei Modi des externen Interrupts - eine 1:1 Zuordnung für für die "echten" externen Interrupts" und die sogenannten "Pin Change Interrupts" `PCINT23...0`.
 
-![Bild](../images/05_Timer/PinChangeInterrupt.png "Controllregister ADCSR des Analog-Digital-Wandlers [^AVR328] Seite 79")
+![Bild](../images/05_Timer/PinChangeInterrupt.png "Pin Change Interrupt Control Register (PCICR) und Pin Change Mask Register (PCMSK) [^AVR328] Seite 79")
 
 **Analog Digitalwandler**
 
@@ -477,7 +693,7 @@ Timer-Modi bestimmen das Verhalten des Zählers und der angeschlossenen Ausgäng
 Die Periode über eine `OCnA` Ausgang ergibt sich entsprechend zu
 
 $$
-f_{OCnA} = \frac{f_{clk_i/o}}{2 \cdot N \ cdot (1 + OCRnA)}
+f_{OCnA} = \frac{f_{clk_i/o}}{2 \cdot N \cdot (1 + OCRnA)}
 $$
 
 Der Counter läuft zwei mal durch die Werte bis zum Vergleichsregister `OCRnA`. Die Frequenz kann durch das Setzen eine Prescalers korrigiert werden.
@@ -489,7 +705,7 @@ Der Counter läuft zwei mal durch die Werte bis zum Vergleichsregister `OCRnA`. 
 Die Periode des Signals an `OCRnA` wechselt während eines Hochzählens des Counters. Damit kann eine größere Frequenz bei gleicher Auflösung des Timers verglichen mit CTC erreicht werden.
 
 $$
-f_{OCnA} = \frac{f_{clk_i/o}}{N \ cdot (1 + TOP)}
+f_{OCnA} = \frac{f_{clk_i/o}}{N \cdot (1 + TOP)}
 $$
 
 **Phase Correct PWM**
@@ -497,7 +713,7 @@ $$
 ![Bild](../images/05_Timer/PhaseCorrectPWM.png "PhaseCorrectPWM Modus des AVR [^AVR328] Seite 145")
 
 $$
-f_{OCnA} = \frac{f_{clk_i/o}}{2 \cdot N \ cdot TOP)}
+f_{OCnA} = \frac{f_{clk_i/o}}{2 \cdot N \cdot TOP}
 $$
 
 [^AVR328]: Firma Microchip, megaAVR® Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
@@ -508,7 +724,7 @@ Für die Umsetzung eines einfachen Timers, der wie im nachfolgenden Beispiel jed
 Sekunde aktiv wird, genügt es einen entsprechenden Vergleichswert zu bestimmen,
 den der Zähler erreicht haben muss.
 
-![Bild](../images/05_Timer/AVRSimpleCounter.png "FastPWM Modus des AVR [^AVR328] Seite 126")
+![Bild](../images/05_Timer/AVRSimpleCounter.png "Einfacher Timer/Zähler im Normal-Mode des AVR [^AVR328] Seite 126")
 
 <div>
   <wokwi-led color="red" pin="13" port="B" label="13"></wokwi-led>
@@ -608,7 +824,7 @@ Spannung |  +---+........       +----
                   Periode                                                       .
 ```
 
-Im folgenden wird der **Fast PWW Mode** genutzt, um auf diesem Wege die LED an
+Im folgenden wird der **Fast PWM Mode** genutzt, um auf diesem Wege die LED an
 PIN 9 zu periodisch zu dimmen. Dazu wird der Vergleichswert, der in OCR1A enthalten ist kontinuierlich verändert.
 
 ```cpp       avrlibc.cpp
@@ -704,7 +920,7 @@ Zähler |    +       +
 
 ####  Zähler von Aktivitäten
 
-![Bild](../images/05_Timer/16BitTimerAVR.png "Capture Unit des AVR [^AVR328] Seite 250")
+![Bild](../images/05_Timer/16BitTimerAVR.png "Aufbau des 16-Bit Timer/Counter im AVR [^AVR328] Seite 250")
 
 Wir wollen einen Eingangszähler entwerfen, der die Ereignisse als Zählerimpulse betrachtet und zusätzlich mit einem Schwellwert vergleicht.
 
@@ -779,6 +995,7 @@ $$
 #define F_CPU 1000000UL
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 
 ISR( TIMER1_COMPA_vect ){
   OCR1A = 2500-OCR1A;	     }
@@ -787,7 +1004,7 @@ int main (void){
   TCCR1A = (1<<COM1A0);    // Togglen bei Compare Match
   TCCR1B = (1<<WGM12) |
            (1<<CS11);      // CTC-Mode; Prescaler 8
-  TIMSK  = (1<<OCIE1A);    // Timer-Compare Interrupt an
+  TIMSK1 = (1<<OCIE1A);    // Timer-Compare Interrupt an
   OCR1A = 2312;            // Neutralposition
   sei();                   // Interrupts global an
   while( 1 ) {
@@ -795,6 +1012,7 @@ int main (void){
     OCR1A = OCR1A + 3;
     _delay_ms(40);
     ...
+  }
   return 0;
 }
 ```
@@ -1146,339 +1364,6 @@ Im Ergebnis zeigt sich folgendes Bild:
 | `unsigned short _Accum` | 2771.68700 us   |
 | `unsigned long _Accum`  | 45760.37500 us  |
 | `long _Accum`           | 50463.25000 us  |
-
-## Analog-Digital-Wandler Wiederholung
-
-### Motivation
-
-In der vorangegangenen Vorlesung sprachen wir insbesondere über die Erfassung
-von digitalen Signalen. Eine Erfassung von analogen Werten ist allerdings notwendig, um Phänomene der Umgebung mit dem notwendigen Detailgrad beobachten zu können.  
-
-![Bild](../images/04_ADC/Herausforderung.png)
-
-Dabei wird das zeit- und wertkontinuierliche Eingangssignal in eine zeit- und wertdiskrete Darstellung überführt.
-
-### Analog Komperator
-
-Ein Komparator ist eine elektronische Schaltung, die zwei Spannungen vergleicht. Der Ausgang zeigt in binärer/digitaler Form an, welche der beiden Eingangsspannungen höher ist. Damit handelt es sich praktisch um einen 1-Bit-Analog-Digital-Umsetzer.
-
-![Bild](../images/04_ADC/Op-amp_symbol.svg.png "Symbol eines Operationsverstärkers")<!-- style="width: 35%; max-width: 600px" -->
-
-![Bild](../images/04_ADC/Comperator.png "Grundsätzliche Beschaltung eines Operationsversträrkers bei der Verwendung als ADC [^WikipediaOmegatron]" )<!-- style="width: 55%; max-width: 600px" -->
-
-<!--
-style="width: 80%; min-width: 420px; max-width: 720px;"
--->
-```ascii
-                   ^
- Ideales       U_a |------------+
- Verhalten         |            |
-                   |            |
-                   |            |             U_i
-                   +------------+------------->
-                   |            | U_ref
-                   |            |
-                   |            |
-                   |............+------------                                                .
-
-                   ^
- Reales        U_a |--------+
- Verhalten         |        !\  
-                   |        ! \  
-                   |        !  \ U_ref        U_i
-                   +--------!---+------------->
-                   |        !    \  !
-                   |        !     \ !  
-                   |        !      \!
-                   |........!.......+-----------                                                .
-
-                            Hysterese
-```
-
-Im AVR findet sich ein Komperator, der unterschiedliche Eingänge miteinander vergleichen kann:
-Für "+" sind dies die `BANDGAP Reference` und der Eingang `AIN0` und für "-" der Pin `AIN1` sowie alle analogen Eingänge.  
-
-![Bild](../images/04_ADC/AnalogCompAVR.png "Comperator Konfiguration im ATmega [^AtmelHandbuch]")<!-- style="width: 85%; max-width: 1000px" -->
-
-Die grundlegende Konfiguration erfolgt über die Konfiguration der Bits / Register :
-
-| Bits                   | Register | Bedeutung                                              |
-| ---------------------- | -------- | ------------------------------------------------------ |
-| `ACBG`                 | `ACSR`   | Analog Comparator Bandgap Select                       |
-| `ACME`                 | `ADCSRB` | Analog Comparator Multiplexer Enable - Bit im Register |
-| `ADEN`                 | `ADCSRA` | Analog Digital Enable                                  |
-| `MUX2`, `MUX1`, `MUX0` | `ADMUX`  | Mulitiplexer Analog input                              |
-
-Dazu kommen noch weitere Parameterisierungen bezüglich der Interrupts, der Aktivitierung von Timerfunktionalität oder der Synchronisierung.
-
-Weitere Erläuterungen finden Sie im Handbuch auf Seite
-
-> **Aufgabe:** An welchen Pins eines Arduino Uno Boards müssen Analoge Eingänge angeschlossen werden, um die zwei Signale mit dem Komperator zu vergleichen. Nutzen Sie den Belegungsplan (Schematics) des Kontrollers, der unter [Link](https://store.arduino.cc/arduino-uno-rev3) zu finden ist.
-
-Ein Beispiel für den Vergleich eines Infrarot Distanzsensors mit einem fest vorgegebenen Spannungswert findet sich im _Example_ Ordner der Veranstaltung.
-
-![Bild](../images/04_ADC/ComperatorBeispiel.png)<!-- style="width: 85%; max-width: 1000px" -->
-
-```cpp
-#define F_CPU 16000000UL
-#include <avr/io.h>
-
-int main()
-{
-  ADCSRB = (1<<ACME);
-  DDRB = (1<<PB5);
-
-  while(1)
-  {
-    if (ACSR & (1<<ACO))/* Check ACO bit of ACSR register */
-       PORTB &= ~(1 << PB5); /* Then turn OFF PB5 pin */
-    else    /* If ACO bit is zero */
-        PORTB = (1<<PB5); /* Turn ON PB5 pin */
-  }
-}
-```
-
-[^AtmelHandbuch]: Firma Microchip, megaAVR® Data Sheet, Seite 243, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
-
-[^WikipediaOmegatron]: Wikipedia, Autor Omegatron - Eigenes Werk, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=983276
-
-### Analog Digital Wandler
-
-__Flashwandler__
-
-![Bild](../images/04_ADC/FlashWandler.png)<!-- style="width: 85%; max-width: 1000px" -->
-
-Vorteil
-
-+ Hohe Geschwindigkeit
-
-Nachteil
-
-+ Energieverbrauch größer
-+ Hardwareaufwand für höhere Auflösungen
-
-https://www.youtube.com/watch?v=x7oPVWLD59Y
-
-__Sequenzielle Wandler__
-
-Sequenzielle Wandler umgehen die Notwendigkeit mehrerer Komperatoren, in dem das Referenzsignal variabel erzeugt wird.
-
-![Bild](../images/04_ADC/SequenziellerWandler.png)<!-- style="width: 85%; max-width: 1000px" -->
-
-Vorteil
-
-+ sehr hohe Auflösungen möglich
-+ Schaltung einfach umsetzbar – kritisches Element DAC/Komperator
-
-Nachteil
-
-+ Variierende Wandlungsdauer
-+ langsam (verglichen mit dem Flashwandler)
-
-
-### Herausforderungen bei der Wandlung
-
-**Fehlertypen**
-
-![Bild](../images/04_ADC/Fehler.png)<!-- style="width: 85%; max-width: 1000px" -->
-
-+ Quantisierungsfehler sind bedingt durch die Auflösung des Wandlers
-+ Offsetfehler ergeben sich aus einer Abweichung der Referenzspannung und führen zu einem konstanten Fehler.
-+ Verstärkungsfehler im Analog-Digitalwandler wirken einen wertabhängigen Fehler.
-+ Der Linearitätsfehler ist die Abweichung von der Geraden. Linearitätsfehler lassen sich nicht abgleichen.
-
-> **Merke:** Die Fehlerparameter hängen in starkem Maße von der Konfiguration des Wandlers (Sample Frequenz, Arbeitsbreite, Umgebungstemperatur) ab!
-
-![Bild](../images/04_ADC/Linearitätsfehler.png "Datenblatt eines 8 Bit Wandlers der TLC0831 [^TIDatenblatt]")
-
-**Referenzspannung**
-
-Eine Herausforderung liegt in der stabilen Bereitstellung der Referenzspannung für den Analog-Digital-Wandler.
-
-### Parameter eines Analog-Digital-Wandlers
-
-+ Auflösung
-+ Messdauer
-+ Leistungsaufnahme
-+ Stabilität der Referenzspannung
-+ Unipolare/Bipolare Messungen
-+ Zahl der Eingänge
-+ Ausgangsinterfaces (parallele Pins, Bus)
-+ Temperaturabhängigkeit und Rauschverhalten (Gain, Nicht-Linearität, Offset)
-
-[^TIDatenblatt]: Firma Texas Instruments, Datenblatt AD-Wandler 8 Bit DIL-8, TLC0831, TLC0831IP
-
-### Umsetzung im AVR
-
-| Handbuch des Atmega328p                             | Bedeutung                                                                                       |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| 10-Bit Auflösung                                    |                                                                                                 |
-| 0.5 LSB Integral Non-Linearity                      | maximale Abweichung zwischen der idealen und der eigentlichen analogen Signalverlauf am Wandler |
-| +/- 2 LSB Absolute Genauigkeit                      | Summe der Fehler inklusive Quantisierungsfehler, Offset Fehler etc.  (worst case Situation)     |
-| 13 - 260μs Conversion Time                          | Die Dauer der Wandlung hängt von der Auflösung und der der vorgegebenen Taktrate  ab.                                                                                               |
-| Up to 76.9kSPS (Up to 15kSPS at Maximum Resolution) |                                                                                                 |
-| 0 - V CC ADC Input Voltage Range                    |  Es sind keine negativen Spannungen möglich.                                                                                               |
-| Temperature Sensor Input Channel                    |                                                                                                 |
-| Sleep Mode Noise Canceler                                                    |    Reduzierung des Steuquellen durch einen "Sleepmode" für die CPU                                                                                             |
-
-![Bild](../images/04_ADC/AVR_ADC.png "Strukturdarstellung des AD-Wandlers im ATmega [^HandbuchAtmega]")
-
-**Trigger für den Wandlung**
-
-Grundsätzlich sind 3 Modi für die Wandlung möglich:
-
-+ Programmgetriggerte Ausführung der Wandlung
-+ Kontinuierliche Wandlung
-+ ereignisgetriebener Start
-
-![Bild](../images/04_ADC/ADCTrigger.png "Trigger des AD-Wandlers im ATmega [^HandbuchAtmega](Seite 247)")
-
-![Bild](../images/04_ADC/TimeLineADC.png "Zeitlicher Verlauf einer AD-Wandlung  [^HandbuchAtmega](Seite 250)")
-
-**Ergebnisregister**
-
-Die Atmega Prozessoren bieten eine Auflösung von 10Bit oder 8Bit für die analogen Wandlungen. Entsprechend stehen zwei Register `ADCL` und `ADCH` für die Speicherung bereit. Standardmäßig (d.h. `ADLAR == 0`) werden die niederwertigsten 8 im Register `ADCL` bereitgehalten und die zwei höherwertigsten im Register `ADCH`.
-
-<!--
-style="width: 80%; min-width: 420px; max-width: 720px;"
--->
-```ascii
-             ADCH                                   ADCL
-  +---+---+---+---+---+---+---+---+   +---+---+---+---+---+---+---+---+
-  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
-  +---+---+---+---+---+---+---+---+   +---+---+---+---+---+---+---+---+
-                            9   8       7   6   5   4   3   2   1   0
-```
-
-Das Ergebnis ergibt sich dann zu
-
-```c
-uint8_t theLowADC = ADCL
-uint16_t theTenBitResults = ADCH<<8 | theLowADC;
-```
-
-Ist keine 10-bit Genauigkeit erforderlich, wird diese Zuordnung durch das Setzen des `ADLAR` Bits im `ADMUX` Register angepasst. Auf diese Weise kann das ADC Ergebnis direkt als 8 Bit Zahl aus `ADCH` ausgelesen werden.
-
-<!--
-style="width: 80%; min-width: 420px; max-width: 720px;"
--->
-```ascii
-             ADCH                                   ADCL
-  +---+---+---+---+---+---+---+---+   +---+---+---+---+---+---+---+---+
-  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
-  +---+---+---+---+---+---+---+---+   +---+---+---+---+---+---+---+---+
-    9   8   7   6   5   4   3   2       1   0
-```
-
-> **Merke: ** Immer zuerst ADCL und erst dann ADCH auslesen.
-
-Beim Zugriff auf ADCL wird das ADCH Register gegenüber Veränderungen vom ADC gesperrt. Erst beim nächsten Auslesen des ADCH-Registers wird diese Sperre wieder aufgehoben. Dadurch ist sichergestellt, dass die Inhalte von ADCL und ADCH immer aus demselben Wandlungsergebnis stammen, selbst wenn der ADC im Hintergrund im Free-Conversion-Mode arbeitet.
-
-[^HandbuchAtmega]: Firma Microchip, megaAVR® Data Sheet, Seite 247, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
-
-### Beispiele
-
-
-**Beispiel 1 - Lesen eines Analogen Distanzsensors**
-
-Für das Beispiel wird der AtMega2560 verwendet, der eine interne Referenzspannung von 2.56 V anstatt der des AtMega328 von 1.1 V bereit stellt.
-
-![Bild](../images/04_ADC/AtMega2560Refs.png "Referenzsystem des Analog-Digitalwandlers [^HandbuchAtmega](Seite 281)")
-
-Die Bedeutung ergibt sich beim Blick ins Datenblatt des Sensors GP2D, dessen Maximalwertausgabewert liegt bei etwa 2.55V
-
-```c
-#ifndef F_CPU
-#define F_CPU 16000000UL // 16 MHz clock speed
-#endif
-
-#include <avr/io.h>
-#include <util/delay.h>
-
-int readADC(int channel) {
-  int i; int result = 0;
-  // Den ADC aktivieren und Teilungsfaktor auf 64 stellen
-  ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS1);
-  // Kanal des Multiplexers & Interne Referenzspannung (2,56 V)
-  ADMUX = channel | (1<<REFS1) | (1<<REFS0);
-  // Den ADC initialisieren und einen sog. Dummyreadout machen
-  ADCSRA |= (1<<ADSC);
-  while(ADCSRA & (1<<ADSC));
-  ADCSRA |= (1<<ADSC);
-  while(ADCSRA & (1<<ADSC)); // Auf Ergebnis warten...
-  // Lesen des egisters "ADCW" takes care of how to read ADCL and ADCH.
-  result = ADCW;
-  // ADC wieder deaktivieren
-  ADCSRA = 0;
-  return result;
-}
-
-int main(void)
-{
-  Serial.begin(9600);
-  while (1) //infinite loop
-  {
-    int result_individual = readADC(0);
-    Serial.println(result_individual);
-    Serial.flush();
-    _delay_ms(10); //1 second delay
-  }
-  return  0; // wird nie erreicht
-}
-```
-
-> _The first ADC conversion result after switching reference voltage source may be inaccurate, and the user is advised to discard this result._ Handbuch Seite 252
-
-**Beispiel 2 - Temperaturüberwachung des Controllers**
-
-> _The temperature measurement is based on an on-chip temperature sensor that is coupled to a single ended ADC8 channel. Selecting the ADC8 channel by writing the MUX3...0 bits in ADMUX register to "1000" enables the temperature sensor. The internal 1.1V voltage reference must also be selected for the ADC voltage reference source in the temperature sensor measurement. When the temperature sensor is enabled, the ADC converter can be used in single conversion mode to measure the voltage over the temperature sensor._ Handbuch Seite 256
-
-```c
-#ifndef F_CPU
-#define F_CPU 16000000UL // 16 MHz clock speed
-#endif
-
-#include <avr/io.h>
-#include <util/delay.h>
-
-double getTemp(void)
-{
-    unsigned int wADC;
-    double t;
-
-    // Set the internal reference and mux.
-    ADMUX = (1<<REFS1) | (1<<REFS0) | (1<<MUX3);
-    ADCSRA |= (1<<ADEN);  // enable the ADC
-
-    // wait for voltages to become stable.
-    delay(20);
-
-    // Start the ADC
-    ADCSRA |= (1<<ADSC);
-
-    // Detect end-of-conversion
-    while (ADCSRA & (1<<ADSC));
-    wADC = ADCW;
-
-    // The offset of 324.31 could be wrong. It is just an indication.
-    t = (wADC - 324.31 ) / 1.22;
-
-    // The returned temperature is in degrees Celsius.
-    return (t);
-}
-
-int main(void)
-{
-  Serial.begin(9600);
-  while (1)
-  {
-    Serial.println(getTemp());
-    Serial.flush();
-    _delay_ms(10); //1 second delay
-  }
-  return  0; // wird nie erreicht
-}
-```
 
 ## Aufgaben
 
