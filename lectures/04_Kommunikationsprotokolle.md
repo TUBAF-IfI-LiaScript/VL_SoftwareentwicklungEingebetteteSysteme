@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich, Bastian Zötzl
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.5
+version:  1.0.6
 language: de
 narrator: Deutsch Female
 
@@ -41,7 +41,7 @@ Im Rahmen der Veranstaltung wollen wir vier Kommunikationsprotokolle, die durch 
 
 * UART - Universal Asynchronous Receiver Transmitter
 * I2C - Inter-Integrated Circuit (in der "Atmel Welt" als _Two Wire Interface_ (TWI) bezeichnet)
-* SPI - Serial Perepherial Interface
+* SPI - Serial Peripheral Interface
 * CAN - Controller Area Network
 
 > **Merke** `UART` beschreibt eine Schnittstelle während `I2C` und `SPI` konkrete Protokolldefinitionen darstellen.
@@ -89,21 +89,31 @@ Unterscheidungsmerkmale von Kommunikationsmedien:
 
 ********************************************************************************
 
-[^TexasInstruments]: Texas Instruments, CMOS BCD-to-Seven-Segement Latch/Decoder/Driver, [Link](https://www.ti.com/lit/ds/symlink/cd4543b.pdf?ts=1612176181441&ref_url=https%253A%252F%252Fwww.google.com%252F)
+[^TexasInstruments]: Texas Instruments, CMOS BCD-to-Seven-Segment Latch/Decoder/Driver, [Link](https://www.ti.com/lit/ds/symlink/cd4543b.pdf?ts=1612176181441&ref_url=https%253A%252F%252Fwww.google.com%252F)
 
 [^ATmega640]: Firma Microchip, ATmega640/V-1280/V-1281/V-2560/V-2561/V Data Sheet, [Link](https://ww1.microchip.com/downloads/en/DeviceDoc/ATmega640-1280-1281-2560-2561-Datasheet-DS40002211A.pdf)
 
 ## Serielle Schnittstelle
 
-Die serielle Schnittstelle ist eine Bezeichnung für eine Übertragungsmechanismus zur Datenübertragung zwischen zwei Geräten, bei denen einzelne Bits zeitlich nacheinander ausgetauscht werden. Die Bezeichnung bezieht sich in der umgangsprachlichen Verwendung:
+Die serielle Schnittstelle ist eine Bezeichnung für einen Übertragungsmechanismus zur Datenübertragung zwischen Geräten, bei dem einzelne Bits zeitlich nacheinander ausgetauscht werden. Die Bezeichnung bezieht sich in der umgangssprachlichen Verwendung auf:
 
-+ das Wirkprinzip generell, das dann verschiedenste Kommunikationsprotokoll meinen kann (CAN, I2C, usw.) oder
-+ die als EIA-RS-232 bezeichnete Schnittstellendefinition oder
++ das Wirkprinzip generell, das dann verschiedenste Kommunikationsprotokolle meinen kann (CAN, I2C, usw.) oder
++ die als RS-232 (bzw. EIA-232) bezeichnete Schnittstellendefinition oder
 + die auf dem Mikrocontroller zugehörigen Bauteile der UART.
 
-Auf der PC Seite sind RS-232 oder RS-485 jedoch durch die universellere USB-Schnittstelle ersetzt worden. Die USB-Schnittstelle arbeitet zwar ebenfalls seriell, ist aber umgangssprachlich meist nicht gemeint, wenn man von "der seriellen Schnittstelle" redet.
+> **Merke:** Die drei Begriffe operieren auf unterschiedlichen Schichten:
+>
+> | Begriff      | Schicht                  | Inhalt                                                                |
+> | ------------ | ------------------------ | --------------------------------------------------------------------- |
+> | **UART**     | Bauteil / Bit-Frame      | serialisiert Bytes in einen asynchronen Bitstrom mit TTL-Pegeln       |
+> | **RS-232**   | physikalische Schicht    | Spannungspegel (±3…±15 V, invertiert), Stecker (DB-9/25), Punkt-zu-Punkt |
+> | **RS-485**   | physikalische Schicht    | differentielle Pegel, Multi-Drop (bis 32 Knoten), keine Stecker-Norm  |
+>
+> Eine UART kann TTL-Signale liefern, die durch einen Pegelwandler (z. B. MAX232 für RS-232 oder MAX485 für RS-485) auf die jeweilige physikalische Schicht angepasst werden.
 
-Serielle Schnittstellen unterscheiden durch:
+Auf der PC-Seite ist RS-232 weitgehend durch die universellere USB-Schnittstelle abgelöst worden — meist über USB-Seriell-Wandler als virtueller COM-Port. **RS-485 hingegen ist in der Industrie weiter sehr verbreitet** (Modbus RTU, Profibus DP, DMX512, M-Bus, BACnet MS/TP). Die USB-Schnittstelle arbeitet zwar ebenfalls seriell, ist aber umgangssprachlich meist nicht gemeint, wenn man von "der seriellen Schnittstelle" redet.
+
+Serielle Schnittstellen unterscheiden sich durch:
 
 + den verwendeten Steckverbinder
 + die elektrischen Übertragungsparameter,
@@ -112,7 +122,7 @@ Serielle Schnittstellen unterscheiden durch:
 
 ### Implementierung
 
-Damit UART-Baugruppen kommunizieren können, müssen die Empfangsleitung (Rx) der einen und die Sendungsleitung (Tx) der anderen Baugruppe am Stecker gegenüberstehen. Damit können parallel in beiden Richtungen Informationen ausgetauscht werden.
+Damit zwei UART-Baugruppen kommunizieren können, müssen ihre Leitungen *gekreuzt* werden: Tx der einen Seite verbindet sich mit Rx der anderen Seite und umgekehrt. Da Sende- und Empfangsleitung physisch getrennt sind, können beide Richtungen gleichzeitig Daten übertragen (Vollduplex).
 
 ![alt-text](../images/06_Kommunikation/UART_connected_Arduinos.png "Verknüpfung von 2 ATmega328 über die serielle Schnittstelle")
 
@@ -126,7 +136,7 @@ style=" width: 80%;
         margin-right: auto;"
 -->
 
-> Achtung: Die Signalpegel der Abbildung beziehen sich auf eine Standardkonforme RS-232 Verbindung. Beim AVR sind die Pegel TTL konform. Das bedeutet, dass die logische 0 mit 0V und die logische 1 mit 5V dargestellt wird.
+> Achtung: Die Signalpegel der Abbildung beziehen sich auf eine standardkonforme RS-232-Verbindung. Beim AVR sind die Pegel hingegen TTL-konform: logische 0 = 0 V, logische 1 = 5 V. Wichtig: RS-232 verwendet **invertierte Logik** — logisch 1 entspricht einer negativen Spannung („mark", typ. −12 V), logisch 0 einer positiven Spannung („space", typ. +12 V). Ein Pegelwandler wie der MAX232 muss daher nicht nur die Spannungen anpassen, sondern auch das Signal invertieren.
 
 Anmerkungen:
 
@@ -134,7 +144,7 @@ Anmerkungen:
 + Das Start bit und das stop bit definieren den "Data frame". Das Start bit ist immer "0", das stop bit immer "1". Der Beginn der Übertragung wird somit durch den Übergang von 1 auf 0 markiert.
 + Die Größe des Datenwortes kann zwischen 5 und 9 Bit variieren.
 + Das Paritätsbit ist eine einfache Möglichkeit, EINEN Fehler bei der Übertragung zu prüfen, ohne diesen aber korrigieren zu können.
-+ Historisch kommen noch zwei Pins für die Flusskontrolle hinzu - RTS (Ready to send) und CTS (Clear to send). Diese sollen der Synchronisation von Geräten dienen und zeigen an, ob ein Gerät bereit ist die Datenübernahme zu realsieren.
++ Historisch kommen noch zwei Pins für die Flusskontrolle hinzu - RTS (Request to Send) und CTS (Clear to Send). Diese sollen der Synchronisation von Geräten dienen und zeigen an, ob ein Gerät bereit ist die Datenübernahme zu realisieren.
 
 Die Datenrate wird Baud (nach dem französischen Ingenieur und Erfinder [Jean Maurice Émile Baudot](https://de.wikipedia.org/wiki/%C3%89mile_Baudot)) angegeben. Für die UART entspricht dies in _Bit pro Sekunde_ (bps). Dabei werden alle Bits (auch Start- und Stoppbit) gezählt und Lücken zwischen den Bytetransfers ignoriert. Dabei sind die spezifische Datenraten - 150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600 und 115200 Baud - üblich:
 
@@ -150,7 +160,7 @@ Für 32KB sind das also im `1_8_1` Format $32\cdot 1024 \cdot 10 / 9600 = 34.133
 Was bedeutet dies also mit Blick auf die Zeitdauer für ein Bit?
 
 $$
-9600 Baud = 9600 Bit/s = 960 \text{Pakete a la 1-8-1}
+9600 \text{ Baud} = 9600 \text{ Bit/s} = 960 \text{ Pakete à 1-8-1}
 $$
 
 Ein Byte wird entsprechend in 1.041ms übertragen, jeder Zustand hat eine Dauer von $0.1041 ms$. Wie können wir diese spezifische Taktung realisieren?
@@ -191,11 +201,11 @@ Der UART basiert auf TTL-Pegel mit 0V (logisch 0) und 5V (logisch 1). Im Untersc
 | 4   | `DTR`            | Data Terminal Ready                                                       |
 | 5   | `GND`            | 0-Potential                                                               |
 | 6   | `DSR`            | Data Set Ready                                                            |
-| 7   | `RTS` oder `RTR` | Gerät 1 ist bereit Daten zu empfangen                                     |
-| 8   | `CTS`            | Clear To Send - Empfänger bzw. Gerät 2 ist bereit Daten zu empfangen      |
+| 7   | `RTS`            | Request To Send - ursprünglich: Gerät 1 möchte senden; in moderner Flow-Control oft als `RTR` (Ready To Receive) genutzt: Gerät 1 ist bereit, Daten zu empfangen |
+| 8   | `CTS`            | Clear To Send - Empfänger bzw. Gerät 2 ist bereit, Daten zu empfangen     |
 | 9   | `RI`             | Ring Indicator                                                            |
 
-Die in industriellen Anwendungen am häufigsten verwendete serielle Schnittstelle ist die RS-485 (EIA-485). Gegenüber der RS-232-Schnittstelle besteht der große Vorteil darin, das mehrere Empfänger und Sender verbunden werden können. Nativ können bis zu 32 Teilnehmer an den EIA-485-Bus angeschlossen werden.
+Die in industriellen Anwendungen am häufigsten verwendete serielle Schnittstelle ist die RS-485 (EIA-485). Gegenüber der RS-232-Schnittstelle besteht der große Vorteil darin, dass mehrere Empfänger und Sender verbunden werden können. Nativ können bis zu 32 Teilnehmer an den EIA-485-Bus angeschlossen werden.
 Zudem erfolgt die Datenübertragung unter Verwendung von Differenzsignalen, was eine größere Störungssicherheit gewährleistet.
 
 ![alt-text](../images/06_Kommunikation/220px-RS-485_waveform.svg.png "Signalverlauf über einer 485 Datenübertragung [Wiki485]")
@@ -234,7 +244,7 @@ Optional kann jede übertragene Einheit mit einer Prüfsumme Parity versehen wer
                                   {{1-2}}
 ********************************************************************************
 
-Im folgenden fokussieren wir die asynchrone Kommunikation. Dabei sind wir mit zwei Problemen konfrontiert:
+Im Folgenden fokussieren wir die asynchrone Kommunikation. Dabei sind wir mit zwei Problemen konfrontiert:
 
 1. Synchronisierung von Sender und Empfänger
 
@@ -291,7 +301,7 @@ void uart_init(void)
 }
 
 void uart_putchar(char c) {
-   while(!(UCSR0A & (1<<UDRE0))); /* Blockierendes Schreiben, es wird gewartet, bit
+   while(!(UCSR0A & (1<<UDRE0))); /* Blockierendes Schreiben, es wird gewartet, bis
                                      der Speicher frei ist */
    UDR0 = c;
 }
@@ -315,7 +325,7 @@ int main(void)
 ```
 @AVR8js.sketch
 
-Das folgende Beispiel für den lesenden Zugriff nutzt die UART Schnittstelle umgekehrt, um die Led an und aus zu schalten. Leider lässt sich dieses Beispiel nicht in der Simulation ausführen, entsprechend sei auf die Umsetzung auf dem realen Controller verwiesen.
+Das folgende Beispiel für den lesenden Zugriff nutzt die UART Schnittstelle umgekehrt, um die LED an und aus zu schalten. Leider lässt sich dieses Beispiel nicht in der Simulation ausführen, entsprechend sei auf die Umsetzung auf dem realen Controller verwiesen.
 
 ```cpp       uart_basic.cpp
 #define F_CPU 16000000
@@ -366,7 +376,7 @@ vgl. Beispiel im Bereich [codeExamples](https://github.com/TUBAF-IfI-LiaScript/V
 
 Der Inter-Integrated Circuit Bus ($I^2C$) wurde 1982 von Philips (jetzt NXP) eingeführt zur geräteinternen Kommunikation zwischen ICs in z. B. CD-Spielern und Fernsehgeräten. Die erste standardisierte Spezifikation 1.0 wurde 1992 veröffentlicht. Im April 2014 erschien V.6.
 
-Im Unterschied zur UART basierten Kommunikation zielt dessen Spezifikation auf den Datenaustausch zwischen multiplen Geräten.
+Im Unterschied zur UART-basierten Kommunikation zielt dessen Spezifikation auf den Datenaustausch zwischen multiplen Geräten.
 
 ![alt-text](../images/06_Kommunikation/I2C.svg.png "I2C Bus mit einem Master und 3 Slave-Bausteinen [^WikiI2Cnetwork]")
 
@@ -406,7 +416,7 @@ Master |Start| Adressframe| R/W|     | Datenframe 1 |     | Datenframe 2 |     |
        +-----+------------+----+     +--------------+     +--------------+     +------+
 
                                +-----+              +-----+              +-----+
-Slave                          | AKN |              | AKN |              | AKN |
+Slave                          | ACK |              | ACK |              | ACK |
                                +-----+              +-----+              +-----+
 ```
 
@@ -427,7 +437,7 @@ Master |Start| Adressframe| 0  |     | Reg. Adresse |     |    Daten     |     |
        +-----+------------+----+     +--------------+     +--------------+     +------+
 
                                +-----+              +-----+              +-----+
-Slave                          | AKN |              | AKN |              | AKN |
+Slave                          | ACK |              | ACK |              | ACK |
                                +-----+              +-----+              +-----+
 ```
 
@@ -437,11 +447,11 @@ Lesen aus einem der Slave-Register
 ```ascii
 
        +-----+------------+----+     +--------------+                    +-----+------+
-Master |Start| Adressframe| 1  |     | Reg. Adresse |                    |NAKN | Stop |
+Master |Start| Adressframe| 1  |     | Reg. Adresse |                    |NACK | Stop |
        +-----+------------+----+     +--------------+                    +-----+------+
 
                                +-----+              +-----+--------------+
-Slave                          | AKN |              | AKN |    Daten     |
+Slave                          | ACK |              | ACK |    Daten     |
                                +-----+              +-----+--------------+
 ```
 
@@ -500,7 +510,7 @@ uint8_t I2C_Start(char write_address)
     TWCR=(1<<TWSTA)|(1<<TWEN)|(1<<TWINT); /* Enable TWI, generate START */
     while(!(TWCR&(1<<TWINT)));          	/* Wait until TWI finish its current job */
     status=TWSR & 0xF8;		                /* Read TWI status register */
-    if(status!=0x08)		                  /* Check weather START transmitted or not? */
+    if(status!=0x08)		                  /* Check whether START transmitted or not? */
        return 0;		                     	/* Return 0 to indicate start condition fail */
     TWDR=write_address;	                	/* Write SLA+W in TWI data register */
     TWCR=(1<<TWEN)|(1<<TWINT);           	/* Enable TWI & clear interrupt flag */
@@ -521,9 +531,9 @@ uint8_t I2C_Write(char data)
 	TWCR = (1<<TWEN)|(1<<TWINT);				  	/* Enable TWI and clear interrupt flag */
 	while (!(TWCR & (1<<TWINT)));					  /* Wait until TWI finish its current job (Write operation) */
 	status = TWSR & 0xF8;									  /* Read TWI status register with masking lower three bits */
-	if (status == 0x28)										  /* Check weather data transmitted & ack received or not? */
+	if (status == 0x28)										  /* Check whether data transmitted & ack received or not? */
 	  return 0;											       	/* If yes then return 0 to indicate ack received */
-	if (status == 0x30)										  /* Check weather data transmitted & nack received or not? */
+	if (status == 0x30)										  /* Check whether data transmitted & nack received or not? */
 	  return 1;												      /* If yes then return 1 to indicate nack received */
 	else
 	  return 2;											        /* Else return 2 to indicate data transmission failed */
@@ -544,11 +554,11 @@ In unserer Bastelbox befinden sich 3 Komponenten mit einem I2C Interface:
 
 ## SPI
 
-Das Serial Peripheral Interface (SPI) ist ein im Jahr 1987 voPn Susan C. Hill und anderen beim Halbleiterhersteller Motorola (heute NXP Semiconductors), entwickeltes synchron arbeitendes Bus-System, das ähnlich umlaufenden Schieberegister arbeitet.
+Das Serial Peripheral Interface (SPI) ist ein im Jahr 1987 von Susan C. Hill und anderen beim Halbleiterhersteller Motorola (heute NXP Semiconductors) entwickeltes synchron arbeitendes Bus-System, das ähnlich einem umlaufenden Schieberegister arbeitet.
 
 ![alt-text](../images/06_Kommunikation/SPI_Principle.png "SPI Prinzip [^AtMega328] Seite 170")
 
-| Implmentierung                                                                                          | Bedeutung                                        |
+| Implementierung                                                                                         | Bedeutung                                        |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | ![alt-text](../images/06_Kommunikation/SPI_single_slave.svg.png "[^WikipdeiaSPI]")                      | Einfacher SPI-Bus mit einem SPI-Master und Slave |
 | ![alt-text](../images/06_Kommunikation/1280px-SPI_three_slaves_daisy_chained.svg.png "[^WikipdeiaSPI]") | SPI-Verbindung durch Kaskadierung der Slaves     |
@@ -574,10 +584,10 @@ Geschichte
 ---------------------
 
 * Entwicklung begann 1981 (Fertigungstechnik), 1983 begann die Weiterentwicklung für Kraftfahrzeuge
-* Daimler nutzt erste Serienanwendung in 1991
+* Daimler nutzt erste Serienanwendung 1991
 * 1987 stellt Bosch das Controller-Area-Network vor
 * Jahrtausendwende bringt Weiterentwicklungen: Subsystem LIN (Local Interconnect Network)
-* Weiterentwicklung in 2012 mit vergrößertem Datenfeld auf 64 Byte (urspr. 8) - CAN FD
+* Weiterentwicklung 2012 mit vergrößertem Datenfeld auf 64 Byte (urspr. 8) - CAN FD
 
 ### Konzept 
 
@@ -585,13 +595,13 @@ Das "Can-Bus-Kabel" besteht aus zwei ineinander verdrehten Drähten. Eine gute A
 
 Zusätzlich müssen an den Enden Abschlusswiderstände von 120 Ohm angebracht sein. Solche "line terminations" sind keine Besonderheit des CAN-Bus und lassen sich über elektrotechnische Phänomene erklären.
 
-![](https://upload.wikimedia.org/wikipedia/commons/9/9e/CAN-Bus_Elektrische_Zweidrahtleitung.svg "SCAN-Bus Topologie (Elektrische Zweidrahtleitung) - Autor Stefan-Xp, avialable at: https://commons.wikimedia.org/wiki/File:CAN-Bus_Elektrische_Zweidrahtleitung.svg")
+![](https://upload.wikimedia.org/wikipedia/commons/9/9e/CAN-Bus_Elektrische_Zweidrahtleitung.svg "CAN-Bus Topologie (Elektrische Zweidrahtleitung) - Autor Stefan-Xp, available at: https://commons.wikimedia.org/wiki/File:CAN-Bus_Elektrische_Zweidrahtleitung.svg")
 
-Bei der CAN-Übertragung heißt die logische 1 "rezessiv", die logische 0 "dominant", wobei der rezessive Zustand der Ruhezustand ist. Wird eine logische 0 gesendet, wechselt CANH aus ein höheres Spannungsniveau, CANL auf ein niedrigeres. 
+Bei der CAN-Übertragung heißt die logische 1 "rezessiv", die logische 0 "dominant", wobei der rezessive Zustand der Ruhezustand ist. Wird eine logische 0 gesendet, wechselt CANH auf ein höheres Spannungsniveau, CANL auf ein niedrigeres. 
 
-![](https://upload.wikimedia.org/wikipedia/commons/4/4d/Canbus_levels.svg "Spannungspegel im Highspeed-CAN-Bus - Autor Plupp, avialable at: https://commons.wikimedia.org/wiki/File:Canbus_levels.svg")
+![](https://upload.wikimedia.org/wikipedia/commons/4/4d/Canbus_levels.svg "Spannungspegel im Highspeed-CAN-Bus - Autor Plupp, available at: https://commons.wikimedia.org/wiki/File:Canbus_levels.svg")
 
-Verbreitete CAN-Bus-Geschwindigkeiten sind 125kbit/s (Lowspeed), 250kbit/s, 500kbit/s und 1Mbit/s (Highspeed). Dabei wird eine Kabellänge von bis 40m betrachtet.
+Verbreitete CAN-Bus-Geschwindigkeiten sind 125kbit/s (Lowspeed), 250kbit/s, 500kbit/s und 1Mbit/s (Highspeed). Dabei wird eine Kabellänge von bis zu 40m betrachtet.
 
 ### Nachrichtenpakete
 
@@ -604,12 +614,12 @@ Es gibt vier verschiedene Arten von Frames:
 
 Wir fokussieren uns an dieser Stelle auf den Datenframe:
 
-![](https://upload.wikimedia.org/wikipedia/commons/5/54/CAN-bus-frame-with-stuff-bit-and-correct-CRC.png "Ein kompletter CAN Bus Frame mit Stuff bits, CRC und Interframe-Spaces - Author: Dr Ken Tindell Source https://kentindell.github.io/2020/01/03/canframe_py_tool/ avialable at: https://commons.wikimedia.org/wiki/File:CAN-bus-frame-with-stuff-bit-and-correct-CRC.png")
+![](https://upload.wikimedia.org/wikipedia/commons/5/54/CAN-bus-frame-with-stuff-bit-and-correct-CRC.png "Ein kompletter CAN Bus Frame mit Stuff bits, CRC und Interframe-Spaces - Author: Dr Ken Tindell Source https://kentindell.github.io/2020/01/03/canframe_py_tool/ available at: https://commons.wikimedia.org/wiki/File:CAN-bus-frame-with-stuff-bit-and-correct-CRC.png")
 
 <!-- data-type="none" -->
 | Feld            | Größe        | Bedeutung                             |
 | --------------- | ------------ | ------------------------------------- |
-| Start           | 1 bit        | dominant, zur Syncronisation          |
+| Start           | 1 bit        | dominant, zur Synchronisation         |
 | Identifier      | 11 bits      | Prioritätenübermittlung               |
 | RTR             | 1 bit        | Anforderung (dominant) / Senden       |
 | IDE             | 1 bit        | Identifier Extension (CAN2.0 A / B)   |
@@ -653,4 +663,4 @@ Tritt ein Fehler mehrmals aufeinanderfolgend auf, führt dies zur automatischen 
 
 *I2C hat mittlerweile eine 10 Adressenbit-Version, wobei 7-bit und 10-bit Slaves "mischbar" sind: [I2C-Adressbit-Versionen](https://www.thebackshed.com/forum/uploads/BobD/2015-04-23_130513_I2C_Slave_Addressing.pdf)
 
-Die Betrachtung lässt andere Bussysteme (CAN, LIN, FlexRay), die eine erweiterte Hardware benötigen außer Acht. Analog bleiben die aus Sicht der Eingebetteten Systeme interessanten Sensornetze, die drahtlos Daten austauschen unberücksichtigt.
+Die Betrachtung lässt andere Bussysteme (CAN, LIN, FlexRay), die eine erweiterte Hardware benötigen, außer Acht. Analog bleiben die aus Sicht der Eingebetteten Systeme interessanten Sensornetze, die drahtlos Daten austauschen unberücksichtigt.
