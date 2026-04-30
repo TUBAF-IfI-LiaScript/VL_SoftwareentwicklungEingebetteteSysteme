@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  0.0.3
+version:  0.0.5
 language: de
 narrator: Deutsch Female
 
@@ -13,17 +13,17 @@ import:  https://raw.githubusercontent.com/liascript-templates/plantUML/master/R
 icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_Freiberg.svg
 -->
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/main/exercises/01_AnalogDigitalWandler.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/exercises/01_AnalogDigitalWandler.md#1)
 
 # Analog-Digital-Wandler
 
 | Parameter                | Kursinformationen                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Veranstaltung:**       | `Übungen Digitale Systeme`                                                                                                                                                      |
-| **Semester**             | `Sommersemester 2025`                                                                                                                                                                |
+| **Veranstaltung:**       | `Übungen Softwareentwicklung Eingebettete Systeme`                                                                                                                                                      |
+| **Semester**             | `Sommersemester 2026`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Einarbeitung und digitale Input/Output Operationen`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/01_AnalogDigitalWandler.md](https://github.com/TUBAF-IfI-LiaScript/VL_DigitaleSysteme/blob/main/lectures/01_AnalogDigitalWandler.md) |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/exercises/01_AnalogDigitalWandler.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/exercises/01_AnalogDigitalWandler.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/3gttGAxMSSofe/giphy-downsized.gif)
@@ -52,59 +52,6 @@ Plattformio integiert zwei Debugging Tools für den Arduino Uno unmittelbar:
 ## Hinweise und Anregungen
 
 ![](https://media.giphy.com/media/9PrqNHPAdWyJVOXntF/giphy-downsized.gif)
-
-### Transformation von Wandlerergebnissen
-
-![Bild](../images/exercises/GP2Dcharacteristics.png "Kennlinie des GP2D12 Sensors Distanzsensors der Firma Sharp [^Sharp]")
-
-![Bild](../images/exercises/TransformationADCvalues.png "Abbildung von Wandlungsergebnissen auf den originären Messwert")
-
-> **Frage:** Wie bilden wir das Abbildungsverhalten in unserem eingebetteten Programm ab?
-
-                 {{1}}
-************************************************
-
-**Variante 1 - Interpolierte Funktion**
-
-![Bild](../images/exercises/Interpolation.png "Interpolation anhand von Polynomen unterschiedlicher Grade")
-
-Bedenken Sie die Hardwarebeschränkungen des Controllers und evaluieren Sie die Berechnungsdauer der Kalkulation.
-
-> **Hinweis:** Implementieren Sie Polynome analog zum Horner Schema anstatt in der üblichen Schreibweise. Dies erschwert zwar die Lesbarkeit ein wenig, reduziert aber die Zahl der Multiplikationen ($2(n-1) -> n$) deutlich.
->
-> $y(x) = a_0 + x\cdot(a_1 +x \cdot(a_2 +  ... (a_{n-1} + a_nx)))))$
-
-************************************************
-
-                        {{2}}
-************************************************
-
-**Variante 2 - Lookup-Table**
-
-Lookup-Tabellen (LUT) werden verwendet, um Informationen statisch zu definieren und diese zur Laufzeit des Programms – zur Vermeidung aufwändiger Berechnungen – zu benutzen.
-
-```c
-static const uint8_t lookup[256] =
-{0,0,0,0 ... 20,23,26,30,31,30,28,...,4,4,4,4,4,3,3,3,...0,0,0};
-distance= lookup[ADC_output];
-```
-
-Der ohnehin häufig knappe Speicher des ATmega328P (2KBytes) lässt sich mit dem in `avr/pgmspace.h` enthaltenen Variablenmodifikator `PROGMEM` schonen. In diesem Fall werden zugehörige Datensätze im Programmspeicher (32KBytes) abgelegt.
-
-```c
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-
-const uint8_t lookup_FLASH[256] PROGMEM = {
-0,0,0,0 ... 20,23,26,30,31,30,28,...,4,4,4,4,4,3,3,3,...0,0,0
-}
-```
-
-> **Frage:** Welche Größe einer LUT macht im Zusammenhang mit ADC Resultaten maximal Sinn?
-
-************************************************
-
-[^Sharp]: Sharp Corporation, GP2D12 Optoelectic Device - Datasheet, https://engineering.purdue.edu/ME588/SpecSheets/sharp_gp2d12.pdf
 
 ### Filtern von Ergebnissen
 
@@ -140,9 +87,9 @@ import matplotlib.pyplot as plt
 #------------------------------------------------
 # Create a signal for demonstration.
 #------------------------------------------------
-# 320 samples of (1000Hz + 15000 Hz) at 48 kHz
+# 96 samples of (1000Hz + 15000 Hz) at 48 kHz (~2 Perioden 1 kHz)
 sample_rate = 48000.
-nsamples = 320
+nsamples = 96
 
 F_1KHz = 1000.
 A_1KHz = 1.0
@@ -205,90 +152,84 @@ plt.savefig('foo.png') # notwendig für die Ausgabe in LiaScript
 Die nachfolgende Lösung illustriert die intuitive Umsetzung des Ansatzes anhand von Gleitkommazahlen. Welche Adaptionen drängen sich auf?
 
 ```c          FIRimplementation.c
-#define nc 11    // Anzahl der Filterkoeffizienten  
-int i = 0, zeiger = 0;
-float new_sample, y, circular_buffer[nc];
+#define nc 11    // Anzahl der Filterkoeffizienten
 
 // Filterkoeffizienten b[0] = b_N, ..., b[nc - 1] = b_0
-float b[nc] = {0.0637, 0, -0.1061, 0, 0.3183, 0.5, 0.3183, 0, -0.1061, 0, 0.0637};
-float circular_buffer[i] = {0};
+static const float b[nc] = {0.0637, 0, -0.1061, 0, 0.3183, 0.5,
+                            0.3183, 0, -0.1061, 0, 0.0637};
 
-// Der folgende Code wird jedes Mal ausgeführt, wenn ein
-// neuer Eingangswert (new_sample) zur Verfügung steht  
-// Schreibe neuen Eingangswert in Buffer  
+static float circular_buffer[nc] = {0};
+static uint8_t zeiger = 0;
 
-circular_buffer[zeiger] = new_sample;
-// Inkrementiere Zeiger modulo nc  
-zeiger = (zeiger + 1) % nc;
+// Wird bei jedem neuen Eingangswert aufgerufen
+float fir_update(float new_sample) {
+  // Schreibe neuen Eingangswert in den Ringpuffer
+  circular_buffer[zeiger] = new_sample;
+  // Inkrementiere Zeiger modulo nc
+  zeiger = (zeiger + 1) % nc;
 
-// Berechne neuen Ausgangswert  
-y = 0;
-for(i = 0; i < nc; i++){
-  y += (b[i] * circular_buffer[(zeiger + i) % nc]);
+  // Berechne neuen Ausgangswert
+  float y = 0;
+  for (uint8_t i = 0; i < nc; i++) {
+    y += b[i] * circular_buffer[(zeiger + i) % nc];
+  }
+  return y;
 }
 ```
 
-## Beispiel - Analoger Comperator
+> **Anregungen zur Optimierung für den ATmega328P** (8-Bit, 16 MHz, _keine FPU_)
+>
+> Die obige Implementierung ist als Referenz gedacht — auf einem Mikrocontroller ohne Gleitkommaeinheit ist sie nicht echtzeitfähig. Folgende Schritte helfen, den Filter realistisch einsetzbar zu machen:
 
-![Bild](../images/04_ADC/AnalogCompAVR.png "Comperator Konfiguration im ATmega [^AtmelHandbuch] Seite 243")
+1. **`float` vermeiden.** Jede `float`-Multiplikation kostet auf dem AVR 150–200 Taktzyklen (Software-Emulation), bei `nc=11` also etwa 125 µs allein für Multiplikationen. Eine **Festkommaarithmetik** im Q15-Format (`int16_t × int16_t → int32_t` Akkumulator) reduziert eine MAC-Operation auf 10–15 Takte — Faktor 10–20 schneller.
 
+2. **Koeffizienten in `PROGMEM`.** 11 × 4 Byte = 44 Byte RAM allein für die Konstanten. Mit `PROGMEM` und `pgm_read_*` wandern sie in den 32-kB-Flash. (Passt didaktisch zur PROGMEM-Aufgabe weiter unten.)
 
-```c    AnalogComperator.c
-#define F_CPU 16000000UL
+3. **Modulo-Operation eliminieren.** `%` auf 8-Bit-AVR ohne Hardware-Division kostet ~150 Takte und wird `nc`-mal pro Sample aufgerufen. Bei einer **Zweierpotenz-Länge** (`nc=8` oder `16`) wird daraus ein billiges `& (nc-1)`. Alternative: `if (++idx >= nc) idx = 0;` — ein einzelner Vergleich.
 
-#include <Arduino.h>
+4. **Symmetrie linearphasiger Filter ausnutzen.** Die Koeffizienten `{0.0637, 0, -0.1061, 0, 0.3183, 0.5, 0.3183, 0, -0.1061, 0, 0.0637}` sind spiegelsymmetrisch. Man kann zuerst `x[k] + x[N-1-k]` addieren und dann nur mit der einen Hälfte der Koeffizienten multiplizieren → **halbe Anzahl Multiplikationen**.
 
-#include <avr/io.h>
-#include <util/delay.h>
+5. **Ringpuffer-Schreibrichtung umkehren.** Wenn neue Samples nach hinten geschoben (oder der Index rückwärts laufen) lässt, entfällt das `(zeiger + i) % nc` zugunsten eines linearen Zugriffs `buffer[i]`. Bei größeren Filtern lohnt sich aber der Ringpuffer mehr.
 
-void Init(){
-  DDRB|=(1<<PB5);       
-  DDRC&=~(1<<PC3);      
-  PORTC&=~(1<<PC3);     
-  ADCSRB |=(1<<ACME);   
-  ADCSRB&=~(1<<ADEN);   
-  ADMUX|=(0<<MUX2)|(1<<MUX1)|(1<<MUX0);
-  ACSR|= (0<<ACD)|      
-         (1<<ACBG)|     
-         (1<<ACIE)|     
-         (0<<ACIC)|     
-         (0<<ACIS1)|    
-         (0<<ACIS0);
-  Serial.println("Initalisierung abgeschlossen");
-  Serial.flush();
-}
+6. **Nullkoeffizienten überspringen.** Im obigen Beispiel sind 4 von 11 Koeffizienten exakt 0 (typisch für Halbband-Filter). Eine ausgewählte Multiplikation spart ~36 % der MACs.
 
-int main (void) {  
+7. **Loop-Unrolling.** Bei festem, kleinem `nc` lohnt sich vollständiges Entrollen — der Compiler kann dann konstante Indizes nutzen und spart die Schleifenverwaltung.
 
-   Serial.begin(9600);
-   Serial.println("Hello World");
-   Serial.flush();
+8. **ISR-Sicherheit.** Wird `fir_update()` aus dem ADC-Interrupt aufgerufen, müssen `circular_buffer` und `zeiger` entweder atomar gelesen werden oder die ISR muss alleinigen Zugriff haben. Sonst drohen Race Conditions zwischen Filter und Hauptschleife.
 
-   Init();
-   while(1){
-      if (ACSR & (1<<ACO)) // Check ACO bit of ACSR register
-      PORTB&=~(1<<PB5);    //LED is ON
-      else  PORTB|=(1<<PB5);
-   }
-   return 0;
-}
-```
+> Eine sinnvolle Reihenfolge zur eigenen Umsetzung: erst (1) + (2) + (3) — das ist der größte Hebel und deckt sich mit dem Rest des Aufgabenblattes. (4) und (6) sind elegante Folgeoptimierungen, (7) und (8) eher fortgeschritten.
+
+### Wann ADC, wann Analog-Comparator?
+
+Der ATmega328P besitzt neben dem 10-Bit-ADC einen **Analog-Comparator**, der zwei Spannungen vergleicht und das Ergebnis als 1-Bit-Signal (`ACO`-Bit in `ACSR`) bereitstellt. Für reine **Schwellwertentscheidungen** (Lichtschranke, Über-/Unterspannung, Nulldurchgang einer AC-Größe) ist er dem ADC deutlich überlegen:
+
++ **Latenz:** Vergleichsergebnis liegt nach wenigen Taktzyklen vor — eine ADC-Wandlung dauert demgegenüber ~104 µs (13 Wandlertakte bei 125 kHz ADC-Clock).
++ **Energie:** Kein Sampling, keine sukzessive Approximation.
++ **Interrupt:** Der Comparator kann ohne Polling per ISR auf Flanken reagieren — ideal für ereignisgesteuerte Erkennung.
+
+Der ADC ist immer dann nötig, wenn der **konkrete Messwert** gebraucht wird (Distanz, Temperatur, Joystick-Position).
+
+> Ein vollständiges, kommentiertes Codebeispiel zur Konfiguration des Analog-Comparators mit Bandgap-Referenz und Multiplexer-Eingang findet sich unter [`codeExamples/avr/AnalogComparator/`](../codeExamples/avr/AnalogComparator/). Die Registerbeschreibung steht im Datenblatt [^AtmelHandbuch] im Kapitel „Analog Comparator".
 
 [^AtmelHandbuch]: Firma Microchip, megaAVR® Data Sheet, [Link](http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf)
 
 ## Aufgaben
 
-- [ ] Erfassen Sie die Werte des internen Temperatursensors des ATmega328 mit den Daten des Heizleiters [Link](https://www.mangolabs.de/product/steel-head-thermistor/). Nutzen Sie dafür ggf. den SerialPlotter der Arduino-Umgebung oder ein alternatives Visualsierungstool [Python](https://thepoorengineer.com/en/arduino-python-plot/).
+Roter Faden dieser Übung ist der **Joystick** — von der ADC-Initialisierung über die Wertaufbereitung bis zum gefilterten Signal mit speicheroptimierten Koeffizienten.
 
-- [ ] Verbinden Sie den Joystick mit dem Arduino über GND und +5V mit den zugehörigen Pins auf dem Arduino. Vx und Vy entsprechen analogen Werten zwischen 0V und 5V der jeweiligen Achsen. SW entspricht einem Druck auf den Joystick und ist ein digitaler Schalter. Schreiben Sie eine Funktion, um den ADC zu initialisieren und eine Funktion, um die analogen Werte des Joysticks auszulesen.
+- [ ] **Joystick anschließen und auslesen.** Verbinden Sie den Joystick mit dem Arduino über GND und +5V. `Vx` und `Vy` liefern analoge Spannungen zwischen 0 V und 5 V, `SW` ist ein digitaler Tastendruck. Schreiben Sie eine Funktion, um den ADC zu initialisieren, und eine Funktion, um die analogen Werte beider Achsen auf eine sinnvolle Auslenkungsgröße (z.B. ±100 % oder Winkel in Grad) abzubilden. Visualisieren Sie die Daten z.B. mit dem SerialPlotter der Arduino-Umgebung oder einem alternativen Tool ([Python](https://thepoorengineer.com/en/arduino-python-plot/)).
 
-- [ ] Entwerfen Sie einen Filter für die Glättung der Joystick-Daten. Experimentieren Sie mit unterschiedlichen Konfigurationen des Filters!
+- [ ] **Joystick-Daten filtern.** Entwerfen Sie einen Filter für die Glättung der Joystick-Werte und experimentieren Sie mit unterschiedlichen Konfigurationen (Ordnung, Grenzfrequenz). Orientieren Sie sich an der oben gezeigten FIR-Implementierung — und an den Optimierungsanregungen, sobald die Float-Variante läuft.
 
-- [ ] Speichern Sie die Filterparameter mit `progmem` im Programmspeicher. Analysieren Sie die Konsequenzen anhand einer Analyse des Assemblercodes - evaluieren Sie den Geschwindigkeitsnachteil.
+- [ ] **Filterparameter in `PROGMEM` ablegen.** Verschieben Sie die Filterkoeffizienten mit `PROGMEM` in den Programmspeicher und greifen Sie mit `pgm_read_*` zu. Analysieren Sie die Konsequenzen anhand des erzeugten Assemblercodes und evaluieren Sie den Geschwindigkeitsnachteil.
+
+  > **Toolchain-Hinweis:** Den Assemblercode erhalten Sie z.B. mit `pio run -t disassemble` oder direkt über `avr-objdump -d -S .pio/build/uno/firmware.elf > firmware.lss`. Vergleichen Sie die generierten Lade-Instruktionen vor und nach der Umstellung (`lds`/`ld` für RAM vs. `lpm` für Flash).
 
 
 __Alternativ__
 
-- [ ] Testen Sie das GDB Interface des `simavr` simulators. Alternativ könnte auch SimulAVR eine Option sein. Auf dieser Basis könnten wir dann einen Prototypen für das Skriptgetriebene Debugging bauen. 
+- [ ] **Internen Temperatursensor des ATmega328 auswerten.** Vergleichen Sie die Messwerte mit den Daten eines Heizleiters [Link](https://www.mangolabs.de/product/steel-head-thermistor/). Beachten Sie: der Sensor ist über `MUX[3:0] = 1000` und die interne Bandgap-Referenz (1.1 V) anzusprechen und benötigt eine individuelle Kalibrierung.
 
-- [ ] Evaluieren Sie die Zeitdauer für die Realisierung einer Messung mit dem Analog-Comperator und dem ADC. Erörtern Sie die Vor- und Nachteile der beiden Ansätze.
+- [ ] **GDB-Interface von `simavr` testen.** Alternativ könnte auch SimulAVR eine Option sein. Auf dieser Basis ließe sich ein Prototyp für skriptgetriebenes Debugging bauen.
+
+- [ ] **Analog-Comparator vs. ADC vermessen.** Evaluieren Sie die Zeitdauer für die Realisierung einer Messung mit dem Analog-Comparator und dem ADC. Erörtern Sie Vor- und Nachteile der beiden Ansätze.
