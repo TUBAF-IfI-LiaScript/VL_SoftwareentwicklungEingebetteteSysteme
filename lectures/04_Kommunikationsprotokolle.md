@@ -87,6 +87,18 @@ Unterscheidungsmerkmale von Kommunikationsmedien:
 + Zahl der notwendigen elektrischen Verknüpfungen
 + Maximale Übertragungslänge
 
+> **Terminologische Anmerkung — Controller/Target statt Master/Slave**
+>
+> Die historisch gebräuchlichen Begriffe `Master` und `Slave` werden seit einigen Jahren in den offiziellen Spezifikationen ersetzt:
+>
+> | Protokoll | bisher           | aktuell                  | Quelle                           |
+> | --------- | ---------------- | ------------------------ | -------------------------------- |
+> | I²C / I3C | Master / Slave   | Controller / Target      | NXP UM10204 Rev. 7.0 (2021)      |
+> | SPI       | Master / Slave   | Controller / Peripheral  | u. a. NXP, Microchip ab ca. 2020 |
+> | CAN       | (terminologisch unkritisch — alle Knoten sind gleichberechtigt; klassische Bezeichnung: _Sender/Empfänger_ bzw. _Knoten_) | | ISO 11898                        |
+>
+> In Datenblättern älterer Bauteile (und in den AVR-Registernamen `TWAR`, `MSTR`, `SS`) finden Sie weiterhin die alten Begriffe — wir verwenden im Text die neue Nomenklatur, übernehmen aber Originalbezeichner unverändert, wo sie sich im Code wiederfinden.
+
 ********************************************************************************
 
 [^TexasInstruments]: Texas Instruments, CMOS BCD-to-Seven-Segment Latch/Decoder/Driver, [Link](https://www.ti.com/lit/ds/symlink/cd4543b.pdf?ts=1612176181441&ref_url=https%253A%252F%252Fwww.google.com%252F)
@@ -227,8 +239,8 @@ Damit werden vier Operationskonzepte unterstützt:
 
 + Normal asynchronous,
 + Double Speed asynchronous,
-+ Master synchronous und
-+ Slave synchronous mode.
++ Controller synchronous (im Datenblatt: _Master synchronous_) und
++ Peripheral synchronous (im Datenblatt: _Slave synchronous_) mode.
 
 ![alt-text](../images/06_Kommunikation/UART_blockdiagram.png "Blockdiagramm der UART Komponenten [^AtMega328] Seite 180")
 
@@ -378,9 +390,30 @@ Der Inter-Integrated Circuit Bus ($I^2C$) wurde 1982 von Philips (jetzt NXP) ein
 
 Im Unterschied zur UART-basierten Kommunikation zielt dessen Spezifikation auf den Datenaustausch zwischen multiplen Geräten.
 
-![alt-text](../images/06_Kommunikation/I2C.svg.png "I2C Bus mit einem Master und 3 Slave-Bausteinen [^WikiI2Cnetwork]")
+<!--style="width: 90%; display: block; margin-left: auto; margin-right: auto;" -->
+```ascii
+                            VDD
+                             │
+                     ┌───────┴───────┐
+                     │               │
+                  ┌──┴──┐         ┌──┴──┐         Rp: Pull-up-Widerstände
+                  │ Rp  │         │ Rp  │             typ. 2,2 – 10 kΩ
+                  └──┬──┘         └──┬──┘
+                     │               │
+       SDA  ─────────┴───────────────┼───────────┬───────────┬─
+                                     │           │           │
+       SCL  ─────────────────────────┼─────┬─────┼─────┬─────┼─────┬─
+                                     │     │     │     │     │     │
+                                  ┌──┴─────┴──┐ ┌┴─────┴──┐ ┌┴─────┴──┐
+                                  │ Controller│ │ Target 1│ │ Target 2│
+                                  │   (µC)    │ │  (ADC)  │ │  (DAC)  │  ... weitere Targets
+                                  │           │ │  0x48   │ │  0x60   │
+                                  └───────────┘ └─────────┘ └─────────┘
 
-[^WikiI2Cnetwork]: Wikipedia, Autor Cburnett,  Sample Inter-Integrated Circuit (I²C) schematic with one master (a microcontroller) and three slave nodes (an analog-to-digital converter (ADC), a digital-to-analog converter (DAC), and a microcontroller) [Wikimedia I2C](https://commons.wikimedia.org/wiki/File:I2C.svg)
+       GND ─────────────────────────────────────────────────────────── gemeinsame Masse
+```
+
+> Beispielhafter I²C-Bus mit einem Controller (Mikrocontroller) und zwei Targets (ADC, DAC). Beide Leitungen sind über Pull-up-Widerstände `Rp` an VDD gezogen — sämtliche Teilnehmer haben Open-Drain-Ausgänge und können die Leitungen nur aktiv nach Masse ziehen ("Wired-AND").
 
 ### Konzepte
 
@@ -392,7 +425,7 @@ I2C benötigt zwei Signalleitungen, eine Takt- (SCL = Serial Clock) und eine Dat
 
 **Adressierung und Datenaustausch**
 
-Eine Standard-I2C-Adresse ist das erste vom Master gesendete Byte, wobei die ersten sieben Bit die eigentliche Adresse darstellen und das achte Bit (R/W-Bit) dem Slave mitteilt, ob er Daten vom Master empfangen soll (Low: Schreibzugriff) oder Daten an den Master zu übertragen hat (High: Lesezugriff). I2C nutzt daher einen Adressraum von 7 Bit, was bis zu 112 Knoten auf einem Bus erlaubt - 16 der 128 möglichen Adressen sind für Sonderzwecke reserviert.
+Eine Standard-I2C-Adresse ist das erste vom Controller gesendete Byte, wobei die ersten sieben Bit die eigentliche Adresse darstellen und das achte Bit (R/W-Bit) dem Target mitteilt, ob es Daten vom Controller empfangen soll (Low: Schreibzugriff) oder Daten an den Controller zu übertragen hat (High: Lesezugriff). I2C nutzt daher einen Adressraum von 7 Bit, was bis zu 112 Knoten auf einem Bus erlaubt - 16 der 128 möglichen Adressen sind für Sonderzwecke reserviert.
 
 Jedes I²C-fähige IC hat eine (üblicherweise vom Hersteller) festgelegte Adresse, von der in der Regel eine modellabhängige Anzahl der untersten Bits (LSB) über spezielle Eingangspins des ICs individuell konfiguriert werden können.
 
@@ -410,49 +443,49 @@ Hierdurch wird es möglich, mehrere ICs dieses Typs am selben I2C-Bus zu betreib
 <!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
 
-Bit              7 / 10     1               8                    8
-       +-----+------------+----+     +--------------+     +--------------+     +------+
-Master |Start| Adressframe| R/W|     | Datenframe 1 |     | Datenframe 2 |     | Stop |
-       +-----+------------+----+     +--------------+     +--------------+     +------+
+Bit                  7 / 10     1               8                    8
+           +-----+------------+----+     +--------------+     +--------------+     +------+
+Controller |Start| Adressframe| R/W|     | Datenframe 1 |     | Datenframe 2 |     | Stop |
+           +-----+------------+----+     +--------------+     +--------------+     +------+
 
-                               +-----+              +-----+              +-----+
-Slave                          | ACK |              | ACK |              | ACK |
-                               +-----+              +-----+              +-----+
+                                   +-----+              +-----+              +-----+
+Target                             | ACK |              | ACK |              | ACK |
+                                   +-----+              +-----+              +-----+
 ```
 
 + Startbedingung: Die SDA-Leitung schaltet von einem hohen Spannungspegel auf einen niedrigen Spannungspegel, bevor die SCL-Leitung von High auf Low schaltet.
 + Stop-Bedingung: Die SDA-Leitung wechselt von einem niedrigen Spannungspegel auf einen hohen Spannungspegel, nachdem die SCL-Leitung von low auf high wechselt.
-+ Adressrahmen: Eine 7- oder 10-Bit-Sequenz, die für jeden Slave einzigartig ist und den Slave identifiziert, wenn der Master mit ihm sprechen will.
-+ Read/Write Bit: Ein einzelnes Bit, das angibt, ob der Master Daten an den Slave sendet (niedriger Spannungspegel) oder Daten von ihm anfordert (hoher Spannungspegel).
++ Adressrahmen: Eine 7- oder 10-Bit-Sequenz, die für jedes Target einzigartig ist und das Target identifiziert, wenn der Controller mit ihm sprechen will.
++ Read/Write Bit: Ein einzelnes Bit, das angibt, ob der Controller Daten an das Target sendet (niedriger Spannungspegel) oder Daten von ihm anfordert (hoher Spannungspegel).
 + ACK/NACK-Bit: Auf jeden Frame einer Nachricht folgt ein Acknowledge/No-Acknowledge-Bit. Wenn ein Adressrahmen oder Datenrahmen erfolgreich empfangen wurde, wird ein ACK-Bit vom empfangenden Gerät an den Sender zurückgesendet.
 
 
-Schreiben in eines der Slave-Register
+Schreiben in eines der Target-Register
 
 <!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
 
-       +-----+------------+----+     +--------------+     +--------------+     +------+
-Master |Start| Adressframe| 0  |     | Reg. Adresse |     |    Daten     |     | Stop |
-       +-----+------------+----+     +--------------+     +--------------+     +------+
+           +-----+------------+----+     +--------------+     +--------------+     +------+
+Controller |Start| Adressframe| 0  |     | Reg. Adresse |     |    Daten     |     | Stop |
+           +-----+------------+----+     +--------------+     +--------------+     +------+
 
-                               +-----+              +-----+              +-----+
-Slave                          | ACK |              | ACK |              | ACK |
-                               +-----+              +-----+              +-----+
+                                   +-----+              +-----+              +-----+
+Target                             | ACK |              | ACK |              | ACK |
+                                   +-----+              +-----+              +-----+
 ```
 
-Lesen aus einem der Slave-Register
+Lesen aus einem der Target-Register
 
 <!--style="width: 80%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
 
-       +-----+------------+----+     +--------------+                    +-----+------+
-Master |Start| Adressframe| 1  |     | Reg. Adresse |                    |NACK | Stop |
-       +-----+------------+----+     +--------------+                    +-----+------+
+           +-----+------------+----+     +--------------+                    +-----+------+
+Controller |Start| Adressframe| 1  |     | Reg. Adresse |                    |NACK | Stop |
+           +-----+------------+----+     +--------------+                    +-----+------+
 
-                               +-----+              +-----+--------------+
-Slave                          | ACK |              | ACK |    Daten     |
-                               +-----+              +-----+--------------+
+                                   +-----+              +-----+--------------+
+Target                             | ACK |              | ACK |    Daten     |
+                                   +-----+              +-----+--------------+
 ```
 
 Die Zahl der übermittelten Daten kann beliebig erweitert werden.
@@ -462,7 +495,7 @@ Die Zahl der übermittelten Daten kann beliebig erweitert werden.
 Pros
 
 + verwendet nur zwei Drähte
-+ unterstützt mehrere Master und mehrere Slaves
++ unterstützt mehrere Controller und mehrere Targets (Multi-Controller-Modus)
 + ACK/NACK-Bit gibt Bestätigung, dass jeder Frame erfolgreich übertragen wurde
 + Hardware ist weniger kompliziert als bei UARTs
 + weit verbreitetes Protokoll
@@ -488,7 +521,7 @@ Cons
 | TWBR     | TWI Bit Rate Register |                            |
 | TWSR     | TWI Status Register   |                            |
 | TWDR     | TWI Data Register     |                            |
-| TWAR     | TWI Address Register  | nur im Slave Mode relevant |
+| TWAR     | TWI Address Register  | nur im Target Mode relevant (Registername stammt aus älterer AVR-Doku) |
 
 ![alt-text](../images/06_Kommunikation/TWI_Transmission.png "Two Wire Interface Modul im AVR [^AtMega328] Seite 223")
 
@@ -540,6 +573,32 @@ uint8_t I2C_Write(char data)
 }
 ```
 
+**Warum gerade `0x28` und `0x30`? — Die TWI-Statuscode-Tabelle**
+
+Die im Code geprüften "magischen" Werte sind keine willkürliche Wahl, sondern stammen aus einer **fest verdrahteten Zustandsmaschine** im TWI-Modul des AVR. Nach jeder abgeschlossenen Aktion auf dem Bus (Start gesendet, Adresse gesendet, Datenbyte gesendet, …) schreibt die Hardware einen 5-Bit-Statuscode in die oberen Bits von `TWSR`. Die unteren drei Bits sind Prescaler-Konfigurationsbits und werden daher mit `& 0xF8` ausmaskiert.
+
+Die Statuscodes sind im ATmega328-Datenblatt (Abschnitt _Two-Wire Serial Interface_, Tabellen 22-2 bis 22-4) tabelliert — der Code vergleicht also gegen **Tabellenwerte aus dem Datenblatt**, nicht gegen ein berechnetes ACK-Bit.
+
+Die für den Controller-Transmit-Modus wichtigsten Codes:
+
+| `TWSR & 0xF8` | Ereignis                                                       |
+| ------------- | -------------------------------------------------------------- |
+| `0x08`        | START gesendet                                                 |
+| `0x10`        | Repeated START gesendet                                        |
+| `0x18`        | SLA+W gesendet, **ACK** empfangen                              |
+| `0x20`        | SLA+W gesendet, **NACK** empfangen                             |
+| **`0x28`**    | **Datenbyte gesendet, ACK empfangen** ← Erfolgsfall in `I2C_Write` |
+| **`0x30`**    | **Datenbyte gesendet, NACK empfangen**                         |
+| `0x38`        | Arbitrierung verloren (Multi-Controller-Konflikt)              |
+
+Damit erklärt sich die Verzweigung in `I2C_Write`:
+
++ `0x28` → Target hat das Byte bestätigt — alles in Ordnung.
++ `0x30` → Target hat **nicht** bestätigt — typische Ursachen: Pufferüberlauf, Adresse stimmt zwar, das Target verweigert aber den konkreten Wert, oder Verdrahtungsproblem.
++ alles andere → echter Fehler (z. B. Arbitrierungsverlust `0x38`, Bus-Fehler `0x00`).
+
+> **Merke:** Ein NACK ist nicht automatisch ein Fehler. Beim **Lesen** vom Target sendet der Controller das _letzte_ erwartete Byte sogar **absichtlich mit NACK** — das ist das vereinbarte Signal an das Target, dass keine weiteren Bytes mehr angefordert werden.
+
 !?[alt-text](https://www.youtube.com/watch?v=PjsK6uxUZeA)
 
 [^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
@@ -558,13 +617,37 @@ Das Serial Peripheral Interface (SPI) ist ein im Jahr 1987 von Susan C. Hill und
 
 ![alt-text](../images/06_Kommunikation/SPI_Principle.png "SPI Prinzip [^AtMega328] Seite 170")
 
-| Implementierung                                                                                         | Bedeutung                                        |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| ![alt-text](../images/06_Kommunikation/SPI_single_slave.svg.png "[^WikipdeiaSPI]")                      | Einfacher SPI-Bus mit einem SPI-Master und Slave |
-| ![alt-text](../images/06_Kommunikation/1280px-SPI_three_slaves_daisy_chained.svg.png "[^WikipdeiaSPI]") | SPI-Verbindung durch Kaskadierung der Slaves     |
-| ![alt-text](../images/06_Kommunikation/1280px-SPI_three_slaves.svg.png "[^WikipdeiaSPI]")               | SPI-Sternverbindung                              |
+| Implementierung                                                                                         | Bedeutung                                                |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| ![alt-text](../images/06_Kommunikation/SPI_single_slave.svg.png "[^WikipdeiaSPI]")                      | Einfacher SPI-Bus mit einem SPI-Controller und Peripheral |
+| ![alt-text](../images/06_Kommunikation/1280px-SPI_three_slaves_daisy_chained.svg.png "[^WikipdeiaSPI]") | SPI-Verbindung durch Kaskadierung der Peripherals (Daisy Chain) |
+| ![alt-text](../images/06_Kommunikation/1280px-SPI_three_slaves.svg.png "[^WikipdeiaSPI]")               | SPI-Sternverbindung                                      |
 
-An den Bus können so viele Teilnehmer angeschlossen werden, wie Slave-Select-Leitungen vorhanden sind, zuzüglich des genau einen Masters, der seinerseits das Clock-Signal an SCK erzeugt. Der Master legt mit der Leitung „Slave Select“ fest, mit welchem Slave er kommunizieren will. Wird sie gegen Masse gezogen, ist der jeweilige Slave aktiv und „lauscht“ an MOSI, bzw. legt er seine Daten im Takt von SCK an MISO. Es wird ein Wort vom Master zum Slave und ein anderes Wort vom Slave zum Master transportiert.
+> **Anmerkung zur Signalbenennung:** Die ursprünglichen Bezeichner `MOSI` (Master Out / Slave In), `MISO` (Master In / Slave Out) und `SS` (Slave Select) werden in aktueller Literatur zunehmend durch `SDO`/`SDI` bzw. `COPI`/`CIPO` (_Controller Out Peripheral In_ / _Controller In Peripheral Out_) und `CS` (Chip Select) ersetzt. Da der ATmega328 in seinem Datenblatt und in den Registernamen (`MSTR` im `SPCR`) weiterhin die alten Begriffe verwendet, mischen wir die Notation an Stellen, an denen wir direkt auf das Datenblatt verweisen.
+
+An den Bus können so viele Teilnehmer angeschlossen werden, wie Chip-Select-Leitungen vorhanden sind, zuzüglich des genau einen Controllers, der seinerseits das Clock-Signal an SCK erzeugt. Der Controller legt mit der Leitung „Chip Select" fest, mit welchem Peripheral er kommunizieren will. Wird sie gegen Masse gezogen, ist das jeweilige Peripheral aktiv und „lauscht" an MOSI/COPI, bzw. legt seine Daten im Takt von SCK an MISO/CIPO. In jedem Taktzyklus wird gleichzeitig ein Bit vom Controller zum Peripheral und ein anderes Bit vom Peripheral zum Controller transportiert — SPI ist damit nativ Full-Duplex.
+
+### Taktphase und Taktpolarität — die vier SPI-Modi
+
+Im Unterschied zu I²C besitzt SPI kein protokollarisch festgelegtes Taktverhalten. Stattdessen muss man zwischen Controller und Peripheral abstimmen, **(1) in welchem Ruhezustand SCK liegt** und **(2) auf welcher Flanke die Daten gültig sind**. Dafür gibt es zwei Parameter:
+
++ **CPOL** (Clock Polarity) — Ruhezustand der Taktleitung
+  - `CPOL = 0`: SCK ist im Leerlauf **Low**
+  - `CPOL = 1`: SCK ist im Leerlauf **High**
++ **CPHA** (Clock Phase) — auf welcher Flanke gesampelt wird
+  - `CPHA = 0`: Daten werden auf der **ersten** (führenden) Flanke übernommen
+  - `CPHA = 1`: Daten werden auf der **zweiten** (nachlaufenden) Flanke übernommen
+
+Daraus ergeben sich vier Kombinationen, die als _SPI-Modus 0…3_ bezeichnet werden:
+
+| Modus | CPOL | CPHA | SCK-Ruhezustand | Daten gültig auf       | Verwendung (typisch)                                       |
+| ----- | ---- | ---- | --------------- | ---------------------- | ---------------------------------------------------------- |
+| 0     | 0    | 0    | Low             | steigender Flanke      | **De-facto-Standard** — SD-Karten, viele EEPROMs, Sensoren |
+| 1     | 0    | 1    | Low             | fallender Flanke       | seltener, z. B. bestimmte ADCs                             |
+| 2     | 1    | 0    | High            | fallender Flanke       | seltener                                                   |
+| 3     | 1    | 1    | High            | steigender Flanke      | u. a. einige TI-DSPs, manche RF-Module                     |
+
+> **Praxisnotiz:** Eine falsche Modus-Wahl ist die häufigste Ursache stummer SPI-Fehler: der Bus läuft, die Bitfolge passt formal — aber Sender und Empfänger einigen sich nicht auf den Sample-Zeitpunkt, und es kommen scheinbar zufällige Werte an. **Immer im Datenblatt des Peripherals nachsehen** und mit den Bits `CPOL` und `CPHA` im Register `SPCR` (ATmega328: Seite 173) entsprechend setzen.
 
 [^AtMega328]: Firma Microchip, Handbuch AtMega328, http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-PA-88A-PA-168A-PA-328-P-DS-DS40002061A.pdf
 
@@ -631,36 +714,95 @@ Wir fokussieren uns an dieser Stelle auf den Datenframe:
 | EOF             | 7 bits       | end of field, rezessiv                |
 | IFS             | 3 / 7 bits   | rezessiv, Puffer-Feld!                | 
 
-### Fehlererkennung 
+### Fehlererkennung
 
-Das CAN-Protokoll beinhaltet 5 Fehlerüberprüfungsmethoden. Drei davon sind aus "Nachrichten-Level", zwei davon auf "Bit-Level". Sobald einer der Fehler auftritt wird ein ***Error-Frame*** generiert. 
+Das CAN-Protokoll beinhaltet **fünf** kombinierte Fehlerüberprüfungsmethoden — **drei** auf "Nachrichten-Level" und **zwei** auf "Bit-Level". Sobald **irgendein** Teilnehmer einen Fehler erkennt, sendet er sofort einen ***Error-Frame*** (6 dominante Bits — eine bewusste Verletzung des Bit-Stuffings), wodurch **alle anderen Knoten** den Fehler ebenfalls erkennen. Die laufende Nachricht wird ungültig und der Sender wiederholt sie automatisch.
 
-Nachrichtenlevel
+**1. Bit-Monitoring (Bit-Level, vom Sender)**
 
-1. Cyclic Redundancy Check (CRC)
-2. Frame-check
-3. ACK-Fehler
+Jeder sendende Knoten liest **gleichzeitig die Leitung mit, die er gerade selbst treibt**. Stimmt der gelesene Pegel nicht mit dem gesendeten überein, liegt ein Bitfehler vor. Ausnahme: Während der Arbitrierungsphase ist "dominant gewinnt rezessiv" normales Verhalten und kein Fehler.
 
-Bit-Level
+> Erkennt vor allem lokale Treiberdefekte und Leitungsfehler in unmittelbarer Sender-Nähe.
 
-1. Monitoring und Vergleich zwischen Senden und Empfangen
-2. Bit-stuffing
+**2. Bit-Stuffing-Verletzung (Bit-Level, vom Empfänger)**
 
-Tritt ein Fehler mehrmals aufeinanderfolgend auf, führt dies zur automatischen Abschaltung des Knotens. Da immer alle Teilnehmer (auch der Sender selbst) mitlesen wird eine Fehlererkennung sicher gewährleistet.
+CAN nutzt **NRZ-Codierung** — bei langen Folgen gleicher Bits fehlen die Pegelwechsel, die die Empfänger zur Bit-Takt-Synchronisation brauchen. Lösung: Nach **fünf gleichen Bits in Folge** schiebt der Sender automatisch ein **invertiertes Stopf-Bit** ein. Der Empfänger entfernt es beim Lesen wieder.
+
+**3. Cyclic Redundancy Check (Nachrichten-Level, vom Empfänger)**
+
+Vor dem CRC-Delimiter überträgt der Sender eine **15-Bit-Prüfsumme** über alle vorhergehenden Bits (ohne Stopf-Bits), berechnet mit dem Polynom $x^{15} + x^{14} + x^{10} + x^8 + x^7 + x^4 + x^3 + 1$. Jeder Empfänger berechnet die CRC selbst nach und vergleicht.
+
+> Erkennt: bis zu 5 zufällig verteilte Einzelbitfehler sicher, alle Bitfehler mit ungerader Anzahl, alle Burst-Fehler ≤ 15 Bit Länge.
+
+**4. Frame-Check (Nachrichten-Level, vom Empfänger)**
+
+Bestimmte Bits an festen Positionen im Frame **müssen** vordefinierte Werte haben:
+
++ CRC-Delimiter — muss rezessiv sein
++ ACK-Delimiter — muss rezessiv sein
++ End-of-Frame — muss aus 7 rezessiven Bits bestehen
+
+Findet ein Empfänger an einer dieser Stellen den falschen Pegel, ist der Frame strukturell defekt.
+
+**5. ACK-Fehler (Nachrichten-Level, vom Sender)**
+
+Der ACK-Mechanismus von CAN ist konzeptionell anders als bei I²C — er ist **kollektiv und broadcast-artig**:
+
+> CAN kennt **keine Empfänger-Adressen** — Nachrichten sind broadcast und werden über den Identifier _inhaltlich_ adressiert (also nicht "an Knoten X", sondern "es ist die Motordrehzahl"). Der ACK sagt daher nur "irgendwer hat zugehört", nicht "der gewünschte Empfänger hat empfangen". Bleibt der ACK-Slot rezessiv, weiß der Sender: niemand am Bus ist empfangsbereit.
+
+**Wer erkennt was?**
+
+| Mechanismus       | Ebene       | Wer erkennt?     | Erkennt vor allem …                  |
+| ----------------- | ----------- | ---------------- | ------------------------------------ |
+| Bit-Monitoring    | Bit         | **Sender**       | Treiberfehler, lokale Leitungsfehler |
+| Bit-Stuffing      | Bit         | **Empfänger**    | einzelne Bit-Verfälschungen          |
+| CRC               | Nachricht   | **Empfänger**    | Mehrbit-Fehler, Burst-Fehler         |
+| Frame-Check       | Nachricht   | **Empfänger**    | Format-/Struktur-Fehler              |
+| ACK-Fehler        | Nachricht   | **Sender**       | "Niemand am Bus hört zu"             |
+
+Nach Spezifikation erkennt CAN:
+
++ **alle** Einzelbitfehler
++ **alle** zwei nicht-benachbarten Bitfehler
++ **alle** Burst-Fehler ≤ 15 Bit
++ Restfehlerwahrscheinlichkeit insgesamt $< 4{,}7 \cdot 10^{-11}$ pro Frame
+
+Bei 1 Mbit/s Dauerbetrieb entspricht das einem statistisch unerkannten Fehler etwa **alle 1000 Jahre**.
 
 ## Ausblick und Vergleich
 
 <!-- data-type="none" -->
-|                       | UART        | I2C          | SPI                  | CAN             |
-| --------------------- | ----------- | ------------ | -------------------- | --------------- |
-| Pins                  | RxD, TxD    | SDA, SCL     | SCLK, MOSI, MISO, SS | CANH, CANL      |
-| Datenrate             | 20KBps      | 1MBps        | 20MBps               | bis zu 1 Mbit/s |
-| Kommunikationsmodus   | asynchron   | synchron     | synchron             | asynchron       |
-| Kommunikationspartner | $=2$        | $2<=x<=127$* | $>=2$                | $2<=x<=128$     |
-| Master                | -           | $>=1$        | $>=1$                | -               |
-| Duplex                | Full Duplex | Half Duplex  | Full Duplex          | Half Duplex     |
-| Kompatibilität        | gut         | gut          | gut                  | gut             |
+|                       | UART        | I2C            | SPI                       | CAN                  |
+| --------------------- | ----------- | -------------- | ------------------------- | -------------------- |
+| Pins                  | RxD, TxD    | SDA, SCL       | SCLK, MOSI, MISO, CS      | CANH, CANL           |
+| max. Datenrate        | ~1 Mbit/s   | 3,4 Mbit/s (High-Speed Mode); 5 Mbit/s (Ultra-Fast) | typ. 10–50 Mbit/s, MCU-abhängig | 1 Mbit/s (Classic) / 8 Mbit/s (FD-Daten) |
+| Kommunikationsmodus   | asynchron   | synchron       | synchron                  | asynchron (NRZ + Bit-Stuffing) |
+| Kommunikationspartner | $=2$        | $2<=x<=112$*   | $>=2$                     | $2<=x<=\sim110$      |
+| Controller            | -           | $>=1$          | $>=1$                     | -                    |
+| Duplex                | Full Duplex | Half Duplex    | Full Duplex               | Half Duplex          |
+| Reichweite (typ.)     | wenige m    | < 1 m (on-board) | < 1 m (on-board)        | bis 40 m bei 1 Mbit/s |
+| Fehlererkennung       | optional Parität | ACK/NACK pro Frame | keine (anwendungsabhängig) | CRC + 5-fache Prüfung |
 
-*I2C hat mittlerweile eine 10 Adressenbit-Version, wobei 7-bit und 10-bit Slaves "mischbar" sind: [I2C-Adressbit-Versionen](https://www.thebackshed.com/forum/uploads/BobD/2015-04-23_130513_I2C_Slave_Addressing.pdf)
+*I2C hat mittlerweile eine 10-Bit-Adressversion, wobei 7-Bit- und 10-Bit-Targets „mischbar" sind: [I2C-Adressbit-Versionen](https://www.thebackshed.com/forum/uploads/BobD/2015-04-23_130513_I2C_Slave_Addressing.pdf)
 
-Die Betrachtung lässt andere Bussysteme (CAN, LIN, FlexRay), die eine erweiterte Hardware benötigen, außer Acht. Analog bleiben die aus Sicht der Eingebetteten Systeme interessanten Sensornetze, die drahtlos Daten austauschen unberücksichtigt.
+### Weiterentwicklungen und benachbarte Bussysteme
+
+Die in dieser Vorlesung behandelten Protokolle decken den Kernbestand klassischer Mikrocontroller-Kommunikation ab. In aktueller Hardware finden sich zunehmend Erweiterungen, die Sie beim Blick in moderne Datenblätter (z. B. STM32H7, ESP32-S3, NXP i.MX RT) antreffen werden:
+
++ **CAN FD** (_Flexible Data Rate_, ISO 11898-1:2015) — Erweiterung des klassischen CAN-Frames auf bis zu **64 Byte Nutzdaten** (statt 8) und höhere Bitraten in der Datenphase (typ. 2–8 Mbit/s). Arbitrierung bleibt bei 1 Mbit/s. Heute in nahezu allen neuen Fahrzeug-Steuergeräten Standard.
+
++ **CAN XL** (CiA 610, 2024) — nächste Stufe: bis zu **2048 Byte Nutzdaten**, bis zu 20 Mbit/s, mit Service-Data-Unit-Typ für IP-/Ethernet-Tunneling. Adressraum auf 11 Bit Prioritäts-ID + 32 Bit „Acceptance Field" erweitert. Ziel: zonale Architekturen im Automobil, Übergang zu Automotive Ethernet.
+
++ **I3C** (MIPI Alliance, seit 2017) — Rückwärtskompatibler Nachfolger von I²C auf denselben zwei Leitungen, aber mit:
+  - bis zu **12,5 Mbit/s** im SDR-Modus (HDR-Modi entsprechend mehr),
+  - dynamischer Adresszuweisung statt fester 7-Bit-Adressen,
+  - In-Band-Interrupts (kein zusätzlicher INT-Pin mehr nötig),
+  - Hot-Join für später hinzukommende Teilnehmer.
+  
+  Treibend ist die Smartphone-Sensorik; zunehmend auch in MCUs (z. B. STM32U5, NXP i.MX 95) verfügbar.
+
++ **LIN** (Local Interconnect Network, ISO 17987) — kostengünstiger Single-Wire-Subbus für unkritische KFZ-Komfortfunktionen (Fensterheber, Spiegel), typisch unter einem CAN-Gateway aufgehängt. 20 kbit/s, ein Controller, bis zu 16 Responder.
+
++ **Automotive Ethernet** (100BASE-T1 / 1000BASE-T1) — paarweise differentielle Single-Pair-Verkabelung; ersetzt zunehmend Hochlast-Domänen, in denen klassischer CAN nicht mehr ausreicht (Kamera, Fahrerassistenz).
+
+Drahtlose Sensornetze (BLE, Zigbee, Thread, LoRa, ESP-NOW) bleiben in der Veranstaltung unberücksichtigt, sind aber für moderne IoT-Anwendungen mindestens ebenso relevant — wir streifen sie ggf. im Zusammenhang mit dem ESP32-S3 in [14_ESP32S3.md](14_ESP32S3.md).
