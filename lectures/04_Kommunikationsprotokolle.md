@@ -392,25 +392,25 @@ Im Unterschied zur UART-basierten Kommunikation zielt dessen Spezifikation auf d
 
 <!--style="width: 90%; display: block; margin-left: auto; margin-right: auto;" -->
 ```ascii
-                            VDD
-                             │
-                     ┌───────┴───────┐
-                     │               │
-                  ┌──┴──┐         ┌──┴──┐         Rp: Pull-up-Widerstände
-                  │ Rp  │         │ Rp  │             typ. 2,2 – 10 kΩ
-                  └──┬──┘         └──┬──┘
-                     │               │
-       SDA  ─────────┴───────────────┼───────────┬───────────┬─
-                                     │           │           │
-       SCL  ─────────────────────────┼─────┬─────┼─────┬─────┼─────┬─
+		                 VDD
+			              │
+                     ┌────┴────┐
+                     │         │
+                  ┌──┴──┐   ┌──┴──┐         Rp: Pull-up-Widerstände
+                  │ Rp  │   │ Rp  │             typ. 2,2 – 10 kΩ
+                  └──┬──┘   └──┬──┘
+                     │         │
+       SDA  ─────────o─────────┼─────o───────────o───────────o───────
+                               │     │           │           │
+       SCL  ───────────────────o─────┼─────o─────┼─────o─────┼─────o─
                                      │     │     │     │     │     │
                                   ┌──┴─────┴──┐ ┌┴─────┴──┐ ┌┴─────┴──┐
                                   │ Controller│ │ Target 1│ │ Target 2│
                                   │   (µC)    │ │  (ADC)  │ │  (DAC)  │  ... weitere Targets
                                   │           │ │  0x48   │ │  0x60   │
-                                  └───────────┘ └─────────┘ └─────────┘
-
-       GND ─────────────────────────────────────────────────────────── gemeinsame Masse
+                                  └──┬────────┘ └─┬───────┘ └─┬───────┘
+                                     │            │           │
+       GND ──────────────────────────o────────────o───────────o────── gemeinsame Masse
 ```
 
 > Beispielhafter I²C-Bus mit einem Controller (Mikrocontroller) und zwei Targets (ADC, DAC). Beide Leitungen sind über Pull-up-Widerstände `Rp` an VDD gezogen — sämtliche Teilnehmer haben Open-Drain-Ausgänge und können die Leitungen nur aktiv nach Masse ziehen ("Wired-AND").
