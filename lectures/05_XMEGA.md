@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.4
+version:  1.0.0
 language: de
 narrator: Deutsch Female
 
@@ -128,17 +128,58 @@ Wenn ein Interrupt aktiviert ist und die Interrupt-Bedingung eintritt, empfängt
 
 Standardmäßig haben alle Peripheriegeräte die Prioritätsstufe 0. Es ist möglich, eine Interrupt-Anforderung der Stufe 1 (hohe Priorität) zuzuordnen, indem Sie ihre Interrupt-Vektornummer in das `CPUINT.LVL1VEC`-Register schreibt. Diese Interrupt-Anforderung hat dann eine höhere Priorität als die anderen (normal priorisierten) Interrupt-Anforderungen.
 
+> [!CAUTION]
+> Ein Interrupt kann die Hohe Priorität haben. Alle anderen haben die Niedrige Priorität.
+
 | Priorität | Level                          | Quelle                 |
 | --------- | ------------------------------ | ---------------------- |
 | Höchste   | _Non Maskable Interrupt_ (NMI) | für 4809 nur CRC check |
 | Hohe      | Level 1                        |                        |
 | Niedrige  | Level 0                        |                        |   
 
+> **Warum ausgerechnet der CRC-Check als NMI?** Der `CRCSCAN` prüft die Integrität des Flash-Speichers. Schlägt diese Prüfung fehl, ist der Programmcode selbst korrupt — und damit kann man weder der Interruptvektortabelle noch dem Maskierungsbit (`SREG.I`) noch der Priorisierungslogik trauen. Ein NMI ist *nicht maskierbar* und kann nicht durch die Prioritätslogik verzögert werden; er feuert also garantiert, egal in welchem Zustand sich die Software befindet. Genau diese Unausweichlichkeit fordern Sicherheitsnormen wie IEC 60730 oder IEC 61508 für die Selbstüberwachung des Programmspeichers. (Mehr dazu in der Vorlesung [Fehlertoleranz](12_Fehlertoleranz.md).)
+
 Interrupts werden entsprechend ihrer Prioritätsstufe UND ihrer Interruptvektoradresse (vgl. Datenblatt Seite 66) priorisiert. Interrupts der Prioritätsstufe 1 unterbrechen Interrupthandler der Prioritätsstufe 0. Bei Interrupts der Prioritätsstufe 0 wird die Priorität anhand der Interruptvektoradresse ermittelt, wobei die niedrigste Interruptvektoradresse die höchste Interruptpriorität hat.
 
 ![alt-text](../images/09_megaAVR_0/InterruptScheduling.png "Interruptsystem des 4809 [^Microchip4809] Seite 116" )
 
 Optional kann für Interrupts der Prioritätsstufe 0 ein Round-Robin-Schema aktiviert werden. Dadurch wird sichergestellt, dass alle Interrupts innerhalb einer bestimmten Zeitspanne bearbeitet werden.
+
+#### Beispiel: Pin-Change-Interrupt am 4809
+
+Im Vergleich zum ATmega328 (vgl. Vorlesung 03) fällt auf:
+
++ jeder GPIO-Pin kann als Interruptquelle dienen — die Konfiguration erfolgt direkt im Port-Register (`PORTx.PINnCTRL`),
++ die globale Freigabe geschieht weiterhin über das Statusregister, aber unter neuem Namen (`CPU.SREG` statt `SREG`, bzw. `sei()`),
++ optional kann ein Interrupt durch Eintrag der Vektornummer in `CPUINT.LVL1VEC` zu hoher Priorität befördert werden.
+
+```c
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+ISR(PORTB_PORT_vect)
+{
+    // Interrupt-Flag manuell löschen (kein automatisches Clearing!)
+    VPORTB.INTFLAGS = PORT_INT2_bm;
+    VPORTA.OUT ^= PIN0_bm;        // LED toggeln
+}
+
+int main(void)
+{
+    PORTA.DIRSET = PIN0_bm;       // LED-Pin als Ausgang
+    PORTB.DIRCLR = PIN2_bm;       // Taster-Pin als Eingang
+    // Pull-up aktivieren UND Interrupt bei fallender Flanke konfigurieren:
+    PORTB.PIN2CTRL = PORT_PULLUPEN_bm | PORT_ISC_FALLING_gc;
+
+    // optional: diesen Vektor zu Level-1 (hoch) befördern
+    // CPUINT.LVL1VEC = PORTB_PORT_vect_num;
+
+    sei();                        // entspricht: CPU.SREG |= CPU_I_bm;
+    while (1) { }
+}
+```
+
+> **Unterschied zum 328er:** Beim ATmega328 mussten externe Interrupts auf wenige dedizierte Pins (`INT0`, `INT1`, Pin-Change-Gruppen) gemappt werden. Beim 4809 trägt *jeder* Port einen eigenen Vektor (`PORTA_PORT_vect`, `PORTB_PORT_vect`, …), die Pin-Auswahl erfolgt rein registerbasiert.
 
 ### Konfigurierbare Logik
 
@@ -178,7 +219,7 @@ style="width: 80%; min-width: 420px; max-width: 720px;"
 Für die Aufgabe ergibt sich folgender Graph:
 
 ```text @plantUML.png
-@startuml
+@startdot
 digraph finite_state_machine {
     rankdir=LR;
 
@@ -196,7 +237,7 @@ digraph finite_state_machine {
     E  -> L  [ label = "AB=01" ];
     L  -> L  [ label = "AB={00, 01, \n10, 11}"];
 }
-@enduml
+@enddot
 ```
 
 
@@ -326,6 +367,8 @@ Diese erweitern wir nun um die Speicherglieder und deren Rückkopplung. Beachten
 
 [^AMD]: Datenblatt PAL16R8 Family, Advanced Micro Devices, [link](http://www.applelogic.org/files/PAL16R8.pdf), 1996
 
+> **Brücke zur CCL:** Genau dieses Prinzip — wenige Eingänge führen über eine programmierbare Logikfunktion (LUT) auf einen Ausgang, optional gepuffert durch ein Flip-Flop — findet sich im 4809 als _Configurable Custom Logic_ wieder. Statt eines PAL-Chips neben dem Controller ist die "Klebelogik" direkt im Silizium integriert und lässt sich aus C konfigurieren.
+
 #### Integration im 4809
 
 ![alt-text](../images/09_megaAVR_0/CCL_Logic.png "Konfigurierbare Logikbausteile des 4809 [^Microchip4809] Seite 116" )
@@ -368,6 +411,28 @@ Welche Inhalte können mit welchen Ausgaben verknüpft werden finden Sie im Hand
 !?[alt-text](https://www.youtube.com/watch?v=WosagCSKdng&t=106s)
 
 Events könnnen auch in Software ausgelöst werden.
+
+#### Minimalbeispiel: Timer triggert ADC ohne CPU-Beteiligung
+
+Klassisches Szenario: ein periodischer Abtastzeitpunkt soll *exakt* eingehalten werden — ohne Jitter durch ISRs.
+
+```c
+#include <avr/io.h>
+
+void event_setup(void)
+{
+    // 1. Quelle: TCA0 Overflow auf Event-Channel 0 routen
+    EVSYS.CHANNEL0 = EVSYS_GENERATOR_TCA0_OVF_gc;
+
+    // 2. Senke: ADC0 hört auf Channel 0
+    EVSYS.USERADC0 = EVSYS_CHANNEL_CHANNEL0_gc;
+
+    // 3. ADC akzeptiert Start via Event
+    ADC0.EVCTRL = ADC_STARTEI_bm;
+}
+```
+
+> **Was hier passiert:** Sobald TCA0 überläuft, startet die ADC-Wandlung *in Hardware* — ohne ISR, ohne Polling, ohne CPU-Last. Die CPU kann schlafen oder andere Arbeit erledigen und greift erst auf das `RESRDY`-Ereignis zu, wenn der Wert fertig ist. Dieses Muster ist auf 8-Bit-Controllern ohne DMA der Schlüssel zu deterministischem Echtzeitverhalten.
 
 ### Analog Comparator
 
@@ -548,3 +613,14 @@ typedef struct ADC_struct {
 > Auslesen eines Potentiometers am Analog Pin des Controllers unter Ausnutzung des Akkumulators
 
 https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/tree/main/codeExamples/xmega/xMegaADC
+
+## Fazit & Ausblick
+
+Damit schließen wir die Betrachtung der 8-Bit-AVR-Welt ab. Die zentralen Lehren, die wir in die 32-Bit-Welt mitnehmen:
+
++ **Peripherie wird mächtiger und entkoppelter:** Event-System, CCL und konfigurierbare Pin-Mappings zeigen einen Trend — die CPU soll möglichst *nicht* in jedem Signalpfad stehen. In Cortex-M wird dieser Gedanke mit DMA, Cross-Triggern und einer hierarchisch priorisierten Interruptarchitektur (NVIC) fortgeführt.
++ **Interrupts werden priorisierbar:** Der Schritt vom statischen Vektor-Schema des ATmega328 zur zweistufigen Priorität mit Round-Robin im 4809 ist ein Vorgeschmack auf den NVIC, der bis zu 256 Prioritätsebenen unterstützt.
++ **Register-Zugriff über `structs`:** Das `struct`-basierte Mapping der avrlibc für den 4809 ist konzeptionell identisch mit dem CMSIS-Ansatz auf ARM-Controllern — der Wechsel der Architektur bedeutet *nicht* gleichzeitig einen radikal anderen Programmierstil.
++ **Klare Skalierungsgrenze:** 8 Bit, ~20 MHz, keine FPU, kein DMA, kein Cache, keine MMU. Sobald Aufgaben Gleitkomma-Mathematik, parallele DMA-Streams oder ein RTOS mit MPU-Schutz verlangen, ist die natürliche Grenze erreicht.
+
+Im nächsten Schritt — der [Cortex-M-Architektur](06_CortexM.md) — schauen wir uns an, wie ARM diese Gedanken mit einer 32-Bit-RISC-Pipeline, dem NVIC und einem einheitlichen Speichermodell konsequent weiterführt.
