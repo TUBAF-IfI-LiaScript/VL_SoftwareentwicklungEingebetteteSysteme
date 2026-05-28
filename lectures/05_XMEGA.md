@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.0
+version:  1.0.1
 language: de
 narrator: Deutsch Female
 
@@ -571,7 +571,19 @@ Dahinter stehen folgende Macros der `avrlibc`.
 ```
 
 In der Umsetzung für den 4809 geht man einen anderen Weg. Hier definieren wir
-ein Set von `structs`, die auf den Speicher gemapt werden.
+ein Set von `structs`, die auf den Speicher gemapt werden. Der Grund: Eine
+Peripherieeinheit ist in Hardware ein zusammenhängender Registerblock — die
+`struct` bildet genau dieses Layout ab, statt jedes Register als isoliertes
+Makro zu führen. Das hat drei praktische Konsequenzen:
+
++ **Gruppierung ist im Namen sichtbar.** `ADC0.CTRLA` benennt eindeutig das
+  Control-Register *des ADC*, während ein flaches `CTRLA` bei mehreren
+  Peripherien mehrdeutig wäre.
++ **Mehrere identische Instanzen** desselben Typs sind trivial: `ADC0`, `ADC1`
+  sind beide vom Typ `ADC_t` — kein Vervielfältigen von Makronamen.
++ **Treiber lassen sich parametrieren.** Ein `void init(ADC_t *adc)` arbeitet
+  über einen Zeiger auf *jede* Instanz. Das frei stehende `_SFR_IO8`-Makro ist
+  dagegen kein übergebbarer Wert.
 
 ![alt-text](../images/10_megaAVR_0/Structs_Register_avr.png "Darstellung der Strukturen über dem Speicherraum [^AR1000] Seite 5")
 
@@ -599,12 +611,97 @@ typedef struct ADC_struct {
 }
 ```
 
-| Postfix | Meaning               | Example           |
-| ------- | --------------------- | ----------------- |
-| `_gm`   | Group - Mask          | TC_CLKSEL_gm      |
-| `_gc`   | Group - Configuration | TC_CLKSEL_DIV1_gc |
-| `_bm`   | Bit   - Mask          | TC_CCAEN_bm       |
-| `_bp`   | Bit   - Position      | TC_CCAEN_bp       |
+Das `WORDREGISTER`-Macro löst den 8/16-Bit-Zugriff elegant über eine `union`:
+Dasselbe Speicherwort ist wahlweise als 16-Bit-Wert (`CH0RES`) **oder**
+byteweise (`CH0RESL`/`CH0RESH`) ansprechbar — ohne Adressarithmetik. Beim
+ATmega328 musste man die L/H-Register als getrennte Makros kennen und das
+Ergebnis manuell zusammensetzen.
+
+Die Konfigurationsbits werden nicht mehr einzeln über `(1 << BIT)` gesetzt,
+sondern über benannte Konstanten mit sprechenden Postfixen:
+
+| Postfix | Bedeutung             | Wofür                                          | Beispiel          |
+| ------- | --------------------- | ---------------------------------------------- | ----------------- |
+| `_gc`   | Group Configuration   | fertig positionierter Wert eines Bitfelds (Schreiben) | TC_CLKSEL_DIV1_gc |
+| `_gm`   | Group Mask            | Bitfeld gezielt löschen (`& ~`) vor dem Neuschreiben  | TC_CLKSEL_gm      |
+| `_bm`   | Bit Mask              | Einzelbit setzen/löschen/abfragen              | TC_CCAEN_bm       |
+| `_bp`   | Bit Position          | nackte Bitnummer (selten, nur für manuelles Shiften) | TC_CCAEN_bp       |
+
+Im Header wird je Peripherie-Instanz ein benannter Zeiger auf die Basisadresse
+gelegt — `#define ADC0 (*(ADC_t *)0x0600)`. Der Zugriff ersetzt damit das
+flache `_SFR_IO8`-Schema und kombiniert `struct`-Felder mit den Postfix-Konstanten:
+
+```c
+void ADC0_init()
+{
+    ADC0.CTRLC = ADC_PRESC_DIV4_gc      /* CLK_PER / 4 (Group Configuration) */
+               | ADC_REFSEL_VDDREF_gc;  /* interne Referenz VDD             */
+    ADC0.CTRLA |= ADC_RESSEL_10BIT_gc;  /* 10-Bit-Auflösung                 */
+    ADC0.CTRLA |= ADC_ENABLE_bm;        /* Enable-Bit setzen (Bit Mask)     */
+}
+```
+
+Gegenüber dem `DDRB = (1 << DDB0) | ...` oben wird so sowohl der Bezug zur
+Peripherie (`ADC0.`) als auch die Bedeutung jedes Werts unmittelbar lesbar. Das
+vollständige Beispiel inkl. Akkumulator findet sich im Anwendungsfall unten.
+
+### Masken, Positionen und Konfigurationswerte am Beispiel
+
+Als durchgängiges Beispiel betrachten wir die Anweisung, die im Anwendungsfall
+unten wörtlich auftaucht:
+
+```c
+ADC0.CTRLC = (ADC0.CTRLC & ~ADC_REFSEL_gm) | ADC_REFSEL_VDDREF_gc;
+```
+
+Das ist das klassische **Read-Modify-Write**-Idiom — unverzichtbar, sobald ein
+Register mehrere unabhängige Felder enthält. `CTRLC` führt neben `REFSEL` noch
+`SAMPCAP` und `PRESC` (Prescaler); eine einfache Zuweisung
+`ADC0.CTRLC = ADC_REFSEL_VDDREF_gc;` würde diese Nachbarfelder auf 0 setzen
+und damit jede zuvor gesetzte Konfiguration zerstören.
+
+Der Ausdruck zerfällt in drei Phasen:
+
+| Phase             | Code-Fragment             | Bedeutung                                    |
+| ----------------- | ------------------------- | -------------------------------------------- |
+| **Read**          | `ADC0.CTRLC`              | aktuellen Registerinhalt lesen               |
+| **Modify (Mask)** | `& ~ADC_REFSEL_gm`        | nur die REFSEL-Bits auf 0, Rest erhalten     |
+| **Modify (Set)**  | `\| ADC_REFSEL_VDDREF_gc` | gewünschten Wert in die freigeräumten Bits   |
+| **Write**         | `ADC0.CTRLC = …`          | Ergebnis zurück ins Register schreiben       |
+
+Hier zeigen sich die beiden Postfixe in ihrer komplementären Rolle: **`_gm`**
+zum *Löschen* der alten Feldbits (mit `& ~`), **`_gc`** zum *Setzen* der neuen
+Feldbits (mit `|`). Bit-für-Bit, angenommen `CTRLC` enthält vorher
+`0b1011_0101` (REFSEL = `10`, übrige Bits beliebig), Ziel REFSEL = `00`:
+
+```ascii
+   ADC0.CTRLC              1 0 1 1 0 1 0 1
+ & ~ADC_REFSEL_gm       &  1 1 0 0 1 1 1 1
+                          ─────────────────
+                           1 0 0 0 0 1 0 1
+ | ADC_REFSEL_VDDREF_gc |  0 0 0 0 0 0 0 0
+                          ─────────────────
+   Ergebnis                1 0 0 0 0 1 0 1                                                                  .
+```
+
+REFSEL wurde gezielt aktualisiert, die übrigen Felder blieben unverändert.
+
+Für *Einzelbits* tritt `_bm` an die Stelle von `_gm` — zum Setzen (`|=`),
+Löschen (`&= ~`) oder Abfragen, etwa `while (ADC0_COMMAND & ADC_STCONV_bm);`.
+Die Maskenform `&= ~…_gm` begegnet einem im Anwendungsfall ebenso wörtlich als
+`PORTD.PIN0CTRL &= ~PORT_ISC_gm;` — dort ohne anschließendes `|`, weil das
+Feld nur gelöscht werden soll.
+
+### Was prüft der Compiler dabei eigentlich?
+
+Die Group Configurations sind als `enum` typisiert (`ADC_REFSEL_t`) — verleitet
+das nicht zu der Annahme, der Compiler fange damit Verwechslungen ab?
+
+Der reale Gewinn der `_gc`-Konstanten ist nicht Typsicherheit,
+sondern **Lesbarkeit und automatisch korrekte Bitposition** — das falsche
+Shiften, häufigster Fehler des `(1 << BIT)`-Stils, kann gar nicht erst
+entstehen. Echte Feld-Typsicherheit gibt es nur im Sonderfall: ein einzelner
+`_gc`-Wert, in C++ an eine enum-Variable oder einen enum-Parameter zugewiesen.
 
 [^AR1000]: Firma Microchip, AVR1000: Getting Started Writing C-code for XMEGA, [Link](http://ww1.microchip.com/downloads/en/AppNotes/doc8075.pdf)
 
