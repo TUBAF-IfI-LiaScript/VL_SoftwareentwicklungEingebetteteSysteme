@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.6
+version:  1.0.8
 language: de
 narrator: Deutsch Female
 
@@ -44,12 +44,25 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | avrlibc, FreeRTOS                                                                                                 | avrlibc, FreeRTOS                                                                                                    | CMSIS, mbedOS, FreeRTOS                                                                        |
 | 10 Bit Analog-Digital-Wandler, 16 Bit Timer,                                                                      | 10 Bit Analog-Digital-Wandler, 16 Bit Timer, Eventsystem, programmierbare Logik, priorisierbare Interrupts           | 10 timers, 16- and 32-bit (84 MHz), 12-bit ADC                                                 |
 
+> **Lernziele dieser Vorlesung**
+>
+> Nach dieser Einheit können Sie ...
+>
+> - die **ARM-Architekturversionen** und die drei Cortex-Profile (**A/R/M**) einordnen und die Cortex-M-Linie (M0–M33) anhand ihres Befehlssatzes unterscheiden.
+> - die zentralen **Systemkomponenten** eines Cortex-M erklären: **MPU**, **FPU**, **DSP-Erweiterungen**, **DMA-Controller**, **SysTick-Timer** und **NVIC**.
+> - **Interrupts, Exceptions und Events** voneinander abgrenzen und die Latenz-Optimierungen des NVIC (Tail-Chaining, Late-Arriving, Lazy State Preservation) beschreiben.
+> - die gängigen **Programmierframeworks** (CMSIS, HAL, LL, mbed) gegeneinander abwägen und ein einfaches Beispiel umsetzen.
+>
+> _Roter Faden:_ Wir gehen von der **Architektur** (ARM → Cortex-M → Systemkomponenten) über die **konkrete Hardware** (STM32F4 / Nucleo-F401RE) zur **Programmierung** (Frameworks, SysTick, Interrupts, DMA) und schließen mit **lauffähigen Beispielen**.
+
 
 ## Was ist eigentlich ein ARM Prozessor?
 
+       {{0-1}}
+**********************************************************
+
 > ARM-Prozessoren sind Mikroprozessoren, die nach der **ARM-Architektur** arbeiten.  Der Begriff ARM steht ursprünglich für "**Acorn RISC Machine**", später "**Advanced RISC Machines**".
 
---{{1}}--
 Die Architektur von ARM-Prozessoren erfuhr seit 1985 zahlreiche Veränderungen, zum Beispiel bei der Zahl der Register, der Größe des Adressraumes und dem Umfang des Befehlsatzes. Sie wird daher in Versionen unterteilt, abgekürzt mit ARMv[Versionsnummer]. Beginnend mit ARMv2, wurden die Architekturversionen in mehr als nur einem Prozessordesign implementiert.
 
 | Jahr        | Architektur | Familie                                      | Neuerungen / Features                                                                 |
@@ -66,7 +79,11 @@ Die Architektur von ARM-Prozessoren erfuhr seit 1985 zahlreiche Veränderungen, 
 
 > In Bezug auf das Instruktionsset werden verschiedene Befehlssätze implementiert - Thumb, Thumb-2, ARM32 und ARM64.
 
-{{2}}
+**********************************************************
+
+       {{1-2}}
+**********************************************************
+
 Ab der Armv7-Architektur werden die sie implementierenden Prozessorkerne drei Anwendungsfeldern zugeteilt:
 
 + Cortex-A (Application Profile)
@@ -92,7 +109,25 @@ Ab der Armv7-Architektur werden die sie implementierenden Prozessorkerne drei An
 
 > Aufgabe: Recherchieren Sie die Unterschiede zwischen MMU und MPU - worin unterschieden sich die beiden Konzepte?
 
+<details>
+<summary>Musterlösung anzeigen</summary>
+
+| Merkmal               | **MMU** (Cortex-A)                          | **MPU** (Cortex-M / Cortex-R)               |
+| --------------------- | ------------------------------------------- | ------------------------------------------- |
+| **Hauptzweck**        | Virtuelle Speicherverwaltung **+** Schutz   | **Nur** Speicherschutz                      |
+| **Adressübersetzung** | Ja – virtuell → physisch über Page Tables   | Nein – arbeitet auf physischen Adressen     |
+| **Granularität**      | Pages (z. B. 4 KB), feingranular            | Wenige Regionen (8–16), Größe Zweierpotenz  |
+| **Konfiguration**     | Page Tables im RAM, TLB als Cache           | Wenige Register direkt im Core              |
+| **Determinismus**     | Nicht-deterministisch (TLB-Miss, Page-Walk) | Deterministisch – keine versteckte Latenz   |
+| **Typische Nutzung**  | Linux/Android: Prozessisolation, Paging     | RTOS: Task-/Stack-Schutz, MMIO-Sperre       |
+
+**Kernaussage:** Eine MMU *übersetzt und schützt* Adressen und ermöglicht damit virtuellen Speicher – jeder Prozess sieht seinen eigenen, durchgehenden Adressraum. Diese Übersetzung kostet aber Determinismus (ein TLB-Miss löst einen Page-Table-Walk aus). Die MPU *schützt nur*: Sie teilt den **physischen** Adressraum in einige Regionen mit Zugriffsrechten auf, ohne Übersetzung. Genau dieser Verzicht ist für Cortex-M gewollt – **harte Echtzeit braucht vorhersagbare Speicherzugriffe**.
+
+</details>
+
 ARM entwickelt das Design von RISC-Prozessoren, deren Fertigung von den Lizenznehmern durchgeführt wird, zu denen die Firmen AMD, Apple, Microchip, Freescale, HiSilicon, IBM, Infineon, Intel, MediaTek, Nvidia, NXP, Qualcomm, Renesas, Samsung, Texas Instruments, ... gehören.
+
+**********************************************************
 
 ## Cortex M Prozessoren
 
@@ -137,7 +172,7 @@ Cortex-M3, mit größerer Chipfläche, umfasst den vollständigen Thumb- und Thu
 || |   ARMv7                            |||                            
 || |   Erweiterte Datenverarbeitung     |||                                                      
 || |   Bit Operationen                  |||                                          
-|| |   Multiplikations/Addtionseinheit  |||                                                         
+|| |   Multiplikations/Additionseinheit |||                                                         
 || +------------------------------------+||                                                              
 ||     Cortex-M4                         ||              
 ||     Digitaler Signal Prozessor        ||          
@@ -148,6 +183,43 @@ Cortex-M3, mit größerer Chipfläche, umfasst den vollständigen Thumb- und Thu
 |      optionale FPU Einheit              |                                            
 +-----------------------------------------+                                    .
 ```
+
+### Hersteller
+
+Unter anderem bieten folgende Halbleiterhersteller Cortex-M4 basierende Mikrocontroller an:
+
++ Atmel: SAM4-Familie (Cortex-M4)
++ Freescale: Kinetis-Familie (Cortex-M4 und Cortex-M4F)
++ Infineon: XMC4000-Familie (Cortex-M4F)
++ NXP: LPC40xx- und LPC43xx-Familien (Cortex-M4)
++ STMicroelectronics: STM32-F4, L4-, F3-, G4-Familien (Cortex-M4F)
++ Texas Instruments: Stellaris-LM4F- und Tiva-TM4C-Familie (Cortex-M4F)
++ Toshiba: TX04-Familie (Cortex-M4F)
++ ...
+
+Um das Bezeichnungsgewirr komplett zu machen, führen die Hersteller, hier STMicroelectronics (STM), dann noch eigene Bezeichnungen ein:
+
+| STM32 Series           | ARM CPU Core |
+| ---------------------- | ------------ |
+| L5                     | Cortex-M33F  |
+| F7, H7                 | Cortex-M7F   |
+| F3, F4, G4, L4, L4+, J | Cortex-M4F   |
+| F1, F2, L1, W, J       | Cortex-M3    |
+| G0, L0, J              | Cortex-M0+   |
+| F0, J                  | Cortex-M0    |
+
+
+### STMicroelectronics STM32F
+
+Die STM32 F4-Serie ist die erste Gruppe von STM32-Mikrocontrollern, die auf dem ARM Cortex-M4F-Kern basieren und über DSP- und Fließkomma-Befehle verfügt. Die F4-Serie ist Pin-zu-Pin-kompatibel mit der STM32 F2-Serie und bietet zusätzlich eine höhere Taktrate, 512 KB Flash Memory, bis zu 96 Kbytes SRAM, Full-Duplex I2S, eine Echtzeituhr und schnellere ADCs. Der Betriebsspannungsbereich beträgt 1,8 bis 3,6 Volt.
+
+![alt-text](../images/11_CortexM/VergleichSTM32F4xx.png "Vergleich der Features der STM32F4xx [^STM32F4]")
+
+![alt-text](../images/11_CortexM/BlockDiagramm.png "Interne Struktur des STM32F401 [^STM32] Seite 14")<!-- style="width: 100%; max-width: 100%;" -->
+
+[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+
+## Kernkomponenten eines Cortex-M4F
 
 ### Memory Protection Unit (MPU)
 
@@ -181,26 +253,26 @@ typedef struct {
 // Im Context-Switcher des RTOS (Ausschnitt)
 void context_switch_to_task(Task_TCB_t *next_task) {
     // 1. MPU deaktivieren (vor dem Laden neuer Konfigurationen)
-    SCB->MPU_CTRL = 0;
+    MPU->CTRL = 0;
     __DSB(); // Data Synchronization Barrier
     __ISB(); // Instruction Synchronization Barrier
 
     // 2. MPU-Regionen des nächsten Tasks laden
     for (int i = 0; i < next_task->num_mpu_regions; i++) {
-        SCB->MPU_RNR = next_task->mpu_regions[i].region_number;
-        SCB->MPU_RBAR = next_task->mpu_regions[i].base_address;
-        SCB->MPU_RASR = next_task->mpu_regions[i].attributes_and_size;
+        MPU->RNR = next_task->mpu_regions[i].region_number;
+        MPU->RBAR = next_task->mpu_regions[i].base_address;
+        MPU->RASR = next_task->mpu_regions[i].attributes_and_size;
     }
 
     // Optional: Alle nicht verwendeten Regionen deaktivieren, um Lecks zu verhindern
     for (int i = next_task->num_mpu_regions; i < MAX_MPU_REGIONS_SUPPORTED; i++) {
-        SCB->MPU_RNR = i;
-        SCB->MPU_RASR = 0; // Region deaktivieren
+        MPU->RNR = i;
+        MPU->RASR = 0; // Region deaktivieren
     }
 
 
     // 3. MPU reaktivieren und PRIVDEFENA (falls benötigt)
-    SCB->MPU_CTRL = MPU_CTRL_ENABLE_Msk | MPU_CTRL_PRIVDEFENA_Msk; // MPU aktivieren + Default Map für Privilegiertes
+    MPU->CTRL = MPU_CTRL_ENABLE_Msk | MPU_CTRL_PRIVDEFENA_Msk; // MPU aktivieren + Default Map für Privilegiertes
 
     __DSB(); // Data Synchronization Barrier
     __ISB(); // Instruction Synchronization Barrier
@@ -268,9 +340,41 @@ void add_arrays_simd_safe(const int16_t *a, const int16_t *b, int16_t *result, i
 
 https://arm-software.github.io/CMSIS_5/Core/html/group__intrinsic__SIMD__gr.html
 
-### Direct memory access (DMA)
+> Die weiteren zentralen Systemkomponenten des Cortex-M – **SysTick-Timer**, **NVIC**, **DMA-Controller** und das Eventsystem – werden in den folgenden Kapiteln im Zusammenhang mit ihrer Programmierung behandelt.
 
-Direkter Speicherzugriff (DMA) ist eine Funktion von Computersystemen, die es bestimmten Hardware-Subsystemen ermöglicht, unabhängig von der Zentraleinheit (CPU) auf den Hauptsystemspeicher (Random-Access Memory) zuzugreifen. 
+### DMA
+
+Wenn wir der CPU (Hauptprozessor) die ganze Arbeit des Abholens von Anweisungen (Code) aus dem Flash, der Ausführung der dekodierten Anweisungen und des Verschiebens von Daten zu und von Peripheriegeräten und Speicher erledigen lassen, führt mit steigender Zahl von Komponenten zu einer steigenden Auslastung des Systems. Die Zahl der Interrupts, die ein UART1-Datenempfänger generiert, der einen Datenstrom erhält, den die CPU sofort in einen lokalen Puffer im Speicher übertragen muss, um kein Datenpaket zu verlieren, führt dies mit
+
+$(1 Start + 8 data + 0 Parity + 1 stop)$ = $10 Bit$ bei $115200Baud$
+
+zu 11520 Interrupts pro Sekunde. Diese konkurrieren dann noch mit den anderer Peripheriegeräten wie UART, SPI, ADC. Dabei passiert bei dieser konkreten Aufgabe nichts anderes als das "hin- und herschaufeln" von Daten. Eine Rechenpower wird gar nicht abgefragt.
+
+Noch schlimmer wird die Situation, wenn neben der eigentlichen Kopieroperation auch noch der Overhead für das Umschalten des Kontexts zu und von Interrupt-Handlern berücksichtigt wird. Die CPU ist nicht in der Lage die volle Arbeitsleistung zu entfalten, da sie mit Datentransaktionen beschäftigt ist.
+
+#### Bussysteme
+
+Zudem werden die erweiterten Komponenten durch ein mehrteiliges Bussystem verknüpft:
+
+| Bus                  | Bedeutung       |
+| -------------------- | --------------- |
+| I-Bus                | Instruction Bus |
+| D-Bus                | Datenbus        |
+| S-Bus                | System Bus      |
+| DMA Bus Verbindungen |                 |
+| USB On-the-go        |                 |
+
+Diese Bus Ausgänge des Core werden auf unterschiedliche Busse im Controller abgebildet.
+
+![alt-text](../images/11_CortexM/BusMatrix.png "Busmatrix am Beispiel des STM32F401 Controllers[^STM32] Seite 36")
+
+[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+
+
+#### Prinzip
+
+Der Speicherdirektzugriff oder englisch Direct Memory Access (DMA) erlaubt den Datenaustausch über das Bussystem, ohne dass die CPU auf dem Umweg über den Prozessorkern auf den Speicher zugreift.
+Diese Technik erlaubt angeschlossenen Peripheriegeräten, untereinander und mit dem Arbeitsspeicher zu kommunizieren. Der Vorteil des Speicherdirektzugriffs ist die schnellere Datenübertragung bei gleichzeitiger Entlastung des Prozessors.
 
 ```mermaid @mermaid
 sequenceDiagram
@@ -296,84 +400,275 @@ sequenceDiagram
 
 > Vorteil: Effizientere CPU-Auslastung und schnellere Datenverarbeitung
 
-### SysTick Timer
+#### Umsetzung im STM32
 
-Was ist der SysTick?
+![alt-text](../images/11_CortexM/BlockDiagramm.png "Interne Struktur des STM32F401 [^STM32] Seite 14")
+
+Der DMA-Controller führt den direkten Speichertransfer durch: als AHB-Master kann er die Kontrolle über die AHB-Busmatrix übernehmen, um AHB-Transaktionen zu initiieren. er kann folgende Transaktionen durchführen:
+
+- Peripherie-zu-Speicher
+- Speicher-zu-Peripherie
+- Speicher-zu-Speicher
+
+![alt-text](../images/11_CortexM/BusMatrix.png "Busmatrix am Beispiel des STM32F401 Controllers[^STM32] Seite 36")
+
+| Modus                  | DMA1 | DMA2 |
+| ---------------------- | ---- | ---- |
+| Peripherie-zu-Speicher | X    | X    |
+| Speicher-zu-Peripherie | X    | X    |
+| Speicher-zu-Speicher   |      | X    |
+
+![alt-text](../images/12_FeaturesSTM32/DMA_Overview.png "DMA Basisstruktur [^STM32] Seite 168")
+
+Jeder Kanal kann einen DMA-Transfer zwischen einem Peripherieregister, das sich an einer festen Adresse befindet, und einer Speicheradresse durchführen. Die Menge der zu übertragenden Daten (bis zu 65535) ist programmierbar. Das Register, das die Menge der zu übertragenden Datenelemente enthält, wird nach jeder Transaktion dekrementiert.
+
+![alt-text](../images/12_FeaturesSTM32/DMA2_Channels.png "DMA Channelzuordnungen [^STM32] Seite 171")
+
+Die Übertragungsdatengrößen der Peripherie und des Speichers sind über die Bits PSIZE und MSIZE im Register DMA_CCRx voll programmierbar.
+
+Eine DMA-Transaktion besteht aus einer Folge von einer konfigurierbaren Anzahl von Datenübertragungen. Dabei besteht jede DMA-Übertragung besteht aus drei Operationen:
+
+- Laden aus dem Peripherie-Datenregister oder einer Speicherstelle, die über das DMA_SxPAR- oder DMA_SxM0AR-Register adressiert wird
+- Speichern der geladenen Daten im Peripherie-Datenregister oder einer Speicherstelle, die über das DMA_SxPAR- oder DMA_SxM0AR-Register adressiert wird -
+- Nachdekrementieren des DMA_SxNDTR-Registers, das die Anzahl der noch auszuführenden Transaktionen enthält
+
+Effizient wird das DMA-Verfahren allerdings erst, wenn nicht nur ein einzelnes Datenwort zu übertragen ist, sondern größere zusammenhängende Speicherbereiche, z. B. ganze Datensektoren oder -spuren von einer Festplatte. Dann lohnt sich auch der gewisse Overhead, der dadurch entsteht, dass zuallererst der DMA-Controller durch Setzen diverser Registerinhalte für die bevorstehende Aufgabe aufgesetzt werden muss. Peripherie- und Speicherzeiger können optional nach jeder Transaktion automatisch nachinkrementiert werden. Wenn der inkrementierte Modus aktiviert ist, ist die Adresse der nächsten Übertragung die Adresse der vorherigen Übertragung, die je nach gewählter Datengröße um 1, 2 oder 4 inkrementiert wird.
+
+[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+
+
+### SysTick-Timer
+
+Der SysTick-Timer ist ein 24-Bit-Zähler, der in jedem Cortex-M-Prozessor vorhanden ist. Er wird verwendet, um regelmäßige Zeitintervalle zu erzeugen, die für die Implementierung von Echtzeitsystemen und Betriebssystemen nützlich sind. Der SysTick-Timer kann so konfiguriert werden, dass er Interrupts generiert, wenn der Zähler einen bestimmten Wert erreicht.
+
+Eigenschaften im Überblick:
 
 - Ein **24-bit Zähler**, integriert in jeden **ARM Cortex-M-Kern**
 - Teil der **Cortex-M Systemsteuerungseinheit** (System Control Block)
 - Läuft mit dem **Prozessortakt** oder einem separaten Takt
 - Wird meist im **periodischen Modus** betrieben
 
-Anwendungsfälle
+Anwendungsfälle:
 
-- **Zeitgeber für Echtzeitanwendungen**  
-- **Trigger für Taskwechsel in RTOS** (z. B. FreeRTOS, Zephyr)  
-- **Systemheartbeat / zyklischer Interrupt**  
+- **Zeitgeber für Echtzeitanwendungen**
+- **Trigger für Taskwechsel in RTOS** (z. B. FreeRTOS, Zephyr)
+- **Systemheartbeat / zyklischer Interrupt**
 - **Benchmarking / Profiling von Codeabschnitten**
 
-Daraus ergeben sich folgende Abläufe
+Daraus ergibt sich folgender typischer Ablauf:
 
-1. SysTick wird mit gewünschtem Intervall (z. B. 1 ms) konfiguriert  
-2. Er erzeugt periodisch einen **SysTick-Interrupt**  
+1. SysTick wird mit gewünschtem Intervall (z. B. 1 ms) konfiguriert
+2. Er erzeugt periodisch einen **SysTick-Interrupt**
 3. Der RTOS-Kernel nutzt diesen Interrupt für:
    - Zeitverwaltung (`xTaskIncrementTick`)
    - Taskwechsel (`vTaskSwitchContext`)
 
-### Bussysteme
+```c
+volatile uint32_t tickCount = 0;
 
-Zudem werden die erweiterten Componenten durch ein mehrteiliges Bussystem verknüpft:
+void SysTick_Handler(void) {
+  tickCount++;
+  if (tickCount >= 1000) {           // 1000 ms erreicht?
+    GPIOA->ODR ^= GPIO_ODR_OD5;      // LED toggeln
+    tickCount = 0;                   // zurücksetzen
+  }
+}
 
-| Bus                  | Bedeutung       |
-| -------------------- | --------------- |
-| I-Bus                | Instruction Bus |
-| D-Bus                | Datenbus        |
-| S-Bus                | System Bus      |
-| DMA Bus Verbindungen |                 |
-| USB On-the-go        |                 |
+int main(void) {
+  // LED Setup (z. B. PA5)
+  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+  GPIOA->MODER |= GPIO_MODER_MODE5_0;
 
-Diese Bus Ausgänge des Core werden auf unterschiedliche Busse im Controller abgebildet.
+  // SysTick: 1ms-Takt bei 16 MHz == 16.000 Ticks pro Sekunde
+  SysTick_Config(SystemCoreClock / 1000);
 
-![alt-text](../images/11_CortexM/BusMatrix.png "Busmatrix am Beispiel des STM32F401 Controllers[^STM32] Seite 36")
+  while (1) {
+    __WFI();  // "Wait for Interrupt" – Stromsparmodus
+  }
+}
+```
+
+> Recherchieren Sie die maximale Zykluszeit des SysTick Timers und die maximale Anzahl an Interrupts pro Sekunde, die damit realisiert werden können.
+> 
+> Was hat es mit dem Macro `__WFI` auf sich? Schlagen Sie die Stromsparmodi des Prozessors nach.
+>
+> Was stört Sie an diesem Code?
+
+
+### Interrupts / Events
+
+Interrupts können in zwei Gruppen kategorisiert werden, nämlich in asynchrone Interrupts (aka Interrupt, Hardware-Interrupt) und synchrone Interrupts (aka Exception). Erstere können jederzeit eintreffen, typischerweise IO-Interrupts, letztere können nur nach der Ausführung eines Befehls eintreffen, z.B. wenn die CPU versucht, eine Zahl durch 0 zu dividieren oder ein Page Fault. Das ist also der Unterschied zwischen Interrupts und Exceptions.
+
+Die Intel-Dokumentation klassifiziert Interrupts und Exceptions wie folgt:
+
+| Kategorie  | Subkategorie                 | Bedeutung                                                                                                                                                                    |
+| ---------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interrupts | Maskierbare Interrupts       | Alle Interrupt Requests (IRQs), die von I/O-Geräten ausgegeben werden, führen zu maskierbaren Interrupts. Ein maskierbarer Interrupt wird ignoriert, sofern er maskiert ist. |
+|            | Nicht-maskierbare Interrupts | Nur wenige kritische Ereignisse (z. B. Hardwarefehler) führen zu nichtmaskierbaren Interrupts . Nichtmaskierbare Interrupts werden von der CPU immer erkannt.                |
+| Exceptions | Fehler                       | Können im Allgemeinen behoben werden; nach der Behebung kann das Programm ohne Verlust der Kontinuität neu gestartet werden.                                                 |
+|            | Traps                        | Traps werden vom Anwenderprogramm ausgelöst, um eine Funktionalität des Betriebssystems aufzurufen.                                                                          |
+|            | Programmierte Ausnahmen      |        Programmierte Ausnahmen werden von der Steuereinheit als Traps behandelt; sie werden oft als Software-Interrupts bezeichnet.                                                                                                                                                                       |
+
+Die Intel-Dokumentation kennt keine "Events" im Sinne von STM32, weil x86-Prozessoren keine hardwareseitige Peripherie-Verkettung wie Mikrocontroller bieten. Stattdessen läuft alles zentral über Interrupts und Polling, gesteuert durch das Betriebssystem.
+
+| Merkmal        | Interrupt          | Event                     |
+| -------------- | ------------------ | ------------------------- |
+| CPU beteiligt  | ja                 | nein                      |
+| Stromverbrauch | höher              | niedriger                 |
+| Latenz         | mittel             | sehr gering               |
+| Anwendung      | Reaktion mit Logik | Hardware-Modul-Verkettung |
+
+
+#### Eventsystem
+
+Ein Event im STM32 ist eine direkte Verbindung zwischen Peripherieeinheiten auf Chip-Ebene, z. B.:
+
++ Timer → ADC (startet Wandlung)
++ Timer → DMA (startet Speichertransfer)
++ GPIO → EXTI-Event → Wakeup
+
+Diese Verbindungen passieren ohne CPU-Beteiligung – es ist ein reines Hardware-Signalnetz.
+
+
+```mermaid @mermaid
+graph TD
+
+%% Peripherieeinheiten
+TIMER[TIM2<br>Timer Update Event]
+EVENT[TRGO<br>Event Signal]
+ADC[ADC1<br>Externe Triggerquelle: Timer]
+DMA[DMA<br>Schreibt ADC-Daten ins RAM]
+RAM[(RAM)]
+
+%% Verbindungen
+TIMER --> EVENT
+EVENT --> ADC
+ADC --> DMA
+DMA --> RAM
+
+%% CPU nur zur Initialisierung
+subgraph CPU
+    INIT[HAL_Init / Start Timer / Start DMA]
+end
+INIT --> TIMER
+INIT --> ADC
+INIT --> DMA
+```
+
+> _"Events sind neben Interrupts etwas, das dem Cortex Core seinen Schlaf  rauben kann."_ (mikrocontroller.net Forenbeitrag)
+
+> **Vergleich:** Dasselbe Konzept kennen Sie bereits vom **ATmega4809** aus der AVR-Welt – dort heißt es **EVSYS (Event System)**. Die Grundidee ist identisch: Peripherie wird direkt mit Peripherie verdrahtet, ohne CPU-Beteiligung, latenzarm und stromsparend. Die beiden Architekturen lösen es jedoch unterschiedlich:
+
+<!-- data-type="none" -->
+| Merkmal                  | **ATmega4809 (EVSYS)**                          | **STM32 / Cortex-M**                                    |
+| ------------------------ | ----------------------------------------------- | ------------------------------------------------------- |
+| **Organisationsform**    | *ein* zentrales Event-System mit freien Kanälen | viele *feste* Trigger-Pfade (Timer-TRGO, EXTI, DMA-Req) |
+| **Routing**              | flexible Crossbar: Generator → Channel → User   | Auswahl aus einer Matrix erlaubter Quellen je Peripherie |
+| **Routing-Flexibilität** | **höher** (fast beliebige Kombinationen)        | geringer, dafür vorhersagbar                            |
+| **DMA-Anbindung**        | **kein DMA** vorhanden                           | Events triggern DMA → ganze Datenströme CPU-frei        |
+| **Core-Events**          | –                                               | zusätzlich `SEV` / `WFE` auf Instruktionsebene          |
+
+Daraus ergibt sich ein lehrreicher Gegensatz: Der **AVR ist im Routing flexibler** (echte Crossbar statt fester Matrix), der **STM32 ist im Gesamtsystem mächtiger** – vor allem, weil seine Events den **DMA-Controller** ansteuern und so komplette autonome Datenströme (Timer → ADC → DMA → RAM) ermöglichen, während der DMA-lose 4809 am Ende doch wieder die CPU zum Abholen der Daten benötigt. Es ist also kein "besser/schlechter", sondern Ausdruck der jeweiligen Designphilosophie: **8-Bit kompensiert wenig Hardware durch viel Verschaltungs-Freiheit, 32-Bit bietet viel Hardware mit gezielten, festen Pfaden** (und damit Determinismus).
+
+#### NVIC
+
+> Was steht im Werbetext zum Nested Vector Interrupt Controller (NVIC) und was bedeuten diese Aussagen?
+
+_The devices embed a nested vectored interrupt controller able to manage 16 priority levels, and handle up to 62 maskable interrupt channels plus the 16 interrupt lines of the Cortex®-M4 with FPU:_
+
++ _Closely coupled NVIC gives low-latency interrupt processing_
++ _Interrupt entry vector table address passed directly to the core_
++ _Allows early processing of interrupts_
++ _Processing of late arriving, higher-priority interrupts_
++ _Support tail chaining_
++ _Processor state automatically saved_
+
+
+Der NVIC verwaltet:
+
++ Welche Interrupts überhaupt aktiv sind
++ Welche gerade verarbeitet werden
++ Welche verschachtelt werden dürfen (Preemption)
++ Welche Warteschlange haben (Pending)
+
+1. Preemption Priority - Bestimmt, ob ein Interrupt einen anderen unterbrechen darf, höhere Priorität = kleinere Zahl (z. B. 0 > 2)
+2. Subpriority - Wird nur verwendet, wenn zwei Interrupts die gleiche Preemption Priority haben. Sie wird in der NVIC-Registerbank gespeichert und kann von der Software geändert werden.
+
+> Die im Werbetext genannten Latenz-Optimierungen (_late arriving_, _tail chaining_, _processor state automatically saved_) werden weiter unten im Abschnitt [Beschleunigung der Abarbeitung](#beschleunigung-der-abarbeitung) im Detail erklärt.
+
+#### Trigger für die ISR
+
+Cortex-M Controller implementieren mindestens die folgenden Exceptions/Interrupts:
+
+| Exception     | Beschreibung                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| **Reset**     | Wird ausgelöst, wenn der Controller startet oder zurückgesetzt wird.                       |
+| **NMI**       | Nicht maskierbarer Interrupt mit sehr hoher Priorität, kann nicht deaktiviert werden.      |
+| **HardFault** | Wird bei schwerwiegenden Fehlern wie Speicherverletzungen oder Division durch 0 ausgelöst. |
+| **SVCall**    | Wird durch den Befehl `svc` ausgelöst. Dient zur Ausführung privilegierter Funktionen.     |
+| **PendSV**    | Softwareausgelöste Exception für Dienste, z. B. für Kontextwechsel im RTOS.                             |
+| **SysTick**   | Zeitgeber-Interrupt, häufig genutzt als System-Tick (z. B. alle 1 ms).                     |
+
+
+
+#### Umsetzung
+
+![alt-text](../images/12_FeaturesSTM32/ExtInterrupt.png "Beschaltung externer Interrupts [^STM32] Seite 206")
+
+> _The devices embed a nested vectored interrupt controller able to manage 16 priority levels._
 
 [^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
 
-## Hersteller
 
-Unter anderem bieten folgende Halbleiterhersteller Cortex-M4 basierende Mikrocontroller an:
+#### Beschleunigung der Abarbeitung
 
-+ Atmel: SAM4-Familie (Cortex-M4)
-+ Freescale: Kinetis-Familie (Cortex-M4 und Cortex-M4F)
-+ Infineon: XMC4000-Familie (Cortex-M4F)
-+ NXP: LPC40xx- und LPC43xx-Familien (Cortex-M4)
-+ STMicroelectronics: STM32-F4, L4-, F3-, G4-Familien (Cortex-M4F)
-+ Texas Instruments: Stellaris-LM4F- und Tiva-TM4C-Familie (Cortex-M4F)
-+ Toshiba: TX04-Familie (Cortex-M4F)
-+ ...
-
-Um das Bezeichnungsgewirr komplett zu machen, führen die Hersteller, hier STMicroelectronics (STM), dann noch eigene Bezeichnungen ein:
-
-| STM32 Series           | ARM CPU Core |
-| ---------------------- | ------------ |
-| L5                     | Cortex-M33F  |
-| F7, H7                 | Cortex-M7F   |
-| F3, F4, G4, L4, L4+, J | Cortex-M4F   |
-| F1, F2, L1, W, J       | Cortex-M3    |
-| G0, L0, J              | Cortex-M0+   |
-| F0, J                  | Cortex-M0    |
+| Ansatz                       | Erklärung |
+|-----------------------------|-----------|
+| **Tail-Chaining**            | Beim Beenden einer Interrupt-Service-Routine (ISR) muss die CPU normalerweise mindestens acht "caller-saved" Register vom Stack laden und beim nächsten Interrupt wieder speichern. Wenn jedoch direkt eine neue Exception ansteht, kann das erneute Sichern und Wiederherstellen übersprungen werden – die Register bleiben erhalten. Dadurch wird wertvolle Zeit gespart. |
+| **Late-Arriving Preemption** | Während der Prozessor noch mit dem Eintritt in eine ISR (Exception Entry) beschäftigt ist, kann eine höher priorisierte Exception eintreffen. In diesem Fall wird die ursprünglich vorgesehene ISR verworfen, und stattdessen direkt die ISR mit höherer Priorität geladen. Der gesicherte Registerzustand bleibt dabei gültig. Dies reduziert die Latenz für dringende Interrupts erheblich. Nach deren Abarbeitung kann die zuerst erkannte ISR direkt im Anschluss ausgeführt werden. |
+| **Lazy State Preservation**  | ARMv7- und ARMv8-Prozessoren mit FPU verfügen über zusätzliche Register (z. B. `s0–s31` und `fpscr`). Da viele ISRs keine Gleitkommaoperationen nutzen, kann das Betriebssystem die Sicherung dieser Register verzögern, bis tatsächlich eine FP-Instruktion ausgeführt wird. Erst dann werden die FP-Register gesichert – das spart Speicherzugriffe und Zeit bei Interrupts, die keine FPU benötigen. |
 
 
-## Microchip STM32F
+```text @plantUML
+@startuml
+participant A as "Thread A"
+participant B as "Thread B"
+participant OS
+participant CPU
+participant FPU
 
-Die STM32 F4-Serie ist die erste Gruppe von STM32-Mikrocontrollern, die auf dem ARM Cortex-M4F-Kern basieren und über DSP- und Fließkomma-Befehle verfügt. Die F4-Serie ist Pin-zu-Pin-kompatibel mit der STM32 F2-Serie und bietet zusätzlich eine höhere Taktrate, 512 KB Flash Memory, bis zu 96 Kbytes SRAM, Full-Duplex I2S, eine Echtzeituhr und schnellere ADCs. Die Betriebsspannungsbereich beträgt 1,8 bis 3,6 Volt.
+== Thread A läuft und nutzt FPU ==
+A -> FPU: FP-Befehl
+FPU --> A: Ergebnis
 
-![alt-text](../images/11_CortexM/VergleichSTM32F4xx.png "Vergleich der Features der STM32F4xx [^STM32F4]")
+== Interrupt tritt auf ==
+CPU -> OS: Exception Entry
+OS -> CPU: Save CPU-Register von A (FPU unberührt)
 
-![alt-text](../images/11_CortexM/BlockDiagramm.png "Interne Struktur des STM32F401 [^STM32] Seite 14")
+== Kontextwechsel zu Thread B ==
+OS -> CPU: Restore CPU-Register von B
+OS --> B: Kontrolle an Thread B
 
-[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+== Thread B läuft (noch ohne FPU) ==
+B -> CPU: Ausführung normaler Instruktionen
+CPU --> B: Kein FPU-Zugriff → kein Problem
 
-[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+== Erste FP-Instruktion von Thread B ==
+B -> FPU: FP-Befehl
+FPU --> CPU: Exception (FPU nicht aktiviert)
+
+== Lazy FPU-Handling ==
+CPU -> OS: FPU Exception Handling
+OS -> CPU: Save FPU-Kontext von Thread A
+OS -> CPU: Load/Init FPU-Kontext für Thread B
+OS -> FPU: FPU aktivieren
+OS --> B: Rückkehr zur FP-Instruktion
+
+== FP-Instruktion wird wiederholt ==
+B -> FPU: FP-Befehl erneut
+FPU --> B: Ergebnis
+@enduml
+```
 
 ## Programmierung
 
@@ -451,7 +746,7 @@ HAL und LL sind komplementär und decken ein breites Spektrum von Anwendungsanfo
 
 Der Quellcode der HAL- und LL-Treiber ist in ANSI-C entwickelt, was ihn unabhängig von den Entwicklungswerkzeugen macht.
 
-**Alternative Framesworks**
+**Alternative Frameworks**
 
 + Standard-Peripherie-Bibliothek (veraltet) - Die ST Standard Peripheral Library bietet eine Reihe von Funktionen für den Umgang mit der Peripherie auf den Mikrocontrollern der STM32 Familie.
 
@@ -461,7 +756,83 @@ Der Quellcode der HAL- und LL-Treiber ist in ANSI-C entwickelt, was ihn unabhän
 
 + Mbed OS - Arm Mbed OS ist ein Open-Source-Embedded-Betriebssystem, es enthält alle Funktionen, die Sie für die Entwicklung eines vernetzten Produkts auf Basis eines Arm Cortex-M-Mikrocontrollers benötigen, einschließlich Sicherheit, Konnektivität, einem RTOS und Treibern für Sensoren und E/A-Geräte.
 
-## Beispiele
+
+## Grundsätzliche Fragen
+
+Warum sollte ich umsteigen?
+================================
+
+<!-- data-type="none" -->
+| Merkmal                             | AVR (z. B. ATmega328)     | ARM Cortex-M (z. B. STM32, RP2040, Teensy) |
+| ----------------------------------- | ------------------------- | ------------------------------------------ |
+| **Taktfrequenz**                    | typ. 16 MHz               | typ. 48–600 MHz                            |
+| **Flash**                           | 32 KB                     | 256 KB – mehrere MB                        |
+| **RAM**                             | 2 KB                      | 32 KB – mehrere MB                         |
+| **ADC-Auflösung**                   | 10 Bit                    | 12–16 Bit                                  |
+| **DMA-Unterstützung**               | Nein                      | Ja (bei vielen ARM-Chips)                  |
+| **USB nativ**                       | Nur über externen Wandler | USB nativ (CDC, HID, MSC, MIDI…)           |
+| **Mehrere Serielle Schnittstellen** | Meist 1–2                 | Viele (UART, I²C, SPI, CAN etc.)           |
+| **Energieeffizienz**                | Gut                       | Oft besser durch Sleep-Modi                |
+| **FPU (Floating Point Unit)**       | Nein                      | Ja (bei Cortex-M4/M7/F7 etc.)              |
+
+Brauche ich den ganzen Embedded-Kram denn?
+================================
+
+<!-- data-type="none" -->
+| Aspekt                          | **C / C++**                        | **MicroPython**                          |
+| ------------------------------- | ---------------------------------- | ---------------------------------------- |
+| **Performance**                 | Sehr hoch – direkter Maschinencode | Deutlich langsamer – Interpreter         |
+| **Echtzeitverhalten**           | Deterministisch, präzise Timing    | Schlechtere Latenz, keine harte Echtzeit |
+| **Speicherauslastung**          | Minimal, volle Kontrolle           | Höherer RAM- und Flash-Bedarf            |
+| **Peripheriezugriff**           | Direkt (Register, HAL, LL)         | Eingeschränkt, oft über Wrapper          |
+| **Toolchain**                   | Komplexer (Compiler, Debugger)     | Sehr einfach (REPL, USB-DragDrop)        |
+| **Entwicklungsgeschwindigkeit** | Langsamer (kompilieren, flashen)   | Sehr schnell (live testen, REPL)         |
+| **Debugging**                   | Leistungsstark (SWD, Breakpoints)  | Eingeschränkt (print, rudimentär)        |
+| **Lernkurve**                   | Steil                              | Flach                                    |
+| **Community-Beispiele**         | Viele (STM32 + C)                  | Weniger, aber wachsend                   |
+
+
+### Programmierbeispiel
+
+Nutzung externer Interrupts am Beispiel des User-Buttons auf dem STM32F401RE Nucleo-Board. Auf dem Board ist der User-Button **B1** mit dem Pin **PC13** und die User-LED **LD2** mit **PA5** verbunden. Über die EXTI-Leitung (External Interrupt) löst ein Tastendruck eine ISR aus, die die LED umschaltet.
+
+![Pinbelegung des STM32 Nucleo-F401RE Boards](../images/12_FeaturesSTM32/STM32-Nucleo-F401RE-Board-complete-pinout.png "Vollständige Pinbelegung des Nucleo-F401RE – User-Button B1 an PC13, User-LED LD2 an PA5")
+
+```c
+// EXTI-ISR für PC13 (User-Button B1)
+void EXTI15_10_IRQHandler(void) {
+  if (EXTI->PR & EXTI_PR_PR13) {     // Interrupt von Leitung 13?
+    EXTI->PR = EXTI_PR_PR13;         // Pending-Bit löschen (durch Schreiben einer 1!)
+    GPIOA->ODR ^= GPIO_ODR_OD5;      // LED (PA5) umschalten
+  }
+}
+
+int main(void) {
+  // Takt für GPIOA, GPIOC und SYSCFG aktivieren
+  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN;
+  RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+
+  GPIOA->MODER |= GPIO_MODER_MODE5_0;   // PA5 als Ausgang (LED)
+  // PC13 ist nach Reset bereits Eingang -> keine MODER-Änderung nötig
+
+  // EXTI13 auf Port C legen
+  SYSCFG->EXTICR[3] |= SYSCFG_EXTICR4_EXTI13_PC;
+  EXTI->IMR  |= EXTI_IMR_IM13;          // Interrupt-Maske für Leitung 13 freigeben
+  EXTI->FTSR |= EXTI_FTSR_TR13;         // fallende Flanke (Button gegen GND)
+
+  NVIC_EnableIRQ(EXTI15_10_IRQn);       // NVIC-Kanal aktivieren
+
+  while (1) {
+    __WFI();                            // auf Interrupt warten (stromsparend)
+  }
+}
+```
+
+> Aufgabe: Warum wird das Pending-Bit `EXTI->PR` durch *Schreiben einer 1* gelöscht und nicht durch eine 0? Was passiert, wenn man das Löschen in der ISR vergisst?
+>
+> Aufgabe: Der Taster prellt mechanisch. Wie würden Sie ein Entprellen (Debouncing) ergänzen, ohne die ISR mit `delay()` zu blockieren?
+
+### Weitere Beispiele
 
 ![Nucleo](../images/00_Einfuehrung/Nucleo64.jpg)
 
@@ -478,318 +849,18 @@ Der Quellcode der HAL- und LL-Treiber ist in ANSI-C entwickelt, was ihn unabhän
 
 ![alt-text](https://os.mbed.com/docs/mbed-os/v6.16/introduction/images/Mbed_OS_diagram_for_intro.png "mbed OS Architektur - Mbed OS 6 Dokumentation [Link](https://os.mbed.com/docs/mbed-os/v6.16/introduction/architecture.html)")
 
-## Grundsätzliche Fragen
+**Lauffähige Codebeispiele im Repository**
 
-Warum sollte ich umsteigen?
-================================
+Dieselbe "Hello World"-Anwendung (Blink-LED) ist im Repository in fünf Varianten umgesetzt – einmal pro Framework. So lässt sich derselbe Anwendungsfall vom Registerzugriff (CMSIS) bis zur Hochsprachen-Abstraktion (mbed) direkt vergleichen:
 
-| Merkmal                             | AVR (z. B. ATmega328)     | ARM Cortex-M (z. B. STM32, RP2040, Teensy) |
-| ----------------------------------- | ------------------------- | ------------------------------------------ |
-| **Taktfrequenz**                    | typ. 16 MHz               | typ. 48–600 MHz                            |
-| **Flash**                           | 32 KB                     | 256 KB – mehrere MB                        |
-| **RAM**                             | 2 KB                      | 32 KB – mehrere MB                         |
-| **ADC-Auflösung**                   | 10 Bit                    | 12–16 Bit                                  |
-| **DMA-Unterstützung**               | Nein                      | Ja (bei vielen ARM-Chips)                  |
-| **USB nativ**                       | Nur über externen Wandler | USB nativ (CDC, HID, MSC, MIDI…)           |
-| **Mehrere Serielle Schnittstellen** | Meist 1–2                 | Viele (UART, I²C, SPI, CAN etc.)           |
-| **Energieeffizienz**                | Gut                       | Oft besser durch Sleep-Modi                |
-| **FPU (Floating Point Unit)**       | Nein                      | Ja (bei Cortex-M4/M7/F7 etc.)              |
+| Anwendung                       | Framework-Varianten                | Link                                                                                                                                  |
+| ------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Blink-LED mit SysTick           | CMSIS, STM HAL, STM LL, CubeMX, mbed | [codeExamples/STM32/HelloWorld/](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/codeExamples/STM32/HelloWorld/) |
+| ADC mit DMA (Circular Buffer)   | HAL / CubeMX                       | [codeExamples/STM32/ADC_DMA_CircularBuffer/](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/codeExamples/STM32/ADC_DMA_CircularBuffer/) |
 
-Brauche ich den ganzeen Embedded-Kram denn?
-================================
+Die Variante in PlatformIO nutzt jeweils einen vorgelagerten STM32CubeMX-Generator zur Erzeugung des Initialisierungscodes.
 
-| Aspekt                          | **C / C++**                        | **MicroPython**                          |
-| ------------------------------- | ---------------------------------- | ---------------------------------------- |
-| **Performance**                 | Sehr hoch – direkter Maschinencode | Deutlich langsamer – Interpreter         |
-| **Echtzeitverhalten**           | Deterministisch, präzise Timing    | Schlechtere Latenz, keine harte Echtzeit |
-| **Speicherauslastung**          | Minimal, volle Kontrolle           | Höherer RAM- und Flash-Bedarf            |
-| **Peripheriezugriff**           | Direkt (Register, HAL, LL)         | Eingeschränkt, oft über Wrapper          |
-| **Toolchain**                   | Komplexer (Compiler, Debugger)     | Sehr einfach (REPL, USB-DragDrop)        |
-| **Entwicklungsgeschwindigkeit** | Langsamer (kompilieren, flashen)   | Sehr schnell (live testen, REPL)         |
-| **Debugging**                   | Leistungsstark (SWD, Breakpoints)  | Eingeschränkt (print, rudimentär)        |
-| **Lernkurve**                   | Steil                              | Flach                                    |
-| **Community-Beispiele**         | Viele (STM32 + C)                  | Weniger, aber wachsend                   |
-
-
-
-## SysTick (Wiederholung)
-
-Der SysTick-Timer ist ein 24-Bit-Zähler, der in jedem Cortex-M-Prozessor vorhanden ist. Er wird verwendet, um regelmäßige Zeitintervalle zu erzeugen, die für die Implementierung von Echtzeitsystemen und Betriebssystemen nützlich sind. Der SysTick-Timer kann so konfiguriert werden, dass er Interrupts generiert, wenn der Zähler einen bestimmten Wert erreicht.
-
-
-```c
-volatile uint32_t tickCount = 0;
-
-void SysTick_Handler(void) {
-  tickCount++;
-  if (tickCount >= 1000) {           // 1000 ms erreicht?
-    GPIOA->ODR ^= GPIO_ODR_OD5;      // LED toggeln
-    tickCount = 0;                   // zurücksetzen
-  }
-}
-
-int main(void) {
-  // LED Setup (z. B. PA5)
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-  GPIOA->MODER |= GPIO_MODER_MODE5_0;
-
-  // SysTick: 1ms-Takt bei 16 MHz == 16.000 Ticks pro Sekunde
-  SysTick_Config(SystemCoreClock / 1000);
-
-  while (1) {
-    __WFI();  // "Wait for Interrupt" – Stromsparmodus
-  }
-}
-```
-
-> Recherchieren Sie die maximale Zykluszeit des SysTick Timers und die maximale Anzahl an Interrupts pro Sekunde, die damit realisiert werden können.
-> 
-> Was hat es mit dem Macro `__WFI` auf sich? Schlagen Sie die Stromsparmodi des Prozessors nach.
->
-> Was stört Sie an diesem Code?
-
-
-## Interrupts / Events
-Interrupts können in zwei Gruppen kategorisiert werden, nämlich in asynchrone Interrupts (aka Interrupt, Hardware-Interrupt) und synchrone Interrupts (aka Exception). Erstere können jederzeit eintreffen, typischerweise IO-Interrupts, letztere können nur nach der Ausführung eines Befehls eintreffen, z.B. wenn die CPU versucht, eine Zahl durch 0 zu dividieren oder ein Page Fault. Das ist also der Unterschied zwischen Interrupts und Exceptions.
-
-Die Intel-Dokumentation klassifiziert Interrupts und Exceptions wie folgt:
-
-| Kategorie  | Subkategorie                 | Bedeutung                                                                                                                                                                    |
-| ---------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Interrupts | Maskierbare Interrupts       | Alle Interrupt Requests (IRQs), die von I/O-Geräten ausgegeben werden, führen zu maskierbaren Interrupts. Ein maskierbarer Interrupt wird ignoriert, sofern er maskiert ist. |
-|            | Nicht-maskierbare Interrupts | Nur wenige kritische Ereignisse (z. B. Hardwarefehler) führen zu nichtmaskierbaren Interrupts . Nichtmaskierbare Interrupts werden von der CPU immer erkannt.                |
-| Exceptions | Fehler                       | Können im Allgemeinen behoben werden; nach der Behebung kann das Programm ohne Verlust der Kontinuität neu gestartet werden.                                                 |
-|            | Traps                        | Traps werden vom Anwenderprogramm ausgelöst, um eine Funktionalität des Betriebssystems aufzurufen.                                                                          |
-|            | Programmierte Ausnahmen      |        Programmierte Ausnahmen werden von der Steuereinheit als Traps behandelt; sie werden oft als Software-Interrupts bezeichnet.                                                                                                                                                                       |
-
-Die Intel-Dokumentation kennt keine "Events" im Sinne von STM32, weil x86-Prozessoren keine hardwareseitige Peripherie-Verkettung wie Mikrocontroller bieten. Stattdessen läuft alles zentral über Interrupts und Polling, gesteuert durch das Betriebssystem.
-
-| Merkmal        | Interrupt          | Event                     |
-| -------------- | ------------------ | ------------------------- |
-| CPU beteiligt  | ja                 | nein                      |
-| Stromverbrauch | höher              | niedriger                 |
-| Latenz         | mittel             | sehr gering               |
-| Anwendung      | Reaktion mit Logik | Hardware-Modul-Verkettung |
-
-
-### Eventsystem
-
-Ein Event im STM32 ist eine direkte Verbindung zwischen Peripherieeinheiten auf Chip-Ebene, z. B.:
-
-+ Timer → ADC (startet Wandlung)
-+ Timer → DMA (startet Speichertransfer)
-+ GPIO → EXTI-Event → Wakeup
-
-Diese Verbindungen passieren ohne CPU-Beteiligung – es ist ein reines Hardware-Signalnetz.
-
-
-```mermaid @mermaid
-graph TD
-
-%% Peripherieeinheiten
-TIMER[TIM2<br>Timer Update Event]
-EVENT[TRGO<br>Event Signal]
-ADC[ADC1<br>Externe Triggerquelle: Timer]
-DMA[DMA<br>Schreibt ADC-Daten ins RAM]
-RAM[(RAM)]
-
-%% Verbindungen
-TIMER --> EVENT
-EVENT --> ADC
-ADC --> DMA
-DMA --> RAM
-
-%% CPU nur zur Initialisierung
-subgraph CPU
-    INIT[HAL_Init / Start Timer / Start DMA]
-end
-INIT --> TIMER
-INIT --> ADC
-INIT --> DMA
-```
-
-> _"Events sind neben Interrupts etwas, das dem Cortex Core seinen Schlaf  rauben kann."_ (mikrocontroller.net Forenbeitrag)
-
-### NVIC
-
-> Was steht im Werbetext zum Nested Vector Interrupt Controller (NVIC) und was bedeuten diese Aussagen?
-
-_The devices embed a nested vectored interrupt controller able to manage 16 priority levels, and handle up to 62 maskable interrupt channels plus the 16 interrupt lines of the Cortex®-M4 with FPU:_
-
-+ _Closely coupled NVIC gives low-latency interrupt processing_
-+ _Interrupt entry vector table address passed directly to the core_
-+ _Allows early processing of interrupts_
-+ _Processing of late arriving, higher-priority interrupts_
-+ _Support tail chaining_
-+ _Processor state automatically saved_
-
-
-Der NVIC verwaltet:
-
-+ Welche Interrupts überhaupt aktiv sind
-+ Welche gerade verarbeitet werden
-+ Welche verschachtelt werden dürfen (Preemption)
-+ Welche Warteschlange haben (Pending)
-
-1. Preemption Priority - Bestimmt, ob ein Interrupt einen anderen unterbrechen darf, höhere Priorität = kleinere Zahl (z. B. 0 > 2)
-2. Subpriority - Wird nur verwendet, wenn zwei Interrupts die gleiche Preemption Priority haben. Sie wird in der NVIC-Registerbank gespeichert und kann von der Software geändert werden.
-
-### Trigger für die ISR
-
-Cortex-M Controller implementieren mindestens die folgenden Exceptions/Interrupts:
-
-| Exception     | Beschreibung                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------ |
-| **Reset**     | Wird ausgelöst, wenn der Controller startet oder zurückgesetzt wird.                       |
-| **NMI**       | Nicht maskierbarer Interrupt mit sehr hoher Priorität, kann nicht deaktiviert werden.      |
-| **HardFault** | Wird bei schwerwiegenden Fehlern wie Speicherverletzungen oder Division durch 0 ausgelöst. |
-| **SVCall**    | Wird durch den Befehl `svc` ausgelöst. Dient zur Ausführung privilegierter Funktionen.     |
-| **PendSV**    | Softwareausgelöste Exception für Dienste, z. B. für Kontextwechsel im RTOS.                             |
-| **SysTick**   | Zeitgeber-Interrupt, häufig genutzt als System-Tick (z. B. alle 1 ms).                     |
-
-
-> HardFault
-
-- Tritt auf bei:
-  - Zugriff auf ungültige Speicheradressen
-  - Illegalen Befehlen
-  - Division durch Null
-- **ARMv6-M**: ein einziger Fault-Handler
-- **ARMv7-M/v8-M**: kann durch spezialisierte Fault-Handler ergänzt werden:
-  - `MemManage`
-  - `BusFault`
-  - `UsageFault`
-
-> PendSV & SysTick
-
-- `SysTick` liefert den Takt, z. B. für Zeitscheiben (Time Slices)
-- `PendSV` wird genutzt, um Aufgabenwechsel (Kontextwechsel) durchzuführen
-
-
-### Umsetzung
-
-![alt-text](../images/12_FeaturesSTM32/ExtInterrupt.png "Beschaltung externer Interrupts [^STM32] Seite 206")
-
-> _The devices embed a nested vectored interrupt controller able to manage 16 priority levels._
-
-[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
-
-
-### Beschleunigung der Abarbeitung
-
-| Ansatz                       | Erklärung |
-|-----------------------------|-----------|
-| **Tail-Chaining**            | Beim Beenden einer Interrupt-Service-Routine (ISR) muss die CPU normalerweise mindestens acht "caller-saved" Register vom Stack laden und beim nächsten Interrupt wieder speichern. Wenn jedoch direkt eine neue Exception ansteht, kann das erneute Sichern und Wiederherstellen übersprungen werden – die Register bleiben erhalten. Dadurch wird wertvolle Zeit gespart. |
-| **Late-Arriving Preemption** | Während der Prozessor noch mit dem Eintritt in eine ISR (Exception Entry) beschäftigt ist, kann eine höher priorisierte Exception eintreffen. In diesem Fall wird die ursprünglich vorgesehene ISR verworfen, und stattdessen direkt die ISR mit höherer Priorität geladen. Der gesicherte Registerzustand bleibt dabei gültig. Dies reduziert die Latenz für dringende Interrupts erheblich. Nach deren Abarbeitung kann die zuerst erkannte ISR direkt im Anschluss ausgeführt werden. |
-| **Lazy State Preservation**  | ARMv7- und ARMv8-Prozessoren mit FPU verfügen über zusätzliche Register (z. B. `s0–s31` und `fpscr`). Da viele ISRs keine Gleitkommaoperationen nutzen, kann das Betriebssystem die Sicherung dieser Register verzögern, bis tatsächlich eine FP-Instruktion ausgeführt wird. Erst dann werden die FP-Register gesichert – das spart Speicherzugriffe und Zeit bei Interrupts, die keine FPU benötigen. |
-
-
-```text @plantUML
-@startuml
-participant A as "Thread A"
-participant B as "Thread B"
-participant OS
-participant CPU
-participant FPU
-
-== Thread A läuft und nutzt FPU ==
-A -> FPU: FP-Befehl
-FPU --> A: Ergebnis
-
-== Interrupt tritt auf ==
-CPU -> OS: Exception Entry
-OS -> CPU: Save CPU-Register von A (FPU unberührt)
-
-== Kontextwechsel zu Thread B ==
-OS -> CPU: Restore CPU-Register von B
-OS --> B: Kontrolle an Thread B
-
-== Thread B läuft (noch ohne FPU) ==
-B -> CPU: Ausführung normaler Instruktionen
-CPU --> B: Kein FPU-Zugriff → kein Problem
-
-== Erste FP-Instruktion von Thread B ==
-B -> FPU: FP-Befehl
-FPU --> CPU: Exception (FPU nicht aktiviert)
-
-== Lazy FPU-Handling ==
-CPU -> OS: FPU Exception Handling
-OS -> CPU: Save FPU-Kontext von Thread A
-OS -> CPU: Load/Init FPU-Kontext für Thread B
-OS -> FPU: FPU aktivieren
-OS --> B: Rückkehr zur FP-Instruktion
-
-== FP-Instruktion wird wiederholt ==
-B -> FPU: FP-Befehl erneut
-FPU --> B: Ergebnis
-@enduml
-```
-
-
-### Programmierbeispiel
-
-Nutzung Externer Interrupts in Form der Buttons auf dem STM32F401RE Board.
-
-
-## DMA
-
-Wenn wir der CPU (Hauptprozessor) die ganze Arbeit des Abholens von Anweisungen (Code) aus dem Flash, der Ausführung der dekodierten Anweisungen und des Verschiebens von Daten zu und von Peripheriegeräten und Speicher erledigen lassen, führt mit steigender Zahl von Komponenten zu einer steigenden Auslastung des Systems. Die Zahl der Interrupts, die ein UART1-Datenempfänger generiert, der einen Datenstrom erhält, den die CPU sofort in einen lokalen Puffer im Speicher übertragen muss, um kein Datenpaket zu verlieren, führt dies mit
-
-$(1 Start + 8 data + 0 Parity + 1 stop)$ = $10 Bit$ bei $115200Baud$
-
-zu 11520 Interrupts pro Sekunde. Diese konkurrieren dann noch mit den anderer Peripheriegeräten wie UART, SPI, ADC. Dabei passiert bei dieser konkreten Aufgabe nichts anderes als das "hin- und herschaufeln" von Daten. Eine Rechenpower wird gar nicht abgefragt.
-
-Noch schlimmer wird die Situation, wenn neben der eigentlichen Kopieroperation auch noch der Overhead für das Umschalten des Kontexts zu und von Interrupt-Handlern berücksichtigt wird. Die CPU ist nicht in der Lage die volle Arbeitsleistung zu entfalten, da sie mit Datentransaktionen beschäftigt ist.
-
-## Programmierbeispiel 
-
-Blink LED mit SysTick Timer und STM CubeIDE 
-
-1. in der CubeIDE 
-2. in PlatformIO mit vorgelagertem STM32CubeMX-Generator
-
-https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/codeExamples/STM32/HelloWorld/
-
-### Umsetzung
-
-Der Speicherdirektzugriff oder englisch Direct Memory Access (DMA) erlaubt den Datenaustausch über das Bussystem ohne den Umweg über die CPU auf den Speicher zugreift.
-Diese Technik erlaubt angeschlossenen Peripheriegeräten untereinander und mit dem Arbeitsspeicher zu kommunizieren. Der Vorteil des Speicherdirektzugriffs ist die schnellere Datenübertragung bei gleichzeitiger Entlastung des Prozessors.
-
-![alt-text](../images/11_CortexM/BlockDiagramm.png "Interne Struktur des STM32F401 [^STM32] Seite 14")
-
-Der DMA-Controller führt den direkten Speichertransfer durch: als AHB-Master kann er die Kontrolle über die AHB-Busmatrix übernehmen, um AHB-Transaktionen zu initiieren. er kann folgende Transaktionen durchführen:
-
-- Peripherie-zu-Speicher
-- Speicher-zu-Peripherie
-- Speicher-zu-Speicher
-
-![alt-text](../images/11_CortexM/BusMatrix.png "Busmatrix am Beispiel des STM32F401 Controllers[^STM32] Seite 36")
-
-| Modus                  | DMA1 | DMA2 |
-| ---------------------- | ---- | ---- |
-| Peripherie-zu-Speicher | X    | X    |
-| Speicher-zu-Peripherie | X    | X    |
-| Speicher-zu-Speicher   |      | X    |
-
-![alt-text](../images/12_FeaturesSTM32/DMA_Overview.png "DMA Basisstruktur [^STM32] Seite 168")
-
-Jeder Kanal kann einen DMA-Transfer zwischen einem Peripherieregister, das sich an einer festen Adresse befindet, und einer Speicheradresse durchführen. Die Menge der zu übertragenden Daten (bis zu 65535) ist programmierbar. Das Register, das die Menge der zu übertragenden Datenelemente enthält, wird nach jeder Transaktion dekrementiert.
-
-![alt-text](../images/12_FeaturesSTM32/DMA2_Channels.png "DMA Channelzuordnungen [^STM32] Seite 171")
-
-Die Übertragungsdatengrößen der Peripherie und des Speichers sind über die Bits PSIZE und MSIZE im Register DMA_CCRx voll programmierbar.
-
-Eine DMA-Transaktion besteht aus einer Folge von einer konfigurierbaren Anzahl von Datenübertragungen. Dabei besteht jede DMA-Übertragung besteht aus drei Operationen:
-
-- Laden aus dem Peripherie-Datenregister oder einer Speicherstelle, die über das DMA_SxPAR- oder DMA_SxM0AR-Register adressiert wird
-- Speichern der geladenen Daten im Peripherie-Datenregister oder einer Speicherstelle, die über das DMA_SxPAR- oder DMA_SxM0AR-Register adressiert wird -
-- Nachdekrementieren des DMA_SxNDTR-Registers, das die Anzahl der noch auszuführenden Transaktionen enthält
-
-Effizient wird das DMA-Verfahren allerdings erst, wenn nicht nur ein einzelnes Datenwort zu übertragen ist, sondern größere zusammenhängende Speicherbereiche, z. B. ganze Datensektoren oder -spuren von einer Festplatte. Dann lohnt sich auch der gewisse Overhead, der dadurch entsteht, dass zuallererst der DMA-Controller durch Setzen diverser Registerinhalte für die bevorstehende Aufgabe aufgesetzt werden muss. Peripherie- und Speicherzeiger können optional nach jeder Transaktion automatisch nachinkrementiert werden. Wenn der inkrementierte Modus aktiviert ist, ist die Adresse der nächsten Übertragung die Adresse der vorherigen Übertragung, die je nach gewählter Datengröße um 1, 2 oder 4 inkrementiert wird.
-
-[^STM32]: Firma ST, STM32F401xx Controller Data Sheet, [Link](https://www.st.com/resource/en/reference_manual/dm00096844-stm32f401xbc-and-stm32f401xde-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
-
-### Programmierung
+### Tutorials
 
 Lassen Sie uns das Ganze anhand eines Beispiels evaluieren. Nehmen wir an, dass Sie den Analog-Digital-Wandler auf Ihrem Controller maximal nutzen wollen. Dazu werden die gelesenen Daten in den Speicher geschrieben, um dort beispielsweise gefiltert und analysiert zu werden.
 
