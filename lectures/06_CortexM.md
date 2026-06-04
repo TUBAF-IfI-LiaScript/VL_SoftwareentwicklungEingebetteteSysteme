@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.8
+version:  1.0.9
 language: de
 narrator: Deutsch Female
 
@@ -880,3 +880,89 @@ Welche Schritte sind entsprechend notwendig?
 | **Cache-Inkonsistenz**                    | DMA schreibt Daten in RAM, aber die CPU sieht sie nicht, weil sie im **D-Cache** liegen. | Verwende **Cache-Flush** oder DMA-Zugriff auf **non-cacheable Memory** (z. B. CCM RAM). |
 | **Verlust von Daten durch Überschreiben** | CPU ist zu langsam, liest z. B. Daten nicht rechtzeitig weg.                             | **Interrupts oder DMA-Komplett-Flag** nutzen, um Verarbeitung zu koordinieren.          |
 | 🕳️ **DMA wird blockiert**                   | Wenn CPU zu viel Bandbreite braucht, kann DMA verzögert werden.                          | **Priorisierung im AHB-Bus** (DMA1/2 kann auf bestimmte Kanäle priorisiert werden).     |
+
+## Exkurs: Pointer oder nicht Pointer auf die Register-Structs?
+
+Wenn Sie sich fragen, warum der Zugriff `GPIOA->ODR` (mit `->`) und nicht `GPIOA.ODR` (mit `.`) lautet, lohnt sich ein kurzer Blick "unter die Haube" der CMSIS-Header. Das Peripherie-Register-Layout wird als `struct` beschrieben, deren Felder genau in der Reihenfolge und mit den Abständen der echten Hardware-Register liegen:
+
+```c
+typedef struct {
+    __IO uint32_t MODER;    // offset 0x00
+    __IO uint32_t OTYPER;   // offset 0x04
+    __IO uint32_t OSPEEDR;  // offset 0x08
+    // ...
+    __IO uint32_t ODR;      // offset 0x14
+    // ...
+} GPIO_TypeDef;
+```
+
+Entscheidend ist die Frage, *wo* diese Struktur im Speicher liegt. Anders als ein gewöhnliches C-Objekt darf der Compiler die Struktur **nicht** an einer beliebigen Adresse anlegen — sie muss exakt über der festen Peripherie-Basisadresse liegen. CMSIS löst das, indem `GPIOA` als **Pointer auf eine bereits existierende Adresse** definiert wird:
+
+```c
+#define GPIOA  ((GPIO_TypeDef *) GPIOA_BASE)   // GPIOA_BASE z.B. 0x40020000
+```
+
+`GPIOA` ist hier also eindeutig ein **Pointer** auf das Register-Konstrukt — es gibt keine zweite Lesart dieser Definition. Lehrreich ist aber der Vergleich mit der *hypothetischen* Alternative, die man verwerfen würde: ein echtes Struct-Objekt anzulegen.
+
+> Für Memory-Mapped I/O ist der Pointer der einzig sinnvolle Weg, weil die Register an einer **festen, vorgegebenen** Adresse liegen. Ein echtes Objekt (`GPIO_TypeDef GPIOA;`) würde der Linker irgendwo im RAM platzieren — am falschen Ort. Der Pointer-Ansatz hat darüber hinaus konkrete Vorteile:
+
+1. **Adresse statt Speicherreservierung:** Ein `#define ... ((GPIO_TypeDef*) 0x40020000)` reserviert keinen Speicher und legt kein Objekt an. Es ist lediglich eine Typ-Brille, durch die der Compiler die feste Hardware-Adresse als Struktur interpretiert. Bei `GPIO_TypeDef GPIOA;` würde der Linker dagegen versuchen, ein RAM-Objekt zu platzieren — am falschen Ort.
+2. **Keine Laufzeitkosten:** Da die Basisadresse ein konstantes Literal ist, erzeugt `GPIOA->ODR` denselben effizienten Maschinencode wie ein direkter Zugriff `*(volatile uint32_t*)0x40020014`. Es entsteht *kein* zusätzlicher Indirektionsschritt zur Laufzeit.
+3. **Mehrere Instanzen derselben Peripherie:** `GPIOA`, `GPIOB`, `GPIOC` … nutzen denselben `GPIO_TypeDef`, unterscheiden sich nur in der Basisadresse. Pointer machen das trivial; man könnte sogar generischen Code schreiben, der einen `GPIO_TypeDef *port` als Parameter erhält.
+
+Das `volatile` (in CMSIS über `__IO` bzw. `__I`/`__O`) ist dabei orthogonal zur Pointer-Frage, aber genauso wichtig: Es verhindert, dass der Compiler Registerzugriffe wegoptimiert oder umordnet — die Hardware kann sich schließlich "von außen" ändern.
+
+### Vergleich mit dem ATmega4809
+
+Interessanterweise verwendet der aus den vorigen Vorlesungen bekannte ATmega4809 (megaAVR-0-Familie) **dasselbe Idiom**: Auch hier wird die Peripherie als `struct`-Layout über einer festen Adresse beschrieben. Die Microchip-Header (`<avr/io.h>`) definieren z.B.:
+
+```c
+typedef struct PORT_struct {
+    register8_t DIR;       // offset 0x00
+    register8_t DIRSET;    // 0x01
+    register8_t DIRCLR;    // 0x02
+    register8_t DIRTGL;    // 0x03
+    register8_t OUT;       // 0x04
+    // ...
+} PORT_t;
+
+#define PORTA  (*(PORT_t *) 0x0400)   // Adresse wird direkt dereferenziert
+```
+
+<details>
+<summary>Wie ist diese Dereferenzierung zu lesen?</summary>
+
+Diese eine Zeile lohnt sich, von innen nach außen zu lesen — sie besteht aus drei Schritten:
+
+1. **`0x0400`** — eine ganzzahlige Konstante. Für sich genommen nur eine Zahl, der Compiler weiß noch nicht, dass damit eine Adresse gemeint ist.
+2. **`(PORT_t *) 0x0400`** — der **Cast** interpretiert diese Zahl als *Zeiger auf eine `PORT_t`-Struktur*. Ab jetzt behandelt der Compiler `0x0400` als Adresse, an der das `PORT_t`-Layout liegt: `DIR` bei `0x0400`, `DIRSET` bei `0x0401`, … `OUT` bei `0x0404`. Es wird dabei **nichts angelegt** — wir behaupten nur, dass dort bereits Hardware-Register liegen.
+3. **`*(PORT_t *) 0x0400`** — der **Dereferenzierungs-Operator `*`** macht aus dem *Zeiger auf* die Struktur die *Struktur selbst* (genauer: ein sogenanntes *lvalue*, das auf den Speicher an `0x0400` verweist). Aus „Adresse einer `PORT_t`" wird „die `PORT_t` an dieser Adresse".
+
+Nach der Ersetzung durch den Präprozessor steht also überall, wo `PORTA` steht, der Ausdruck `(*(PORT_t *) 0x0400)`. Deshalb greift man mit dem **Punkt** auf ein Feld zu:
+
+```c
+PORTA.OUT = 0xFF;
+// expandiert zu:
+(*(PORT_t *) 0x0400).OUT = 0xFF;
+// und das ist per Definition dasselbe wie:
+((PORT_t *) 0x0400)->OUT = 0xFF;     // Schreibe 0xFF an Adresse 0x0404
+```
+
+Die letzte Zeile zeigt die Äquivalenz, auf die es ankommt: **`(*p).feld` und `p->feld` bezeichnen genau denselben Speicherzugriff.**
+
+</details>
+
+Das ist rein kosmetisch — `(*ptr).feld` und `ptr->feld` sind identisch. In **beiden** Welten ist die Adresse ein Compile-Zeit-Literal, in beiden wird **kein** RAM für eine Pointer-Variable reserviert, und in beiden begrenzt `volatile` (beim AVR über das `register8_t`-Typedef) die Optimierung auf die Adressberechnung.
+
+Der eigentliche Unterschied liegt in der **Hardware-Architektur**, nicht in der Schreibweise:
+
+<!-- data-type="none" -->
+| Aspekt                      | ATmega4809 (8-bit AVR)                          | STM32 (32-bit Cortex-M)                        |
+| --------------------------- | ----------------------------------------------- | ---------------------------------------------- |
+| Peripherie-Adressraum       | tief (0x0000–0x0FFF), gemeinsam mit RAM         | bei `0x40000000+`, eigener Bereich             |
+| Registerbreite              | 8 bit (`register8_t`)                           | 32 bit (`__IO uint32_t`)                       |
+| Einzelne Bits setzen/löschen | teils Ein-Takt-Befehl `SBI`/`CBI`               | Read-Modify-Write bzw. Bit-Banding (M3/M4)     |
+
+Weil die Adresse konstant **und** klein ist, kann der AVR-Compiler `PORTA.OUT |= (1 << 3);` unter Umständen in einen **einzigen, atomaren** `SBI`-Befehl (Set Bit in I/O) übersetzen — bei einer echten Pointer-Variable wäre das unmöglich. Da die neuen megaAVR-0-Peripherien aber oft *oberhalb* des `SBI`/`CBI`-Adressfensters liegen, stellt Microchip mit **`VPORTA.OUT`** eine in den untersten Bereich gespiegelte Adresse bereit, gerade damit diese Single-Cycle-Bitbefehle wieder greifen. Das ist die direkte AVR-Antwort auf dieselbe Optimierungsfrage, die beim Cortex-M über das Teilen der Basisadresse bzw. Bit-Banding gelöst wird.
+
+> **Merksatz:** Bei MMIO greift man immer über eine *Adresse* auf die Hardware zu, nicht über ein vom Programm verwaltetes Objekt. Genau deshalb ist der Pointer (`->` beim ARM, `.` über das dereferenzierte Makro beim AVR) die natürliche Form — die Struct dient nur als typsicheres "Schablonen-Layout" über dieser Adresse.
