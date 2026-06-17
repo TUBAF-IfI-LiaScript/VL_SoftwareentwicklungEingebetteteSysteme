@@ -1,8 +1,8 @@
 <!--
-author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
+author:   Sebastian Zug, Karl Fessel & André Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.0
+version:  1.0.1
 language: de
 narrator: Deutsch Female
 
@@ -17,7 +17,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 [![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/08_SchedulingAlgorithmen.md#1)
 
 
-# Scheduling-Algorithmen & Synchronisation
+# Scheduling-Algorithmen
 
 
 | Parameter                | Kursinformationen                                                                                                                                                                                    |
@@ -25,7 +25,7 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 | **Veranstaltung:**       | `Vorlesung Softwareentwicklung für eingebettete Systeme`                                                                                                                                                           |
 | **Semester**             | `Sommersemester 2026`                                                                                                                                                                                              |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                                    |
-| **Inhalte:**             | `EDF, Rate Monotonic, Priority Inversion, PIP, PCP`                                                                                                                                             |
+| **Inhalte:**             | `EDD, EDF, Least Laxity, LDF, EDF*, Rate Monotonic`                                                                                                                                             |
 | **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/08_SchedulingAlgorithmen.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/08_SchedulingAlgorithmen.md) |
 | **Autoren**              | @author                                                                                                                                                                                              |
 
@@ -88,6 +88,14 @@ Das Durchsuchen lässt sich anhand einer Baumstruktur darstellen
 Beispiel: Gegeben sei unten stehend folge von 3 Tasks mit unterschiedlichen Ausführungsdauern, Bereitzeiten und Deadlines.
 
 ![alt-text](../images/08_Algorithms/TreeSearchExample.png "Beispielhafter Auszug des Suchbaums mit einem Ergebnis-Tupel")
+
+Die Suche unterscheidet zunächst nur **gültige** Pläne (jeder Task hält seine Deadline) von **ungültigen** (mindestens eine Deadline verletzt - dieser Ast wird abgeschnitten). Gibt es *mehrere* gültige Pläne, braucht es ein **übergeordnetes Auswahlkriterium**, denn „gültig" heißt noch nicht „gut". Gebräuchlich sind etwa:
+
++ **erster gültiger Plan** - wenn nur die Existenzfrage interessiert,
++ **minimale maximale Verspätung** $L_{max} = \max_i (c_i - d_i)$ - das übliche Ziel im Echtzeitkontext,
++ minimale *mittlere* Verspätung, frühester Gesamtabschluss (*makespan*) oder wenigste Kontextwechsel - je nach Anwendungsziel.
+
+> **Motivation für die nächsten Abschnitte:** Die vollständige Baumsuche ist die teure, allgemeine Methode - sie probiert alle Reihenfolgen durch ($O(n!)$) und kann jedes dieser Kriterien optimieren. Die folgenden Algorithmen (EDD, EDF, ...) sind dagegen *Abkürzungen*: Für das spezielle Ziel „$L_{max}$ minimieren" finden sie beweisbar denselben optimalen Plan - aber durch einfaches Sortieren, ohne den ganzen Baum aufzuspannen.
 
 ### Earliest Due Date
 
@@ -210,13 +218,13 @@ Argumente für EDF:
 
 ### Least Laxity
 
-Das Least Laxity (LL) oder Least-Slack-Time-Scheduling (LST) Scheduling weist die Priorität auf der Grundlage des verbleibenden Spielraums zu. Dieser Begriff beschreibt das bis zur Dealine bestehende Zeitintervall bezogen auf den noch nicht realisierten Anteil der Ausführungsdauer.
+Das Least Laxity (LL) oder Least-Slack-Time-Scheduling (LST) Scheduling weist die Priorität auf der Grundlage des verbleibenden Spielraums zu. Dieser Begriff beschreibt das bis zur Deadline bestehende Zeitintervall bezogen auf den noch nicht realisierten Anteil der Ausführungsdauer.
 
 Entsprechend wird der Spielraum jedes Tasks (Deadline minus noch benötigte Rechenzeit) mit
 jedem Schritt neu bestimmt. LL ist ebenfalls optimal im Hinblick auf die Minimierung der Maximalen
 Verspätung.
 
-> **Merke:** Least Laxity berücksichtig im Unterschied zu EDF die Ausführungsdauer. Damit ist das Verfahren in der Lage vor der Kollision mit der Deadline eine Notifizierung durchzuführen.
+> **Merke:** Least Laxity berücksichtigt im Unterschied zu EDF die Ausführungsdauer. Damit ist das Verfahren in der Lage vor der Kollision mit der Deadline eine Notifizierung durchzuführen.
 
 Beispiel:
 
@@ -285,7 +293,7 @@ Damit ergibt sich ein gültiger Plan mit: $T_1, T_2, T_4, T_3, T_5, T_6$.
 
 EDF\* bezeichnet einen angepassten EDF Algorithmus unter Berücksichtigung der Vorrangrelation. Die Idee besteht darin, dass die Menge abhängiger Tasks in eine Menge unabhängiger Tasks durch Modifikation der Bereitzeiten und der Deadlines umgewandelt wird.
 
-Entsprechen implementiert der EDF\* folgende drei Schritte:
+Entsprechend implementiert der EDF\* folgende drei Schritte:
 
 1. Modifikation der Bereitzeiten
 2. Modifikation der Deadlines
@@ -364,7 +372,7 @@ Nach (Liu, Layland, 1973) gilt für $n$ Tasks:     $U_{lub} =  n  (2^{1/n} - 1 )
 | n                    | Obere Schranke           |
 | -------------------- | ------------------------ |
 | $1$                  | $U_{lub} = 1$            |
-| $2$                  | $U_{lub} = 0.82$         |
+| $2$                  | $U_{lub} = 0.828$        |
 | $n\rightarrow\infty$ | $U_{lub} =ln(2) = 0.693$ |
 
 > **Achtung:** EDF ist sehr wohl in der Lage eine Auslastung von 100 Prozent zu realsieren.
@@ -375,8 +383,139 @@ Nach (Liu, Layland, 1973) gilt für $n$ Tasks:     $U_{lub} =  n  (2^{1/n} - 1 )
 
 **Zusammenfassung RMS**
 
-Für alle Ausführungszeiten und Periodenverhältnisse von n Tasks wird unter RMS ein gültiger Plan gefunden, wenn die Auslastung die Schranke von  nicht übersteigt.
+Für alle Ausführungszeiten und Periodenverhältnisse von n Tasks wird unter RMS ein gültiger Plan gefunden, wenn die Auslastung die Schranke $U_{lub} = n\,(2^{1/n} - 1)$ nicht übersteigt.
 
 RMS ist einfacher zu realisieren als EDF, die Prioritäten anhand der Perioden werden einmal zu Beginn festgelegt.
 
 Aber RMS ist nicht immer in der Lage eine Lösung zu finden, obwohl eine existiert. Entsprechend ist RMS kein optimaler Scheduler!
+
+## Von der Theorie zur Praxis
+
+Wir haben mit EDF und Least Laxity zwei Verfahren kennengelernt, die **optimal** sind - sie finden einen gültigen Plan, wann immer einer existiert, und EDF kann den Prozessor bis zu einer Auslastung von 100 % einplanen. RMS dagegen ist nachweislich *nicht* optimal und garantiert nur bis zur Schranke $U_{lub}$.
+
+Man würde also erwarten, dass reale Echtzeitbetriebssysteme EDF oder LL implementieren. Tatsächlich ist das Gegenteil der Fall:
+
+> **Beobachtung:** Die überwiegende Mehrheit der eingesetzten RTOS - darunter FreeRTOS, Zephyr, VxWorks, RTEMS und µC/OS - verwendet im Kern **Fixed-Priority Preemptive Scheduling (FPP)**, also feste, zur Entwicklungszeit vergebene Prioritäten. Genau das Verfahren, das RMS implizit beschreibt - nur ohne die automatische Ableitung der Prioritäten aus den Perioden.
+
+Warum entscheidet sich die Praxis gegen das theoretisch überlegene Verfahren?
+
+### Warum feste Prioritäten?
+
+Die Optimalität von EDF/LL gilt nur unter den idealisierten Annahmen des Modells (vernachlässigbarer Kontextwechsel, exakt bekannte Ausführungszeiten, unabhängige Tasks). Sobald wir auf reale Hardware gehen, kehren sich mehrere Vorteile in Nachteile um:
+
+| Kriterium                     | **EDF / Least Laxity** (dynamisch)                                  | **Fixed-Priority** (statisch, RTOS-Praxis)                          |
+| ----------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| **Prioritätsberechnung**      | Zur *Laufzeit*, bei jedem Ereignis neu (Deadline/Laxity vergleichen) | *Einmalig* zur Entwicklungszeit - zur Laufzeit nur Tabellenzugriff |
+| **Laufzeit-Overhead**         | Hoch: Scheduler muss bei jedem Tick Restzeiten/Deadlines pflegen   | Minimal: höchstpriorer *ready*-Task steht sofort fest              |
+| **Datenstrukturen**           | Sortierte Warteschlange nach Deadline                              | Eine *ready*-Liste pro Prioritätsstufe (O(1)-Auswahl)             |
+| **Determinismus / Debugging** | Reihenfolge hängt von absoluten Zeiten ab - schwer vorherzusagen   | Verhalten ist statisch ablesbar und reproduzierbar                |
+| **Verhalten bei Überlast**    | *Domino-Effekt*: bei Überlast kann das ganze System kippen, auch unkritische Deadlines reißen unvorhersehbar | *Graceful degradation*: niederpriore Tasks fallen zuerst aus, kritische laufen weiter |
+| **Auslastungsgrenze**         | bis 100 % planbar                                                  | nur bis $U_{lub}$ *garantiert* (exakter Test erlaubt aber mehr)    |
+
+Der entscheidende Punkt ist das **Verhalten bei Überlast**. EDF ist optimal, *solange* das System einplanbar ist - aber sobald die Last die Kapazität übersteigt (z. B. durch einen Messwert-Burst oder eine unterschätzte WCET), bricht EDF unkontrolliert zusammen: Es bevorzugt den Task mit der nächsten Deadline, die in der Überlast aber gerade die *bereits verlorene* sein kann. Bei festen Prioritäten ist dagegen vorab klar, welche Tasks im Zweifel geopfert werden - der sicherheitskritische Regler behält immer Vorrang.
+
+### Fixed-Priority Preemptive in Aktion
+
+Bei FPP gilt eine einfache Regel: **Es läuft immer der ausführungsbereite Task mit der höchsten Priorität.** Wird ein höherpriorer Task bereit, verdrängt (*preemptet*) er den laufenden sofort.
+
+Beispiel mit drei Tasks, Priorität $T_1 > T_2 > T_3$:
+
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
+```ascii
+         r3        r2        r1
+         |         |         |
+   T1    |         |         XXXXX             (höchste Priorität)
+   T2    |         XXX             XXX
+   T3    XXX          ...             XXXXXXX  (niedrigste Priorität)
+         +----|----|----|----|----|----|----|->
+         0    2    4    6    8   10   12   14
+
+   T3 startet, wird von T2 verdrängt, T2 wird von T1 verdrängt.
+   Erst wenn die höherprioren Tasks fertig sind, läuft T3 weiter.
+```
+
+Genau dieses Verhalten zeigt der Tick-Interrupt eines RTOS: Bei jedem Timer-Tick (oder bei jedem Ereignis, das einen Task aufweckt) prüft der Kernel, ob nun ein höherpriorer Task *ready* ist, und schaltet gegebenenfalls um.
+
+> **Merke:** „Optimal im Modell" ist nicht „am besten in der Praxis". Die Praxis tauscht einen Teil der theoretischen Auslastung gegen **Vorhersagbarkeit, geringen Overhead und kontrolliertes Überlastverhalten** - und das sind in sicherheitskritischen eingebetteten Systemen die teureren Güter.
+
+### Gleichstand: mehrere Tasks gleicher Priorität
+
+Die FPP-Regel „der höchstpriore *ready*-Task läuft" ist nicht eindeutig, sobald **mehrere bereite Tasks dieselbe Priorität** besitzen. Es braucht eine zusätzliche Regel, wer von ihnen den Prozessor erhält. Zwei Varianten sind gebräuchlich:
+
+**1. Round-Robin / Time-Slicing** (der Normalfall)
+
+Die Tasks gleicher Priorität teilen sich die CPU *zeitscheibengesteuert*: Bei jedem Tick wechselt der Scheduler zyklisch zum nächsten bereiten Task derselben Stufe. So erhält jeder einen fairen Anteil und keiner verhungert.
+
+<!--
+style="width: 80%; min-width: 420px; max-width: 720px;"
+-->
+```ascii
+   Drei Tasks gleicher Priorität, alle bereit:
+
+   Tick:   1    2    3    4    5    6    7    8
+          +----+----+----+----+----+----+----+----+
+          | Ta | Tb | Tc | Ta | Tb | Tc | Ta | Tb |  ... reihum
+          +----+----+----+----+----+----+----+----+
+
+   Höherpriore Tasks würden diese Runde jederzeit unterbrechen.
+```
+
+**2. Ohne Time-Slicing** (FIFO-artig)
+
+Der einmal ausgewählte Task läuft, bis er sich *selbst* blockiert (z. B. `vTaskDelay()`, Warten auf einen Semaphor) oder beendet - erst dann kommt der nächste gleichpriore Task an die Reihe. Das spart Kontextwechsel (geringerer Overhead), bietet aber keine Fairness innerhalb der Stufe.
+
+> **Echtzeit-Hinweis:** Round-Robin macht das Timing *innerhalb* einer Prioritätsstufe schwerer vorhersagbar. In hart-echtzeitkritischen Systemen vergibt man deshalb häufig jedem Task eine **eindeutige Priorität** - dann tritt der Gleichstandsfall gar nicht erst auf, und das Verhalten bleibt vollständig deterministisch.
+
+Welche Variante greift, ist beim RTOS konfigurierbar (in FreeRTOS z. B. über `configUSE_TIME_SLICING`) - die konkrete Umsetzung sehen wir in der nächsten Vorlesung.
+
+### Was bedeutet das für RMS?
+
+RMS ist damit *kein* Nischenverfahren, sondern die **theoretische Grundlage der gängigen Praxis**: Es beantwortet die Frage, *wie* man die festen Prioritäten sinnvoll vergibt (kürzere Periode → höhere Priorität) und *ob* die resultierende Menge einplanbar ist (Auslastungstest gegen $U_{lub}$). Der eigentliche Scheduler im RTOS muss dann nur noch die einfache FPP-Regel umsetzen.
+
+> Reicht der einfache Auslastungstest gegen $U_{lub}$ nicht aus (z. B. weil $U > U_{lub}$, aber $U \leq 1$), gibt es mit der **Response Time Analysis** einen *exakten* Einplanbarkeitstest für feste Prioritäten - dieser kann Mengen als einplanbar nachweisen, die der grobe Auslastungstest verwirft.
+
+## Wenn Tasks Ressourcen teilen
+
+Alle bisherigen Optimalitäts- und Einplanbarkeitsaussagen - von EDD über EDF bis zur RMS-Schranke - beruhen auf einer Annahme, die wir beim periodischen Scheduling explizit getroffen haben:
+
+> *Annahme 4: Alle Tasks sind voneinander unabhängig.*
+
+Sobald sich Tasks eine Ressource **exklusiv** teilen (eine globale Variable, einen Bus, ein Display - geschützt durch einen Mutex), ist diese Annahme verletzt. Ein Task kann dann nicht mehr jederzeit laufen, sobald er der höchstpriore bereite ist: Er muss möglicherweise **warten**, bis ein *anderer* Task die Ressource freigibt. Damit gilt die saubere Theorie nicht mehr unmittelbar - und das wirkt sich direkt auf die Einplanbarkeit aus.
+
+### Blockierung als neuer Term in der Analyse
+
+Im unabhängigen Fall konnte ein Task nur durch *höherpriore* Tasks verzögert werden (*Präemption*). Mit gemeinsamen Ressourcen kommt eine zweite, neue Verzögerungsart hinzu:
+
+> **Blockierung (*blocking*):** Ein Task wird von einem *nieder*prioren Task aufgehalten, weil dieser eine gemeinsam genutzte Ressource hält und sie noch nicht freigegeben hat.
+
+Diese Blockierungszeit muss in den Einplanbarkeitstest aufgenommen werden. Für RMS erweitert sich die Bedingung pro Task $T_i$ um einen **Blocking-Term $B_i$** - die maximale Zeit, die $T_i$ durch niederpriore Tasks blockiert werden kann:
+
+$$
+\sum_{k : \text{prio}(k) \geq \text{prio}(i)} \frac{\Delta e_k}{\Delta p_k} \; + \; \frac{B_i}{\Delta p_i} \; \leq \; U_{lub}(i)
+$$
+
+Der Term $B_i$ ist also kein Detail, sondern geht *unmittelbar* in die Garantie ein: Je länger ein Task blockiert werden kann, desto weniger Auslastung bleibt für die nutzbare Rechenarbeit.
+
+### Was die Protokolle für die Analyse leisten
+
+| Protokoll                                  | Schranke für $B_i$                                              | Deadlock-frei? | Verkettete Blockierung? |
+| ------------------------------------------ | -------------------------------------------------------------- | -------------- | ----------------------- |
+| **kein Protokoll**                         | *unbeschränkt*                                                  | nein           | ja                      |
+| **PIP** (Priority Inheritance, → VL 07)    | endliche Summe über die kritischen Sektionen niederpriorer Tasks | **nein**       | ja (*chained blocking*) |
+| **PCP** (Priority Ceiling)                 | höchstens *eine* einzige kritische Sektion                     | **ja**         | nein                    |
+
+- **PIP**: Der ressourcenhaltende Task *erbt* die Priorität des wartenden. Das macht $B_i$ endlich, verhindert aber **keine Deadlocks** und erlaubt **verkettete Blockierung** - ein Task kann nacheinander an mehreren Ressourcen blockiert werden.
+- **PCP** (*Priority Ceiling Protocol*): Jeder Ressource wird eine *Prioritätsobergrenze* (das *ceiling*) zugewiesen - die höchste Priorität aller Tasks, die sie je anfordern. Ein Task darf eine Ressource nur belegen, wenn seine Priorität echt über allen aktuell gehaltenen *ceilings* liegt. Ergebnis: $B_i$ ist auf **die Länge einer einzigen kritischen Sektion** beschränkt **und** Deadlocks sind ausgeschlossen - der eigentliche theoretische Gewinn gegenüber PIP.
+
+> **Merke:** PIP behandelt die Prioritätsinversion *nachträglich* (Vererbung, wenn sie auftritt), PCP *verhindert* die problematischen Situationen *vorab* durch die Vergaberegel. Für harte Echtzeit ist die garantierte, kleine Blockierungsschranke von PCP der entscheidende Vorteil.
+
+### Ausblick
+
+Damit schließt sich der Bogen dieser Vorlesung: Vom *optimalen* Scheduling unabhängiger Tasks (EDF, LL) über die *praktische* Prioritätsvergabe (RMS, Fixed-Priority) bis zur Erkenntnis, dass gemeinsam genutzte Ressourcen die Analyse erneut verändern und nach Synchronisationsprotokollen verlangen.
+
+Die beiden offenen Enden greifen die folgenden Vorlesungen auf:
+
+- *Warum* Prioritätsinversion gefährlich ist und wie **Priority Inheritance** sie entschärft, haben wir am Mars-Pathfinder-Fall bereits in **VL 07** gesehen.
+- Wie ein RTOS die festen Prioritäten konkret verwaltet, wie der Tick-Interrupt den Kontextwechsel auslöst und wie Tasks über **Semaphoren, Mutexe und Queues** zusammenarbeiten, sehen wir in der nächsten Vorlesung am Beispiel von **FreeRTOS**.
