@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.0
+version:  1.0.2
 language: de
 narrator: Deutsch Female
 
@@ -33,11 +33,305 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ---
 
+## Wozu überhaupt ein RTOS?
+
+> **Die berechtigte Frage:** "Eine LED blinken lassen kann ich mit `_delay_ms()`
+> in drei Zeilen. Warum soll ich mir einen Scheduler, Tasks und Prioritäten
+> antun?" — Diese Skepsis ist gesund. Ein RTOS rechtfertigt sich **nicht** am
+> einfachen Beispiel, sondern erst dort, wo die Super-Loop *nachweisbar*
+> zusammenbricht. Genau diesen Punkt erarbeiten wir hier Schritt für Schritt.
+
+Wir betrachten eine Aufgabe, die zwei **unabhängige Zeitbasen** verlangt — eine
+Situation, die in eingebetteten Systemen die Regel und nicht die Ausnahme ist:
+
+- **(A) Ein Regler** (z. B. ein PI-Regler für Motordrehzahl) muss *exakt* alle
+  **10 ms** einen neuen Stellwert berechnen. Die Abtastzeit `T = 10 ms` ist Teil
+  der Reglerauslegung — weicht sie ab, ändert sich effektiv die Reglerverstärkung,
+  das System schwingt oder wird träge. Das ist eine **harte** Echtzeitanforderung.
+- **(B) Eine Display-Ausgabe** soll alle **250 ms** den aktuellen Zustand auf
+  einem grafischen OLED (SSD1306, 128×64) über I²C darstellen. Zeitlich völlig
+  unkritisch — *aber* das Beschreiben des Displays belegt den Bus (und damit die
+  CPU) **für mehrere Millisekunden**.
+
+**Wie lange dauert ein Display-Update?** Der Framebuffer eines 128×64-OLED ist
+128·64 = 8192 Bit = **1024 Byte**. Jedes Byte braucht auf dem I²C-Bus 8 Datenbits
+plus 1 ACK-Bit, also 9 Bit-Zeiten. Ein voller Frame:
+
+$$ t_{\text{Frame}} = \frac{1024 \text{ Byte} \cdot 9 \text{ Bit}}{f_{\text{SCL}}}
+   = \frac{9216 \text{ Bit}}{400\,000\,\text{Bit/s}} \approx 23 \text{ ms} $$
+
+bei 400 kHz (Fast Mode). Bei 100 kHz wären es sogar ~92 ms. Diese ~23 ms blockieren
+auf dem Arduino die CPU — und das ist der Knackpunkt:
+
+> **Achtung — warum I²C hier blockiert, UART aber nicht:** Beide nutzen eine
+> Hardware-Peripherie (USART bzw. TWI) für das Bit-Timing. Der Unterschied liegt
+> in der *Bibliothek*: `HardwareSerial` puffert und sendet per Interrupt im
+> Hintergrund — `Serial.print()` kehrt sofort zurück (vgl. die Frage *"Warum gerät
+> die UART-Übertragung beim Kontextwechsel nicht durcheinander?"*). Die
+> Arduino-`Wire`-Bibliothek dagegen ist auf dem AVR **blockierend**:
+> `Wire.endTransmission()` pollt die TWI-Statusbits in einer Schleife und kehrt
+> erst zurück, wenn die *gesamte* Übertragung durch ist. Die CPU steckt also die
+> vollen ~23 ms in dieser Warteschleife fest. Genau diese Art von Last — eine
+> blockierende Bibliothek, die nicht an eine ISR delegiert — macht das
+> RTOS-Argument zwingend.
+>
+> Quellen: Arduino-`Wire`/TWI-Implementierung
+> [Wire.cpp](https://github.com/arduino/ArduinoCore-avr/blob/master/libraries/Wire/src/Wire.cpp)
+> · [twi.c](https://github.com/arduino/ArduinoCore-avr/blob/master/libraries/Wire/src/utility/twi.c)
+> — die Übertragung läuft per `ISR(TWI_vect)`, aber `twi_writeTo()` busy-wartet
+> mit `while(wait && (TWI_MTX == twi_state)){ … }` auf deren Abschluss; UART zum
+> Vergleich
+> [HardwareSerial.cpp](https://github.com/arduino/ArduinoCore-avr/blob/master/cores/arduino/HardwareSerial.cpp).
+
+Beide Perioden (10 ms / 250 ms) sind nicht das Problem — das Problem ist, dass
+die unkritische Aufgabe (B) **die CPU länger belegt als die Periode** der
+kritischen Aufgabe (A): ~23 ms blockierender I²C-Transfer gegen einen 10-ms-Takt.
+
+### Stufe 1 — Die naive Super-Loop
+
+Der erste Reflex: beides geradeaus in `loop()` mit `delay()`.
+
+```cpp
+void loop() {
+  static uint8_t diag = 0;
+  reglerSchritt();                 // (A) alle 10 ms
+
+  if (++diag >= 25) {              // (B) jeden 25. Durchlauf ~ 250 ms
+    diag = 0;
+    displaySchreiben(stellwert);   // ~23 ms blockierend (I²C-Frame)
+  }
+  delay(10);                       // Annahme: Schleife kostet 0 ms
+}
+```
+
+**Was schiefgeht:**
+
+- `displaySchreiben()` belegt die CPU ~23 ms. In dieser Zeit läuft *kein*
+  Reglerschritt — in **jedem** Display-Zyklus fallen rund 2 Abtastschritte aus.
+- `delay(10)` ignoriert die Laufzeit der Schleife selbst. Der Reglertakt ist
+  systematisch *langsamer* als 10 ms und driftet.
+
+
+### Stufe 2 — Selbstgebaute Zeitbasis mit `millis()`
+
+"Dann ersetze ich `delay()` durch einen Zeitvergleich" — das klassische
+kooperative Zeitscheiben-Muster (Bare-Metal-Scheduler):
+
+```cpp
+void loop() {
+  uint32_t jetzt = millis();
+  if (jetzt >= naechsterRegler) { naechsterRegler += 10;  reglerSchritt(); }
+  if (jetzt >= naechstesDisplay) { naechstesDisplay += 250; displaySchreiben(stellwert); }
+}
+```
+
+Das ist deutlich besser — und für viele Probleme **völlig ausreichend**. Aber
+der Kern bleibt ungelöst:
+
+- `displaySchreiben()` belegt die CPU weiterhin ~23 ms. Während dieser Zeit wird
+  der obere `if`-Zweig *nicht erreicht* → der Reglertakt reißt erneut auf, nur
+  seltener und schwerer zu diagnostizieren.
+- Es gibt **keine Priorität**. Kooperatives Multitasking heißt: jede Aufgabe
+  muss *freiwillig* schnell zurückkehren. Sobald **eine** Aufgabe blockiert oder
+  lange rechnet, leiden **alle** anderen. Die zeitkritische Regelung kann die
+  unkritische Display-Ausgabe nicht unterbrechen.
+
+> **Hier endet, was man sauber von Hand bekommt.** Was jetzt fehlt, ist
+> **Präemption**: die Fähigkeit, eine laufende, unwichtige Aufgabe *gegen ihren
+> Willen* zu unterbrechen, sobald etwas Wichtigeres fällig ist. Diese Mechanik
+> selbst zu bauen (Timer-ISR, Kontextsicherung, Stack-Umschaltung) ist genau das,
+> was ein RTOS bereits fertig mitbringt.
+
+### Stufe 3 — Die RTOS-Lösung
+
+Jede Aufgabe wird ein eigener Task mit eigener **Priorität**. Der Regler-Task
+bekommt die höhere Priorität:
+
+```cpp
+static void TaskRegler(void *pv) {            // Priorität 2 (hoch)
+  TickType_t last = xTaskGetTickCount();
+  for (;;) {
+    reglerSchritt();
+    vTaskDelayUntil(&last, pdMS_TO_TICKS(10)); // exakt 10 ms, driftfrei
+  }
+}
+
+static void TaskDisplay(void *pv) {           // Priorität 1 (niedrig)
+  for (;;) {
+    displaySchreiben(stellwert);               // ~23 ms blockierend ...
+    vTaskDelay(pdMS_TO_TICKS(250));            // ... wird aber präemptiert
+  }
+}
+```
+
+**Warum es jetzt funktioniert:**
+
+1. **Präemption** — Wird der 10-ms-Tick des Regler-Tasks fällig, entzieht der
+   Scheduler dem Display-Task die CPU *sofort*, mitten im I²C-Transfer. Der
+   Reglertakt bleibt stabil, obwohl die Display-Ausgabe weiterhin ~23 ms läuft.
+   (Der FreeRTOS-Tick selbst ist ein Interrupt und feuert auch während des
+   `Wire`-Busy-Waits — `twi_writeTo()` sperrt die Interrupts nicht. Die laufende
+   I²C-Übertragung wird dabei nicht beschädigt: Die TWI-Hardware taktet das
+   aktuelle Byte autonom fertig; *nur* die CPU wechselt den Task.)
+2. **Driftfreie Zeitbasis** — `vTaskDelayUntil()` rechnet relativ zum *letzten*
+   Weckzeitpunkt; Laufzeit-Jitter akkumuliert sich nicht.
+3. **Trennung von Funktionalität und Timing** — keine `millis()`-Buchhaltung
+   mehr. Jeder Task beschreibt nur *seine* Aufgabe und *seine* Periode.
+
+Am Oszilloskop (Toggle-Pin bei jedem Reglerschritt) wird der Unterschied direkt
+sichtbar:
+
+```ascii
+Stufe 1 / Stufe 2:                         Stufe 3 (FreeRTOS):
+  __    __    __      __    __               __    __    __    __    __
+ |  |  |  |  |  |    |  |  |  |              |  |  |  |  |  |  |  |  |  |
+_|  |__|  |__|  |____|  |__|  |__           _|  |__|  |__|  |__|  |__|  |__
+                ^^^^                         gleichmäßig — kein Einbruch
+                Display blockiert ~23 ms
+                = ~2 Reglertakte verloren
+```
+
+Das vollständige, lauffähige Beispiel mit allen drei Stufen — inklusive
+Messpunkt und Build-Anleitung — liegt im Repository:
+
+[codeExamples/avr/superLoopProblem](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/tree/main/codeExamples/avr/superLoopProblem)
+
+
+### Wann lohnt sich ein RTOS — und wann nicht?
+
+Der Eskalationspfad zeigt: Ein RTOS ist **kein Selbstzweck**. Die Entscheidung
+hängt davon ab, ob die Super-Loop an ihre Grenze stößt:
+
+| Situation                                                             | Super-Loop reicht | RTOS sinnvoll |
+| --------------------------------------------------------------------- | :---------------: | :-----------: |
+| Eine einzige periodische Aufgabe (LED blinken)                        |         ✓         |       –       |
+| Mehrere Aufgaben, alle kurz und nicht-blockierend                     |         ✓         |      (✓)      |
+| Mehrere Zeitbasen, eine Aufgabe blockiert/rechnet lange               |         ✗         |       ✓       |
+| Harte Echtzeit-Deadline trifft auf unkritische Hintergrundlast        |         ✗         |       ✓       |
+| Mischung aus Hard- und Soft-Realtime-Komponenten                      |         ✗         |       ✓       |
+| Code soll über Hardwarewechsel hinweg wiederverwendbar bleiben        |        (✗)        |       ✓       |
+
+Daraus ergeben sich die konkreten Vorteile des RTOS gegenüber dem Super-Loop-Design
+— jetzt *am Beispiel festgemacht* statt nur behauptet:
+
+- **Trennung von Funktionalität und Timing** — der Task beschreibt *was* zu tun
+  ist, der Scheduler *wann*. Kein manuelles `millis()`-Bookkeeping (Stufe 2 → 3).
+- **Explizite Prioritäten** — die wichtige Aufgabe verdrängt die unwichtige
+  automatisch (das, was Stufe 2 grundsätzlich nicht kann).
+- **Mischung von Hard- und Soft-Realtime** in *einem* System ohne dass die
+  unkritische Last die kritische gefährdet.
+- **Wiederverwendbarkeit** — die Task-Logik ist von der Timing-Mechanik
+  entkoppelt und übersteht einen Hardwarewechsel.
+
+> **Merke:** Der Preis dafür ist realer Overhead (Speicher pro Task-Stack,
+> Kontextwechselzeit, Komplexität). Auf einem ATmega328 mit 2 KB RAM sind das
+> spürbare Grenzen — siehe Abschnitt *FreeRTOS auf verschiedenen Architekturen*.
+> Ein RTOS ist ein Werkzeug, kein Pflichtprogramm.
+
+### Der Haken: Was darf *nicht* unterbrochen werden?
+
+Bis hier klang die Geschichte zu glatt: "Der Regler-Task verdrängt die
+Display-Ausgabe — Problem gelöst." Aber sobald **echte** Kommunikation im Spiel
+ist, kippt das. Wird ein Task *mitten in einer Bus-Übertragung* unterbrochen,
+kann die Übertragung beschädigt werden. Wir scheinen ein neues Problem gegen das
+alte eingetauscht zu haben:
+
+```ascii
+ Atomarität  <───────────  Zielkonflikt  ───────────>  Reaktivität
+ (manches darf NICHT          (kritischer               (Regler MUSS
+  unterbrochen werden)         Abschnitt)                sofort dran)
+```
+
+Jeder Schutz vor Unterbrechung (Interrupts sperren) erkauft **Konsistenz** mit
+**Latenz** — und Latenz ist genau das, was die Echtzeitfähigkeit auffrisst. Die
+Auflösung ist **quantitativ**: Es geht nicht um *ob*, sondern um *wie lange*.
+
+| Größe                                       | Wert            |
+| ------------------------------------------- | --------------- |
+| Regler-Periode                              | 10 000 µs       |
+| tolerierbarer Jitter (~0,5 %)               | ~50 µs          |
+| kritischer Abschnitt für *eine* Mikro-Sequenz | ~2 µs         |
+| *ganze* Display-Aktualisierung              | ~23 000 µs      |
+
+Sperrt man die **ganzen 23 ms** → Regler verhungert. Sperrt man nur die **2-µs-
+Mikro-Sequenz** (z. B. die register-kritischen Instruktionen) → Jitter 2 µs ≪
+50 µs → Echtzeit bleibt intakt. Beide Anforderungen sind gleichzeitig erfüllbar,
+**weil die unteilbare Einheit winzig ist und die präemptierbaren Pausen dazwischen
+groß** (bei I²C: das einzelne Byte taktet ohnehin die TWI-Hardware autonom):
+
+```ascii
+FALSCH (atomar = ganze Funktion):
+  [############ 23 ms gesperrt ############]   Regler verhungert
+
+RICHTIG (atomar = nur die Mikro-Sequenz):
+  [#2µs#]...Bus...[#2µs#]...Bus...[#2µs#]      Regler schlägt in den Lücken zu
+   sperr   frei    sperr   frei
+```
+
+### Wo muss ich Atomarität *wirklich* einbauen?
+
+Atomarität ist teuer, also baut man sie **nur dort ein, wo eine Unterbrechung
+nachweisbar Schaden anrichtet**. Das passiert aus genau zwei Gründen:
+
+1. **Geteilter, veränderlicher Zustand (Race):** Zwei Stränge fassen dieselbe
+   Ressource an, mindestens einer verändert sie — nicht-atomares `digitalWrite`
+   auf einen gemeinsamen Port, eine 16-Bit-Variable auf dem 8-Bit-AVR, ein von
+   zwei Tasks geteilter I²C-Bus.
+2. **Zeitlich gekoppelte Sequenz:** Die Pulsbreite oder exakte Reihenfolge *ist*
+   die Information (WS2812, Software-SPI, 1-Wire).
+
+**Trifft keiner der beiden zu — und das ist der Normalfall — bleibt der Code
+präemptierbar.**
+
+```ascii
+Schritt 1 — KANN eine Unterbrechung hier Schaden anrichten?
+  Schaden  ⟺  geteilter veränderlicher Zustand  ODER  Pulsbreite/Reihenfolge = Info
+  │
+  ├─ keiner von beiden?  ──────────────►  KEINE Atomarität  (häufigster Fall)
+  │
+  └─ mindestens einer trifft zu          →  schützen ist PFLICHT, weiter zu Schritt 2
+
+Schritt 2 — WOMIT schützen? (schwächstes ausreichendes Werkzeug)
+  │
+  ├─ Pulsbreite/Reihenfolge ist Information   →  critical section
+  │  (z. B. WS2812, Bitbang — gilt AUCH ohne     (Interrupts aus, nur µs!)
+  │   geteilten Zustand)
+  │
+  └─ geteilter veränderlicher Zustand  →  Wer ist der andere ?
+       ├─ andere TASKS            →  Mutex      (ISRs laufen weiter!)
+       └─ eine ISR / HW-Register  →  critical section                                                       .
+```
+
+Angewendet auf unser I²C-Display-Beispiel (und zwei Vergleichsfälle mit anderer
+Anbindung):
+
+| Stelle                                        | geteilt? | pulsbreiten-kodiert? | Atomarität?             |
+| --------------------------------------------- | :------: | :------------------: | ----------------------- |
+| Der ~23-ms-Frame-Transfer als Ganzes          |   nein   |         nein         | **nein** (nur Last!)    |
+| I²C-Bus, **nur der Display-Task** nutzt ihn   |   nein   |         nein         | **nein**                |
+| I²C-Bus, **von zwei Tasks** geteilt           |  **ja**  |         nein         | **ja — Mutex**          |
+| Zugriff auf `stellwert` (16 Bit, 8-Bit-CPU)   |  **ja**  |         nein         | **ja** — `ATOMIC_BLOCK` |
+| *(Vergleich)* GPIO-Display-Pin am Regler-Port |  **ja**  |         nein         | **ja** — critical, µs   |
+| *(Vergleich)* WS2812-LED-Strip (Bitbang)      |   nein   |        **ja**        | **ja** — critical       |
+
+> **Die Kernregel:** Atomarität gehört *nur* dorthin, wo eine Unterbrechung
+> **geteilten veränderlichen Zustand** zerreißt oder eine **pulsbreiten-kodierte
+> Sequenz** zerstört. Dort nimmt man das **schwächste** ausreichende Werkzeug —
+> ein **Mutex** sperrt keine Interrupts und lässt den Regler weiterlaufen, eine
+> **critical section** sperrt Interrupts und bleibt deshalb so *kurz* wie
+> physikalisch möglich. Solange `max(kritischer Abschnitt) ≪ Deadline-Jitter`,
+> ist die Echtzeitfähigkeit gewahrt. Das ist mehr Kontrolle als die Super-Loop
+> bietet, nicht weniger: Dort ist die *ganze* lange Funktion faktisch atomar.
+
+*****************************************************************************
+
 ## Verwendung von Echtzeitbetriebssystemen
 
 Ein Echtzeitbetriebssystem (RTOS) ist ein Betriebssystem (OS), das für Echtzeitanwendungen vorgesehen ist.  Ereignisgesteuerte Systeme schalten zwischen Tasks auf der Grundlage ihrer Prioritäten um, während Time-Sharing-Systeme die Tasks auf der Grundlage von Taktinterrupts umschalten. Die meisten RTOSs verwenden einen präemptiven Scheduling-Algorithmus.
 
-Vorteile des RTOS vs. Super Loop Design
+Die konkrete Motivation — *wann* sich der Wechsel vom Super-Loop-Design lohnt
+und *woran* es ohne RTOS scheitert — haben wir im vorangehenden Abschnitt
+*Wozu überhaupt ein RTOS?* am Beispiel zweier Zeitbasen erarbeitet. Zusammengefasst:
 
 - Trennung von Funktionalität und Timing - RTOS entlastet den Nutzer und behandelt Timing, Signale und Kommunikation
 - explizite Definition von Prioritäten - deutliche bessere Skalierbarkeit als im SLD
@@ -50,15 +344,9 @@ Vorteile des RTOS vs. Super Loop Design
 
 FreeRTOS ist für leistungsschwache eingebettete Systeme konzipiert. Der Kernel selbst besteht aus nur drei C-Dateien. Um den Code lesbar, einfach zu portieren und wartbar zu machen, ist er größtenteils in C geschrieben, aber es sind einige Assembler-Funktionen (meist in architekturspezifischen Scheduler-Routinen) enthalten. FreeRTOS kann eher als "Thread-Bibliothek" denn als "Betriebssystem" betrachtet werden, obwohl eine Kommandozeilenschnittstelle und POSIX-ähnliche E/A-Abstraktionserweiterungen verfügbar sind.
 
-
-
-
-
-FreeRTOS implementiert mehrere Threads, indem es das Host-Programm in regelmäßigen kurzen Abständen eine Thread-Tick-Methode aufrufen lässt. Die Thread-Tick-Methode schaltet Tasks abhängig von der Priorität und einem Round-Robin-Schema um. Das übliche Intervall beträgt 1 bis 10 Millisekunden (1/1000 bis 1/100 einer Sekunde), über einen Interrupt von einem Hardware-Timer, aber dieses Intervall wird oft geändert, um einer bestimmten Anwendung zu entsprechen.
-
 ### FreeRTOS Grundlagen
 
-Das Task Modell unterscheidet 4 Zustände: Running, Blocked, Suspended, Ready, die mit entsprechenden API Funktionen manipuliert werden können, bzw. durch den Scheduler gesetzt werden. FreeRTOS implmentiert dafür einen präemptiven und einen kooperativen Multitasking Mode.
+Das Task Modell unterscheidet 4 Zustände: Running, Blocked, Suspended, Ready, die mit entsprechenden API Funktionen manipuliert werden können, bzw. durch den Scheduler gesetzt werden. FreeRTOS implementiert dafür einen präemptiven und einen kooperativen Multitasking Mode.
 
 <!--
 style="width: 80%;"
@@ -72,38 +360,56 @@ Priorität   T1  |          XXXXXXXXXX                T1  |                    X
                 0    2    4    6    8   10   12          0    2    4    6    8   10   12   
 ```
 
+FreeRTOS implementiert mehrere Threads, indem es das Host-Programm in regelmäßigen kurzen Abständen eine Thread-Tick-Methode aufrufen lässt. Die Thread-Tick-Methode schaltet Tasks abhängig von der Priorität und einem Round-Robin-Schema um. Das übliche Intervall beträgt 1 bis 10 Millisekunden (1/1000 bis 1/100 einer Sekunde), über einen Interrupt von einem Hardware-Timer, aber dieses Intervall wird oft geändert, um einer bestimmten Anwendung zu entsprechen.
+
 Der FreeRTOS-Echtzeit-Kernel misst die Zeit mit einer Tick-Count-Variable. Ein Timer-Interrupt (der RTOS-Tick-Interrupt) inkrementiert den Tick-Count - so kann der Echtzeit-Kernel die Zeit mit einer Auflösung der gewählten Timer-Interrupt-Frequenz messen.
 
-Jedes Mal, wenn der Tick-Count inkrementiert wird, muss der Echtzeit-Kernel prüfen, ob es nun an der Zeit ist, einen Task zu entsperren oder aufzuwecken. Es ist möglich, dass ein Task, die während des Tick-ISRs geweckt oder entsperrt wird, eine höhere Priorität hat als der unterbrochene Task. Wenn dies der Fall ist, sollte der Tick-ISR zum neu geweckten/entblockten Task zurückkehren - effektiv unterbricht er einen Task, kehrt aber zu einer anderen zurück.
+Jedes Mal, wenn der Tick-Count inkrementiert wird, muss der Echtzeit-Kernel prüfen, ob es nun an der Zeit ist, einen Task zu entsperren oder aufzuwecken. Es ist möglich, dass ein Task, der während des Tick-ISRs geweckt oder entsperrt wird, eine höhere Priorität hat als der unterbrochene Task. Wenn dies der Fall ist, sollte der Tick-ISR zum neu geweckten/entblockten Task zurückkehren - effektiv unterbricht er einen Task, kehrt aber zu einem anderen zurück.
 
-> **Merke:** Das präemptive Scheduling erfordert sowohl auf de Planungsebene, als auch auf der Verwaltungsebene einen größeren Overhead.
+> **Merke:** Das präemptive Scheduling erfordert sowohl auf der Planungsebene, als auch auf der Verwaltungsebene einen größeren Overhead.
 
-FreeRTOS unterstützt 2 Strategien für die Speicherbereitstellung, eine statische und eine dynamische Allokation. Während die erste Variante es der Anwendung überlässt die notwendigen Speicherareale zu aquirieren, über nimmt das RTOS diese Aufgabe im zweiten Modus. Der angeforderte Speicher wird auf dem Heap abgelegt. Mit dem Aufruf von `xTaskCreate()` wird ein Speicherblock alloziert, so dass der Stack und der _task control block_ (TCB) dort abgelegt werden können. Queues, Mutexe und Semaphoren werden ebenfalls dort eingebunden.  
+### Speicherverwaltung
+
+FreeRTOS unterstützt 2 Strategien für die Speicherbereitstellung, eine statische und eine dynamische Allokation. Während die erste Variante es der Anwendung überlässt die notwendigen Speicherareale zu akquirieren, übernimmt das RTOS diese Aufgabe im zweiten Modus. Der angeforderte Speicher wird auf dem Heap abgelegt. Mit dem Aufruf von `xTaskCreate()` wird ein Speicherblock alloziert, so dass der Stack und der _task control block_ (TCB) dort abgelegt werden können. Queues, Mutexe und Semaphoren werden ebenfalls dort eingebunden.  
 
 <!--
 style="width: 80%;"
 -->
 ```ascii
-        Arbeitsspeicher AVR
-Ende    +------------------+
-        | Stack für main   |
-        | und IRQs         |
-        |                  |
-        |                  |
-        +------------------+
-        | freier Speicher  |
-        |                  |      +---------------+
-        |                  |   /  | TCB Tasks A   |
-        +------------------+  /   +---------------+
-        | HEAP             |      | Stack Tasks A |
-        | verwaltet von    |      +---------------+
-        | FreeRTOS         |      | Queue X       |        
-        +------------------+  \   +---------------+
-        | HEAP für main    |   \  |               | free Space
-        |                  |      +---------------+                  
-Start   +------------------+                                                   .
+                  Arbeitsspeicher AVR (SRAM)
 
+hohe Adresse   +-------------------+  RAMEND (z. B. 0x08FF, ATmega328)
+(RAMEND)       | Stack für main    |
+               | und IRQs          |
+               |        |          |
+               |        v  wächst nach unten
+               +-------------------+
+               | freier Speicher   |   <- hier kollidieren Stack & Heap
+               |                   |      im Ernstfall (Stack Overflow!)
+               +-------------------+
+               |        ^  wächst nach oben
+               | FreeRTOS-Heap     |      +-----------------+
+               | (ucHeap[])        |  ->  | TCB Task A      |
+               |                   |      +-----------------+
+               |                   |      | Stack Task A    |
+               |                   |      +-----------------+
+               |                   |      | Queue X / Mutex |
+               +-------------------+      +-----------------+
+               | .data / .bss      |
+               | (globale Var.)    |
+niedrige Adr.  +-------------------+  RAMSTART (0x0100)
+(RAMSTART)
 ```
+
+Zwei wichtige Punkte zur Orientierung:
+
++ **Stack und Heap wachsen aufeinander zu.** Der Stack beginnt bei `RAMEND` (hohe
+  Adresse) und wächst nach *unten*; der Heap wächst nach *oben*. Treffen sie sich
+  im "freien Speicher", ist der RAM erschöpft — auf dem ATmega328 mit nur 2 KB ein
+  realer Engpass.
++ **TCB und Stack eines Tasks sind getrennte Strukturen**, liegen aber benachbart
+  im FreeRTOS-Heap. Der TCB *enthält* den Stack nicht, sondern *zeigt* über
+  `pxTopOfStack` auf dessen aktuelle Spitze (siehe unten).
 
 Beim Kontextwechsel sind auf dem AVR folgende Elemente auf dem Taskzugehörigen Stack zu speichern:
 
@@ -173,6 +479,12 @@ typedef struct tskTaskControlBlock
 } tskTCB;
 ```
 
+> **Warum muss `pxTopOfStack` das *erste* Member sein?** Beim Kontextwechsel lädt
+> der Assembler-Code (siehe `portSAVE_CONTEXT` oben) den Zeiger `pxCurrentTCB` und
+> muss *sofort* an die gespeicherte Stackspitze gelangen. Weil `pxTopOfStack` an
+> Offset 0 liegt, ist die TCB-Adresse zugleich die Adresse von `pxTopOfStack` —
+> der Zugriff geschieht *ohne* Offset-Berechnung. 
+
 Zusammenfassung der FreeRTOS Komponenten:
 
 | Komponente               | Aufgabe                                 |
@@ -194,7 +506,7 @@ Die generellen Parameter einer FreeRTOS-Anwendung finden sich in der Datei [Free
 | `configMINIMAL_STACK_SIZE` | Angabe der Minimalen Stackgröße                                                                                                       |
 | `configMAX_PRIORITIES`     | Definition der Zahl der Prioritäten. Daraus folgt die Zahl der notwendigerweise zu etablierenden Listen für die Verwaltung der Tasks. |
 | `configCPU_CLOCK_HZ`       | Taktfrequenz des Prozessors                                                                                                           |
-| `configTICK_RATE_HZ`       |                                                                                                                                       |
+| `configTICK_RATE_HZ`       | Frequenz des Tick-Interrupts in Hz — bestimmt die zeitliche Auflösung von `vTaskDelay()` & Co. (1 Tick = 1/`configTICK_RATE_HZ` s)    |
 
 > **Achtung!** Die verwendete Implementierung für den AVR lässt einzelne Einstellungsmöglichkeiten außer Acht und realisiert diese fest im Code oder implementiert eigene Konfigurationsmethoden.
 
@@ -212,7 +524,7 @@ static void TaskBlinkRedLED(void *pvParameters) // Main LED Flash
    while(1)
    {
        PINB = ( 1 << PB5 );
-       vTaskDelay(1000/portTick_PERIOD_MS); // wait for one second
+       vTaskDelay(1000/portTICK_PERIOD_MS); // wait for one second
    }
 }
 
@@ -263,6 +575,79 @@ static void TaskBlinkRedLED(void *pvParameters) // Main LED Flash
 
 Entsprechend muss aber in `FreeRTOSConfig.h` eine Makrovariable angepasst werden `#define configUSE_PREEMPTION 0`.
 
+### Praxis: Wie passt man `FreeRTOSConfig.h` an?
+
+Hier stößt das Lehrbuchmodell ("ändere einfach dein `FreeRTOSConfig.h`") auf die
+Arduino-Realität. Mit `lib_deps = feilipu/FreeRTOS` zieht PlatformIO das Paket —
+**inklusive einer fertigen `FreeRTOSConfig.h`** — nach `.pio/libdeps/uno/FreeRTOS/`.
+Dieser Ordner ist ein **Build-Artefakt**: Er wird nicht eingecheckt und bei jedem
+`pio pkg update` oder `rm -rf .pio` neu erzeugt. Editiert man die Datei *dort*,
+ist die Änderung beim nächsten Build oder auf dem Rechner der Kollegin wieder weg.
+
+Drei saubere Wege, die Konfiguration im **Projekt** zu verankern:
+
+__1. Einzelne Makros per Build-Flag (`platformio.ini`)__
+
+Für einzelne Schalter genügt ein `-D` in der `platformio.ini` — die Datei muss
+gar nicht angefasst werden:
+
+```ini
+[env:uno]
+platform = atmelavr
+board = uno
+framework = arduino
+lib_deps = feilipu/FreeRTOS
+build_flags =
+    -D configUSE_PREEMPTION=0      ; kooperatives Scheduling erzwingen
+    -D INCLUDE_vTaskDelayUntil=1
+```
+
+> **Achtung — der Haken:** Das funktioniert *nur*, wenn das Makro in der
+> `FreeRTOSConfig.h` mit `#ifndef` geschützt ist (`#ifndef X` / `#define X …` /
+> `#endif`). Die `feilipu`-Datei definiert `configUSE_PREEMPTION` aber **hart**
+> (ohne `#ifndef`) — ein `-D configUSE_PREEMPTION=0` erzeugt dann nur eine
+> "macro redefined"-Warnung, und der Header gewinnt. Für die `INCLUDE_*`-Flags
+> klappt der `-D`-Weg, für `configUSE_PREEMPTION` *nicht* zuverlässig.
+
+__2. Eigene `FreeRTOSConfig.h` im Projekt (empfohlen)__
+
+Robust ist eine **projekteigene** Kopie, die der Compiler *vor* der Lib findet:
+
+```text
+projekt/
+├── platformio.ini
+├── include/
+│   └── FreeRTOSConfig.h     ← eigene Kopie, hier angepasst (im Git!)
+└── src/
+    └── main.cpp
+```
+
+```ini
+build_flags = -I include      ; den eigenen include-Ordner VOR die Lib stellen
+```
+
+Man kopiert die Original-`FreeRTOSConfig.h` einmal nach `include/`, ändert dort
+`configUSE_PREEMPTION` und **diese** Version wird kompiliert. Sie liegt im
+Git-Repo, übersteht `rm -rf .pio` und ist auf jedem Rechner identisch.
+
+__3. Verschiedene Configs pro Environment__
+
+Für *denselben* Code mit unterschiedlicher Konfiguration (z. B. kooperativ vs.
+präemptiv) bekommt jedes Environment seinen eigenen Config-Ordner:
+
+```ini
+[env:coop]
+build_flags = -I config_coop      ; FreeRTOSConfig.h mit configUSE_PREEMPTION=0
+
+[env:preempt]
+build_flags = -I config_preempt   ; FreeRTOSConfig.h mit configUSE_PREEMPTION=1
+```
+
+> **Merke:** Konfiguration gehört ins **Projekt**, nie in die heruntergeladene
+> Lib. Das deckt sich mit dem Hinweis oben, dass der AVR-Port einzelne
+> Einstellungen fest im Code realisiert — gerade deshalb muss man genau wissen,
+> *welcher* Schalter per `-D` greift und welcher eine eigene Config erzwingt.
+
 
 ```c preemtiveScheduling.c
 static void WorkerTask(void *pvParameters)
@@ -282,6 +667,8 @@ static void WorkerTask(void *pvParameters)
 ```
 
 Das ist die Standardimplementierung, eine Rekonfiguration ist nicht notwendig.
+
+
 
 ### Kommunikation / Synchronisation zwischen Tasks
 
@@ -387,7 +774,7 @@ Verhalten beim Warten auf eine Queue
 
 + Task blockiert ...  Der Empfänger-Task wird in den Blocked-Zustand versetzt, solange keine Daten in der Queue sind.
 + Scheduler wählt anderen Task ... Da der Empfänger-Task blockiert ist, kann er keine CPU-Zeit bekommen. Der Scheduler sucht sich einen anderen bereitstehenden Task mit der höchsten Priorität aus.
-+ CPU wird anderen Tasks zugewiesen ... Der Sender-Task Priorität 2 und der Empfänger Priorität 1. Wenn der Empfänger wartet, läuft der Sender.
++ CPU wird anderen Tasks zugewiesen ... Der Sender-Task hat Priorität 2 und der Empfänger Priorität 1. Wenn der Empfänger wartet, läuft der Sender.
 + Task wird wieder bereit ... Sobald der Sender eine Nachricht in die Queue schreibt, wird der Empfänger-Task automatisch wieder aus dem Blocked-Zustand in die Ready-Liste versetzt.
 + Preemptives Scheduling ... Falls der Empfänger eine niedrigere Priorität hat als den Sender, kann er erst wieder laufen, wenn der Sender sich blockiert oder fertig ist. Wenn Prioritäten gleich oder der Empfänger höher ist, erfolgt ein sofortiger Kontextwechsel.
 
@@ -443,7 +830,7 @@ Eine Mutex wird mit der Funktion
 semaphoreHandle_t mutexName = xSemaphoreCreateMutex(void)
 ```
 
-erstellt. Mutexe sollten nicht von einem Interrupt aus verwendet werden, da der Mechanismus der Prioritätsvererbung nur für einen Task sinnvoll ist, nicht aber für ein Interrupt.
+erstellt. Mutexe sollten nicht von einem Interrupt aus verwendet werden, da der Mechanismus der Prioritätsvererbung nur für einen Task sinnvoll ist, nicht aber für einen Interrupt.
 
 *****************************************************************************
 
@@ -454,14 +841,41 @@ __Beispiel__
 
 Im Beispiel wird auf die Ressource Serielle Schnittstelle durch zwei Tasks zugegriffen. Um ein Überschreiben der Inhalte zu verhindern ist eine Synchronisation erforderlich.
 
+> **Warum hier ein Mutex und kein (binäres) Semaphor?** Beide könnten die UART
+> technisch schützen — aber die *Semantik* unterscheidet sich, und an dieser
+> Stelle passt der Mutex:
+>
+> 1. **Es ist Besitz, kein Signal.** Beide Tasks wollen die Schnittstelle
+>    *exklusiv benutzen*; derselbe Task, der `xSemaphoreTake()` aufruft, gibt sie
+>    mit `xSemaphoreGive()` auch wieder frei (take und give im *selben* Task). Das
+>    ist das Lehrbuch-Muster für einen Mutex. Ein binäres Semaphor wird dagegen
+>    typischerweise von *einem* Strang gegeben und von einem *anderen* genommen —
+>    etwa wenn eine ISR einem Task ein Ereignis signalisiert.
+> 2. **Prioritätsvererbung.** `TaskA` hat Priorität 2, `TaskB` Priorität 1. Hält
+>    der niederpriore `TaskB` gerade die UART und der höherpriore `TaskA` will sie
+>    haben, **erbt `TaskB` temporär Priorität 2**, bis er freigibt. So kann kein
+>    mittelpriorer Task `TaskB` verdrängen und `TaskA` damit indirekt blockieren —
+>    die **Prioritätsinversion** ist vermieden. Ein binäres Semaphor bietet diesen
+>    Schutz *nicht*.
+>
+> Faustregel: *Ressource schützen, die ein Task „besitzt" und selbst wieder
+> freigibt → Mutex. Ein Ereignis von A nach B signalisieren (besonders ISR → Task)
+> → (binäres) Semaphor.*
+>
+> Übrigens: In FreeRTOS ist ein Mutex intern ein Spezialfall eines Semaphors.
+> Deshalb gibt es **keinen** Typ `MutexHandle_t` — der korrekte Typ ist
+> `SemaphoreHandle_t`, erzeugt über `xSemaphoreCreateMutex()`.
+
 [Codesammlung](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/codeExamples/avr/FreeRTOS_taskHandling/src/main.cpp)
 
 ```c 
 #include <Arduino.h>
 #include <Arduino_FreeRTOS.h>
-#include <semphr.h>  // add the FreeRTOS functions for Semaphores (or Flags).
+#include <semphr.h>  // FreeRTOS-Funktionen für Mutexe/Semaphore (gemeinsamer Header)
 
-SemaphoreHandle_t xSerialSemaphore;
+// Mutex (kein Semaphor!): schützt die gemeinsame Ressource "serielle
+// Schnittstelle". Take und Give erfolgen IMMER im selben Task (Besitz).
+SemaphoreHandle_t xSerialMutex;
 
 void TaskA( void *pvParameters );
 void TaskB( void *pvParameters );
@@ -470,11 +884,11 @@ void setup() {
 
   Serial.begin(9600);
   
-  if ( xSerialSemaphore == NULL )  
+  if ( xSerialMutex == NULL )  
   {
-    xSerialSemaphore = xSemaphoreCreateMutex();  
-    if ( ( xSerialSemaphore ) != NULL )
-      xSemaphoreGive( ( xSerialSemaphore ) );  
+    xSerialMutex = xSemaphoreCreateMutex();  // erzeugt einen Mutex
+    if ( ( xSerialMutex ) != NULL )
+      xSemaphoreGive( ( xSerialMutex ) );  // initial freigeben
   }
 
   xTaskCreate(
@@ -482,7 +896,7 @@ void setup() {
     ,  "A"  
     ,  128  
     ,  NULL
-    ,  2  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  2  // Priority, with 2 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
     ,  NULL );
 
   xTaskCreate(
@@ -509,11 +923,11 @@ void TaskA( void *pvParameters __attribute__((unused)) )  // This is a Task.
   for (;;) 
   {
     //Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    // If the semaphore is not available, wait 5 ticks of the Scheduler to see if it becomes free.
-    if ( xSemaphoreTake( xSerialSemaphore, ( TickType_t ) 5 ) == pdTRUE )
+    // Ist der Mutex belegt, bis zu 5 Ticks auf seine Freigabe warten.
+    if ( xSemaphoreTake( xSerialMutex, ( TickType_t ) 5 ) == pdTRUE )
     {
       Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-      xSemaphoreGive( xSerialSemaphore );
+      xSemaphoreGive( xSerialMutex );
     }
 
     vTaskDelay(1);  // one tick delay (15ms) in between reads for stability
@@ -525,10 +939,10 @@ void TaskB( void *pvParameters __attribute__((unused)) )  // This is a Task.
   for (;;)
   {
     //Serial.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
-    if ( xSemaphoreTake( xSerialSemaphore, ( TickType_t ) 5 ) == pdTRUE )
+    if ( xSemaphoreTake( xSerialMutex, ( TickType_t ) 5 ) == pdTRUE )
     {
       Serial.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
-      xSemaphoreGive( xSerialSemaphore ); 
+      xSemaphoreGive( xSerialMutex ); 
     }
 
     vTaskDelay(1);
@@ -536,14 +950,60 @@ void TaskB( void *pvParameters __attribute__((unused)) )  // This is a Task.
 }
 ```
 
+__Was passiert mit und ohne Mutex?__
+
+Schützt der Mutex die Ausgabe (`xSemaphoreTake` … `xSemaphoreGive` um den
+`println` herum), erscheint **jede Zeile vollständig und ungeteilt** — die
+Reihenfolge von A und B hängt vom Scheduling ab, aber sie verzahnen sich nie:
+
+```
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+```
+
+Entfernt man den Mutex (beide `xSemaphoreTake`/`xSemaphoreGive`-Zeilen
+auskommentieren und nur den `println` stehen lassen), zerreißt die Ausgabe
+sichtbar in verschränkte A- und B-Blöcke:
+
+```
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+BBBAAAAAAAAAAAAAAAAAAAAAAAAAAA...BBBBBBBBBBBBBBBBAAAAAAAAAAAAAA...BBB
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+BBBBBBBBBBBBBAAAAAAAAAAAAAAAA...BBBBBBBBBBBBBBBBAAAAAAAAAAAAAA...BBBBBBBBB
+```
+
+> **Warum zerreißt es trotz gepufferter UART?** Im einleitenden Abschnitt hieß es,
+> `Serial.println()` puffere und kehre sofort zurück — das stimmt, *aber nur
+> solange die Nachricht in den Sendepuffer passt*. Der TX-Ringpuffer von
+> `HardwareSerial` ist auf dem ATmega328 nur **64 Byte** groß; die A/B-Strings hier
+> sind aber **~74 Zeichen** lang. Sobald der Puffer voll ist, kann `Serial.write()`
+> die Bytes nicht mehr nur ablegen, sondern **busy-wartet**, bis die Hintergrund-ISR
+> wieder Platz geschaffen hat:
+>
+> ```cpp
+> // HardwareSerial::write(), sinngemäß:
+> while (nächster_Kopf == _tx_buffer_tail) { /* warten, bis die ISR den Puffer leert */ }
+> ```
+>
+> **Genau in diesem Warten wird der Task präemptiert.** Der andere Task läuft an,
+> schiebt *seine* Bytes in denselben Puffer — und so verschränken sich die Blöcke.
+> Die Blockgröße (~16 Zeichen) entspricht grob dem, was pro Zeitscheibe durch den
+> Puffer abfließt. Eine Nachricht **kürzer als 64 Byte** würde diesen Effekt kaum
+> zeigen, weil `println` dann sofort zurückkehrt und selten mitten in der Ausgabe
+> unterbrochen wird. Das Beispiel ist also bewusst „überlang" gewählt, damit der
+> Mutex-Nutzen sichtbar wird — und es illustriert nebenbei, dass selbst die
+> „nicht-blockierende" UART blockierend wird, sobald man ihren Puffer überfüllt.
+
 *****************************************************************************
 
-          {{6-7}}
+          {{5-6}}
 *****************************************************************************
 
 __Event Groups__
 
-Event Groups in FreeRTOS sind ein Mechanismus zur Synchronisation von Tasks über Bitmuster. Sie ermöglichen es dir, mit einer Gruppe von Bits (Events) komplexe Abhängigkeiten zwischen Tasks auszudrücken.
+Event Groups in FreeRTOS sind ein Mechanismus zur Synchronisation von Tasks über Bitmuster. Sie ermöglichen es, mit einer Gruppe von Bits (Events) komplexe Abhängigkeiten zwischen Tasks auszudrücken.
 
 Eine Event Group besteht intern aus einem 32-Bit-Wert. Jedes Bit steht für ein bestimmtes Ereignis (Event).
 
@@ -615,7 +1075,6 @@ int main(void)
 
 ```
 
-
 *****************************************************************************
 
 ### Denken wie ein RTOS Entwickler
@@ -631,7 +1090,7 @@ int main(void)
 
 ```c
 #include <Arduino.h>
-#include <FreeRTOS.h>
+#include <Arduino_FreeRTOS.h>
 #include <task.h>
 
 // Prototypen der Trace-Funktionen (müssen "C" sein, damit der Linker passt)
@@ -712,15 +1171,13 @@ Task2 läuft...
 
 Die FreeRTOS-API ist plattformübergreifend identisch — `xTaskCreate()`, `xSemaphoreTake()` etc. funktionieren auf allen Architekturen gleich. Die Unterschiede liegen in den Ressourcen und Hardwaremechanismen, die dem RTOS-Kernel zur Verfügung stehen.
 
-### Architekturvergleich
-
 <!--data-type="none"-->
 | Aspekt | AVR ATmega328 (8-Bit) | STM32F401 Cortex-M4 (32-Bit) | ESP32-S3 Xtensa LX7 (32-Bit) |
 |--------|----------------------|------------------------------|-------------------------------|
 | RAM | 2 KB | 96 KB | 512 KB |
 | Max. sinnvolle Tasks | 3–4 | Dutzende | Dutzende |
 | Kontextwechsel | Software (~80 Taktzyklen, 32×8-Bit Register sichern) | Hardware-unterstützt (automatisches Stacking durch NVIC) | Hardware-unterstützt |
-| Tick-Timer | 16-Bit Timer, ~1 ms Auflösung bei 16 MHz | 32-Bit SysTick, 84 MHz | 64-Bit Timer, 240 MHz |
+| Tick-Timer | 8-Bit Timer0 (bzw. Watchdog), ~1 ms Auflösung bei 16 MHz | 24-Bit SysTick, getaktet mit bis zu 84 MHz CPU-Takt | Hardware-Timer, 240 MHz CPU-Takt |
 | MPU-Support | Nein | Ja (Task-Isolation) | Teilweise |
 | Multi-Core (SMP) | Nein | Nein (Single-Core) | Ja (Dual-Core) |
 | Tickless Idle (Low Power) | Eingeschränkt | Ja | Ja |
@@ -738,12 +1195,17 @@ Auf dem AVR mit 2 KB RAM ist der Stack-Verbrauch der entscheidende Engpass. Jede
   │ Task 2         ~200 │                │ Task 2        ~1024 │
   │ Task 3         ~200 │                │ Task 3        ~1024 │
   │ Heap/Globals   ~500 │                │ ... weitere Tasks   │
-  │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─│                │ Heap          ~80K  │
+  │ ─ ─ ─ ─ ─ ─ ─ ─- ─ ─│                │ Heap          ~80K  │
   │ Frei:       ~320    │                │ Frei:         ~60K+ │
   └─────────────────────┘                └─────────────────────┘
 ```
 
 ### FreeRTOS SMP auf dem ESP32-S3
+
+> **Ausblick — kommendes Kapitel:** Der folgende Abschnitt ist ein *Vorgriff* auf
+> das nächste Kapitel, in dem wir den ESP32 ausführlich behandeln. Hier soll er
+> nur zeigen, dass dieselbe FreeRTOS-API auch Mehrkern-Systeme bedient — die
+> Details (Core-Affinität, Wi-Fi/BLE-Koexistenz) folgen dort.
 
 Der ESP32-S3 erweitert FreeRTOS um Symmetric Multi-Processing. Tasks können an einen bestimmten Core gebunden oder frei verteilt werden:
 
@@ -764,53 +1226,3 @@ Typisches Muster:
 - **Core 1**: Sensorauswertung, Regelung, zeitkritische Aufgaben
 
 <!-- TODO: Praktisches Codebeispiel AVR vs. STM32 vs. ESP32-S3 ergänzen -->
-
-## Warum das Ganze?
-
-> Das Mars Pathfinder Problem ist ein berühmtes realweltliches Beispiel für Priority Inversion, das 1997 während der Mars-Mission der NASA auftrat. Es hat großen Einfluss auf die Entwicklung von Betriebssystemen wie VxWorks und FreeRTOS gehabt – und zeigt eindrucksvoll, warum Priority Inheritance wichtig ist.
->
-> vgl. "What really happened to the software on the Mars Pathfinder spacecraft?"
-
-Symptome:
-
-+ Rover stürzte sporadisch ab (rebootete sich).
-+ Analyse: Ein „Watchdog Timer" wurde nicht rechtzeitig zurückgesetzt → Das System hielt sich für eingefroren.
-
-Situation:
-
-| Taskname (vereinfacht)              | Priorität | Aufgabe                                                                                    |
-| ----------------------------------- | --------- | ------------------------------------------------------------------------------------------ |
-| **1. Meteorological Task** (Sensor) | niedrig   | Sammelte Umweltdaten (z. B. Temperatur, Druck) und speicherte sie in eine Shared Resource. |
-| **2. Communication Task**           | hoch      | Sendete Telemetriedaten zur Erde (zeitkritisch).                                           |
-| **3. System Management Task**       | mittel    | Führte allgemeine Verwaltungs- und Logging-Aufgaben aus.                                   |
-
-Die beiden Tasks – der Low-Priority-Meteorologie-Task und der High-Priority-Kommunikations-Task – verwendeten dieselbe Speicherstruktur, um auf Sensordaten zuzugreifen.
-
-![](../images/07_Scheduling/MarsPathfinder.png "Mars Pathfinder Problem")
-
-```mermaid @mermaid
-sequenceDiagram
-    participant LowTask as Low-Priority Task
-    participant MediumTask as Medium-Priority Task
-    participant HighTask as High-Priority Task
-    participant Mutex as Shared Resource (Mutex)
-
-    Note over LowTask: Startet und sperrt Mutex
-    LowTask->>Mutex: xSemaphoreTake()
-    Note right of LowTask: Hält nun den Mutex
-
-    Note over HighTask: Wird aktiv\nbenötigt Mutex
-    HighTask->>Mutex: xSemaphoreTake() (blockiert)
-    Mutex-->>HighTask: blockiert (von Low gehalten)
-
-    Note over MediumTask: Wird aktiviert\nund läuft durchgehend
-    MediumTask->>MediumTask: Arbeitet kontinuierlich
-
-    Note over LowTask: Kommt nicht mehr zum Zug<br>wird von Medium verdrängt
-
-    Note over HighTask: Kann Mutex nicht erhalten<br>→ blockiert dauerhaft
-
-    Note over System: HighTask verpasst Deadline<br>→ Watchdog löst Reset aus
-```
-
-Nach mehreren ungeklärten Neustarts auf dem Mars fand man in den Logs Hinweise auf genau dieses Timing-Problem. Die NASA aktivierte daraufhin zur Laufzeit die bereits im RTOS (VxWorks) enthaltene Priority Inheritance, wodurch das Problem komplett verschwand.

@@ -2,6 +2,10 @@
 #include <Arduino_FreeRTOS.h>
 #include <semphr.h>  // FreeRTOS-Funktionen fuer Mutexe/Semaphore (gemeinsamer Header)
 
+// Ausgabe-Strings der Tasks zentral definiert
+#define MSG_TASK_A "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+#define MSG_TASK_B "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+
 // Mutex (kein Semaphor!): schuetzt die gemeinsame Ressource "serielle
 // Schnittstelle". Take und Give erfolgen IMMER im selben Task (Besitz).
 SemaphoreHandle_t xSerialMutex;
@@ -51,11 +55,11 @@ void TaskA( void *pvParameters __attribute__((unused)) )  // This is a Task.
 {
   for (;;) 
   {
-    //Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    //Serial.println(MSG_TASK_A);
     // Ist der Mutex belegt, bis zu 5 Ticks auf seine Freigabe warten.
     if ( xSemaphoreTake( xSerialMutex, ( TickType_t ) 5 ) == pdTRUE )
     {
-      Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+      Serial.println(MSG_TASK_A);
       xSemaphoreGive( xSerialMutex );
     }
 
@@ -67,10 +71,10 @@ void TaskB( void *pvParameters __attribute__((unused)) )  // This is a Task.
 {
   for (;;)
   {
-    //Serial.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+    //Serial.println(MSG_TASK_B);
     if ( xSemaphoreTake( xSerialMutex, ( TickType_t ) 5 ) == pdTRUE )
     {
-      Serial.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+      Serial.println(MSG_TASK_B);
       xSemaphoreGive( xSerialMutex ); 
     }
 
