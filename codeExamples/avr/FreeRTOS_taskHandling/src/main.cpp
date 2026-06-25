@@ -1,8 +1,10 @@
 #include <Arduino.h>
 #include <Arduino_FreeRTOS.h>
-#include <semphr.h>  // add the FreeRTOS functions for Semaphores (or Flags).
+#include <semphr.h>  // FreeRTOS-Funktionen fuer Mutexe/Semaphore (gemeinsamer Header)
 
-SemaphoreHandle_t xSerialSemaphore;
+// Mutex (kein Semaphor!): schuetzt die gemeinsame Ressource "serielle
+// Schnittstelle". Take und Give erfolgen IMMER im selben Task (Besitz).
+SemaphoreHandle_t xSerialMutex;
 
 void TaskA( void *pvParameters );
 void TaskB( void *pvParameters );
@@ -11,11 +13,11 @@ void setup() {
 
   Serial.begin(9600);
   
-  if ( xSerialSemaphore == NULL )  
+  if ( xSerialMutex == NULL )  
   {
-    xSerialSemaphore = xSemaphoreCreateMutex();  
-    if ( ( xSerialSemaphore ) != NULL )
-      xSemaphoreGive( ( xSerialSemaphore ) );  
+    xSerialMutex = xSemaphoreCreateMutex();  
+    if ( ( xSerialMutex ) != NULL )
+      xSemaphoreGive( ( xSerialMutex ) );  
   }
 
   xTaskCreate(
@@ -50,11 +52,11 @@ void TaskA( void *pvParameters __attribute__((unused)) )  // This is a Task.
   for (;;) 
   {
     //Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    // If the semaphore is not available, wait 5 ticks of the Scheduler to see if it becomes free.
-    if ( xSemaphoreTake( xSerialSemaphore, ( TickType_t ) 5 ) == pdTRUE )
+    // Ist der Mutex belegt, bis zu 5 Ticks auf seine Freigabe warten.
+    if ( xSemaphoreTake( xSerialMutex, ( TickType_t ) 5 ) == pdTRUE )
     {
       Serial.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-      xSemaphoreGive( xSerialSemaphore );
+      xSemaphoreGive( xSerialMutex );
     }
 
     vTaskDelay(1);  // one tick delay (15ms) in between reads for stability
@@ -66,10 +68,10 @@ void TaskB( void *pvParameters __attribute__((unused)) )  // This is a Task.
   for (;;)
   {
     //Serial.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
-    if ( xSemaphoreTake( xSerialSemaphore, ( TickType_t ) 5 ) == pdTRUE )
+    if ( xSemaphoreTake( xSerialMutex, ( TickType_t ) 5 ) == pdTRUE )
     {
       Serial.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
-      xSemaphoreGive( xSerialSemaphore ); 
+      xSemaphoreGive( xSerialMutex ); 
     }
 
     vTaskDelay(1);
