@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.3
+version:  1.0.4
 language: de
 narrator: Deutsch Female
 
@@ -29,15 +29,77 @@ icon: https://upload.wikimedia.org/wikipedia/commons/d/de/Logo_TU_Bergakademie_F
 
 ---
 
+## Einordnung: Debugging, Testen & CI/CD
+
+**Testen vs. Debugging — *dass* vs. *warum*:**
+
+|                     | **Testen**                          | **Debugging**                        |
+| ------------------- | ----------------------------------- | ------------------------------------ |
+| **Leitfrage**       | *Funktioniert es?* (ja/nein)        | *Warum funktioniert es nicht?*       |
+| **Ziel**            | Fehler **finden** / Korrektheit zeigen | gefundenen Fehler **lokalisieren**   |
+| **Charakter**       | systematisch, geplant, wiederholbar | reaktiv, explorativ, hypothesengetrieben |
+| **Automatisierbar** | ja — Kern von CI/CD                  | kaum — braucht menschliche Hypothesen |
+| **Ergebnis**        | Pass/Fail-Report                    | Ursache (root cause)                 |
+
+> [!IMPORTANT]
+> Testen und Debugging sind also **keine** Teilmengen voneinander, sondern zwei Schritte im selben Zyklus — der Test findet *dass* etwas kaputt ist, das Debugging findet *warum*.
+
+> **Warum stehen sie trotzdem in einem Kapitel?** Weil sie sich in eingebetteten
+> Systemen dieselben **Werkzeuge** und dieselbe Grundfrage teilen: *Wie komme ich
+> überhaupt an Information aus einem Chip ohne Bildschirm und Dateisystem?* Die
+> Interfaces (JTAG/SWD/UART/ITM), mit denen ein Mensch **debuggt**, sind exakt
+> die, über die ein CI-Runner später **automatisiert testet**. Deshalb die
+> Reihenfolge dieses Kapitels: erst die Debug-Interfaces und Beobachtbarkeit
+> (Debugging) → dann diese Werkzeuge für systematische Tests nutzen (Testen) →
+> dann das Ganze automatisieren (CI/CD).
+
+### Was macht das Testen *eingebetteter* Systeme besonders?
+
+Warum reicht das, was man von Desktop-Software kennt (`assert`, ein
+Test-Framework, „grüner Balken"), hier nicht? Der Unterschied ist **fundamental**
+und bestimmt die gesamte Teststrategie:
+
+| Aspekt                | Desktop-Software                       | Eingebettetes System                                  |
+| --------------------- | -------------------------------------- | ----------------------------------------------------- |
+| **Ausführungsort**    | Test läuft auf *derselben* Maschine    | Code läuft auf *anderer* HW (Cross-Compilation)       |
+| **Peripherie**        | virtuell / gemockt                     | *echte* Register, Sensoren, Aktoren                   |
+| **Zeitverhalten**     | meist irrelevant                       | Echtzeit — Timing *ist* Teil der Korrektheit          |
+| **Beobachtbarkeit**   | stdout, Debugger, Dateisystem          | oft nur UART, JTAG/SWD, ein paar LEDs                 |
+| **Ressourcen**        | quasi unbegrenzt                       | KB an RAM — ein großes Test-Framework passt gar nicht |
+| **Ausfall**           | Exception, Neustart                    | Motor dreht durch, Airbag zündet nicht                |
+
+Aus diesen Zwängen folgt, dass Embedded-Tests auf **verschiedenen Ebenen**
+stattfinden — je näher an echter Hardware, desto realistischer, aber auch
+langsamer und teurer. Das ergibt die **Test-Pyramide für eingebettete Systeme**:
+
+```ascii
+             /\
+            /  \      HIL — ganzes System, simulierte Umwelt
+           / HIL\     real & teuer, wenige Tests, findet Integrationsfehler
+          /------\
+         /On-Targ.\   On-Target — echter µC, echte Register (via JTAG/SWD/UART)
+        /  Target  \  langsamer, braucht Hardware im Loop
+       /------------\
+      /  Host-Tests  \ reine Logik ohne HW, nativ auf dem PC
+     /   (nativ, PC)  \ blitzschnell, tausende in CI, findet Logikfehler früh
+    /------------------\                                                                                            .
+```
+
+> **Die Kernidee:** So viel wie möglich **host-seitig** testen (schnell,
+> hardwarefrei, in jeder CI lauffähig), so wenig wie nötig **on-target** — und
+> **HIL** dort, wo das Zusammenspiel mit der (simulierten) physikalischen Umwelt
+> geprüft werden muss. Der Abschnitt *Testmethodik* füllt diese Pyramide später
+> von unten nach oben.
 
 
-## Debugging
+### Debugging
 
 Debugging für Speicher und leistungsbeschränkte Systeme (unter Echtzeitbedingungen) stellt andere Herausforderungen als konventionelle Analysemethoden. Gleichzeitig sind wir mit kniffligen Bugs konfrontiert mit _Race Conditions_, _Stack Overflows_ oder _Priority Inversions_.
 
-* `printf`-Debugging bläht den Code auf, weil die zugehörigen Implementierungen integriert werden müssen.
-* Debugging verändert das Laufzeitverhalten, entsprechend ist es möglich, dass die Ausführung des entsprechenden Codes durch den Overhead für die Analyse maskiert wird.
-* auf dem Gerät steht gar nicht genügend Speicher zur Verfügung um längere Tracing-Aufzeichnungen umzusetzen
+> [!IMPORTANT]
+> * `printf`-Debugging bläht den Code auf, weil die zugehörigen Implementierungen integriert werden müssen.
+> * Debugging verändert das Laufzeitverhalten, entsprechend ist es möglich, dass die Ausführung des entsprechenden Codes durch den Overhead für die Analyse maskiert wird.
+> * auf dem Gerät steht gar nicht genügend Speicher zur Verfügung um längere Tracing-Aufzeichnungen umzusetzen
 
 ### Verschiedene Methoden für das Debuggen von eingebetteten Systemen
 
@@ -118,7 +180,7 @@ Unterscheidungsmerkmale:
 + Debugging Features vs. bloße Ausführungsumgebung 
 + interner Debugger vs. externer Debugger
 
-## Grundidee
+## Monitoringtechniken
 
 !?[alt-text](https://www.youtube.com/watch?v=NxxQZ3JyjiE "Aufbau eines Bed of Nails Testers")
 
@@ -533,47 +595,139 @@ void loop()
 
 ## Testmethodik
 
-> In diesem Abschnitt werden weiterführende Testmethoden für eingebettete Systeme behandelt, die über einfaches Unit-Testing hinausgehen.
+Nachdem die Debug-Interfaces (JTAG/SWD/UPDI/debugWire) und die Beobachtbarkeit
+eingebetteter Systeme geklärt sind, nutzen wir sie jetzt für *systematisches*
+Testen. Die konzeptionelle Grundlage — Testen vs. Debugging, die Besonderheiten
+eingebetteter Systeme und die **Test-Pyramide** (Host → On-Target → HIL) — steht
+im [Einordnungs-Abschnitt](#einordnung-debugging-testen--und-cicd) am Kapitelanfang.
+Die folgenden Abschnitte füllen diese Pyramide von unten nach oben.
 
-### Unit Testing mit Unity
+### Unit Testing mit Unity — die Host/Target-Trennung
 
-> Grundlagen zum Unit Testing mit Unity wurden bereits im Abschnitt [STM32 Unit-Testing](#stm32-unit-testing) eingeführt. Hier werden weiterführende Konzepte und Best Practices behandelt.
+Die Grundlagen des Unity-Frameworks haben wir im Abschnitt
+[STM32 Unit-Testing](#stm32-unit-testing) gesehen. Der für *eingebettete* Systeme
+entscheidende Schritt ist aber nicht das Framework selbst, sondern die Frage:
+**Was von meinem Code kann ich überhaupt ohne die echte Hardware testen?**
 
-<!-- TODO: Inhalt ergänzen -->
+**Was auf dem Host (nativ, PC) laufen kann — die breite Basis der Pyramide:**
+reine *Logik*, die keine Register anfasst — ein PI-Regler, ein Zustandsautomat,
+ein Protokoll-Parser, eine CRC-Berechnung. Diese Funktionen bekommen ihre
+Eingaben als Werte, nicht direkt aus der Peripherie, und liefern Werte zurück.
+Sie sind auf dem PC in Millisekunden tausendfach testbar.
 
-### MC/DC Coverage: Bedeutung für sicherheitskritische Systeme (DO-178C)
+**Was zwingend on-target laufen muss:** alles, was `PORTB`, den ADC, das
+UART-Register oder das Timing der Hardware berührt.
 
-Modified Condition/Decision Coverage (MC/DC) ist ein Testabdeckungskriterium, das in sicherheitskritischen Systemen (z. B. Luftfahrt nach DO-178C, Automobil nach ISO 26262) gefordert wird. Es stellt sicher, dass jede Bedingung in einer Entscheidung unabhängig das Ergebnis beeinflussen kann.
+Der Hebel, um die erste Gruppe *groß* und die zweite *klein* zu halten, ist eine
+saubere **Hardware-Abstraktion**: Die Logik ruft nicht direkt `analogRead()`,
+sondern eine Schnittstelle — im Test wird diese durch ein **Mock** ersetzt
+(vgl. CMock, oben eingeführt).
 
-<!-- TODO: Inhalt ergänzen -->
+```c
+// regler.c — reine Logik, KEINE Hardware. Auf dem Host testbar.
+int16_t regler_schritt(int16_t sollwert, int16_t istwert) {
+    int16_t fehler = sollwert - istwert;
+    return (KP * fehler) >> 8;          // reine Arithmetik
+}
+```
 
-### HIL-Testing: Konzept und einfacher Aufbau
+```c
+// test_regler.c — läuft NATIV auf dem PC, keine Hardware nötig
+#include <unity.h>
+#include "regler.h"
 
-Hardware-in-the-Loop (HIL) Testing ersetzt reale Systemkomponenten durch Simulationen, um die eingebettete Software unter realistischen Bedingungen zu testen, ohne die vollständige physische Umgebung aufbauen zu müssen.
+void test_regler_null_fehler_null_stellwert(void) {
+    TEST_ASSERT_EQUAL_INT16(0, regler_schritt(100, 100));
+}
 
-<!-- TODO: Inhalt ergänzen -->
+void test_regler_positiver_fehler(void) {
+    TEST_ASSERT_GREATER_THAN_INT16(0, regler_schritt(200, 100));
+}
+```
+
+Mit **PlatformIO** ist die Host/Target-Trennung direkt eine Frage des
+*Environments* — derselbe Test, zwei Ziele:
+
+```ini
+[env:native]          ; Host-Tests: laufen auf dem PC, blitzschnell, CI-tauglich
+platform = native
+
+[env:uno]             ; On-Target: echter ATmega, via UART zurückgemeldet
+platform = atmelavr
+board = uno
+framework = arduino
+```
+
+```bash
+pio test -e native    # reine Logik auf dem PC — Sekunden, keine Hardware
+pio test -e uno        # on-target auf dem echten µC — Ergebnis kommt per UART zurück
+```
+
+> **Merke:** Die Kunst des Embedded-Testens liegt weniger im Framework als im
+> **Schnitt**: Je konsequenter die Logik von der Hardware getrennt ist (HAL +
+> Mocks), desto mehr lässt sich schnell und hardwarefrei in der CI prüfen — und
+> desto kleiner bleibt der teure On-Target-Anteil.
+
+### On-Target- & HIL-Testing: wenn die Hardware im Loop ist
+
+Sobald ein Test *echte* Register, Timing oder Peripherie prüft, braucht er zwei
+Dinge, die der Host-Test nicht hat: einen **Weg auf den Chip** (Flashen) und
+einen **Weg zurück** (Ergebnis auslesen). Genau dafür sind die Debug-Interfaces
+aus der ersten Kapitelhälfte da — hier schließt sich der Kreis:
+
+- **Flashen & Steuern:** JTAG / SWD / UPDI / debugWire (je nach Controller).
+- **Ergebnis zurücklesen:** UART (`Serial`), oder bei Cortex-M eleganter über
+  **SWD/ITM** — die Trace-Ausgabe, die wir bei *Cycle Count Profiling* schon
+  gesehen haben. Der Testrunner wertet aus, was der Chip zurückmeldet.
+
+**Hardware-in-the-Loop (HIL)** geht einen Schritt weiter: Der Mikrocontroller
+läuft mit *echter* Firmware, aber seine **Umwelt** — Sensoren, Motor, Fahrstrecke
+— wird von einem zweiten System *simuliert* und in Echtzeit eingespeist.
+
+```ascii
+   +----------------------+        Sensorsignale (simuliert)      +------------------+
+   |  HIL-Simulator       |  ----------------------------------→  |  Prüfling (DUT)  |
+   |  (Echtzeit-Modell    |                                       |  echter µC mit   |
+   |   der Umgebung:      |  ←----------------------------------  |  echter Firmware |
+   |   Strecke, Sensoren) |        Aktorsignale (PWM, GPIO)       +------------------+
+   +----------------------+                                              |
+            ^                                                            | JTAG/SWD/UART
+            |  Testskript: Szenario einspielen,                          v
+            |  Reaktion & Timing bewerten                         +------------------+
+            +-----------------------------------------------------+  Testrunner / CI |
+                                                                  +------------------+
+```
+
+Was HIL **besonders** macht — und warum es sich lohnt, obwohl es aufwändig ist:
+
+1. **Reproduzierbare Fehlerfälle ohne reale Gefahr.** Ein Sensorausfall, ein
+   Kurzschluss, ein Grenzwert — real gefährlich oder teuer, im Simulator ein
+   Knopfdruck. Man kann *Fehler injizieren*, die man an echter Hardware nie
+   provozieren wollte.
+2. **Echtes Timing.** Anders als ein reiner Simulationslauf reagiert der echte
+   µC mit seiner echten Reaktionszeit — Deadlines und Jitter werden real geprüft.
+3. **Ganzes System statt Einzelfunktion.** HIL findet Integrationsfehler, die
+   Unit-Tests prinzipiell nicht sehen (Spitze der Pyramide).
+
+> **Merke:** On-Target- und HIL-Tests sind *nicht* schneller oder besser als
+> Host-Tests — sie sind **realistischer**. Man setzt sie gezielt oben in der
+> Pyramide ein, wo echte Register, echtes Timing oder das Zusammenspiel mit der
+> Umwelt geprüft werden muss. Alles, was ohne Hardware entscheidbar ist, gehört
+> nach unten (Host) — dorthin, wo es sich billig automatisieren lässt.
 
 ## Build-Systeme & Toolchains
 
 > Für professionelle Embedded-Entwicklung ist die Beherrschung von Build-Systemen und Toolchains essenziell, um reproduzierbare und portable Builds zu gewährleisten.
 
-### CMake für STM32 (statt IDE-Abhängigkeit)
-
-CMake ermöglicht die IDE-unabhängige Konfiguration von Embedded-Projekten und erleichtert die Integration in CI/CD-Pipelines.
-
-<!-- TODO: Inhalt ergänzen -->
-
 ### PlatformIO als plattformübergreifende Alternative
 
-PlatformIO bietet eine einheitliche Entwicklungsumgebung für verschiedene Embedded-Plattformen und vereinfacht das Dependency-Management.
-
-<!-- TODO: Inhalt ergänzen -->
-
-### Linker-Skripte: Memory Layout verstehen
-
-Linker-Skripte definieren das Speicherlayout eines eingebetteten Systems und bestimmen, wo Code, Daten und Stack im Speicher abgelegt werden.
-
-<!-- TODO: Inhalt ergänzen -->
+PlatformIO bietet eine einheitliche Entwicklungsumgebung für verschiedene
+Embedded-Plattformen und vereinfacht das Dependency-Management. Es wird in diesem
+Kurs bereits durchgängig verwendet (u. a. für FreeRTOS in Kapitel 9). Seine Rolle
+für das *Testen* — insbesondere die Host/Target-Trennung über `env`-Konfigurationen
+(`pio test -e native` vs. `-e uno`) — wurde oben im Abschnitt
+[Unit Testing mit Unity](#unit-testing-mit-unity--die-hosttarget-trennung) sowie in
+der [CI-Pipeline](#praxisbeispiel-push--build--test--flash) konkret gezeigt.
 
 ## CI/CD für Embedded
 
@@ -581,24 +735,89 @@ Linker-Skripte definieren das Speicherlayout eines eingebetteten Systems und bes
 
 ### GitHub Actions / GitLab CI mit Cross-Compilation
 
-CI/CD-Systeme können mit Cross-Compilern konfiguriert werden, um Embedded-Firmware automatisch für Zielplattformen zu bauen.
+Die entscheidende Frage beim Automatisieren ist dieselbe wie bei der Test-Pyramide:
+**Braucht dieser Schritt echte Hardware — oder nicht?** Daraus ergeben sich zwei
+Arten von CI-Runnern:
 
-<!-- TODO: Inhalt ergänzen -->
+| Ebene der Pyramide | läuft auf …                    | Hardware nötig? |
+| ------------------ | ------------------------------ | --------------- |
+| Host-Tests         | GitHub-*hosted* Runner (Cloud) | **nein**        |
+| Cross-Build (Firmware kompilieren) | GitHub-*hosted* Runner | nein            |
+| On-Target / HIL    | **self-hosted** Runner mit angeschlossenem µC | **ja** |
+
+**Der hardwarefreie Teil** — Cross-Build der Firmware *und* Host-Tests — läuft in
+der normalen Cloud-CI bei jedem Push. Mit PlatformIO ist das wenige Zeilen:
+
+```yaml
+# .github/workflows/ci.yml
+name: build-and-test
+on: [push, pull_request]
+
+jobs:
+  host-tests:                      # untere Pyramidenebene: keine Hardware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - run: pip install platformio
+      - run: pio test -e native    # reine Logik-Tests auf dem CI-Server
+      - run: pio run -e uno         # Cross-Build der Firmware (nur kompilieren)
+```
 
 ### Automatisiertes Unit-Testing in der Pipeline (QEMU, Renode)
 
-Emulatoren wie QEMU und Renode ermöglichen das Ausführen und Testen von Embedded-Firmware ohne physische Hardware in der CI/CD-Pipeline.
+Zwischen „reiner Host-Test" und „echter Hardware am Runner" gibt es eine dritte
+Option: die Zielhardware **emulieren**. Damit lassen sich auch
+register-/timingnahe Tests in der Cloud-CI fahren, *ohne* physischen Controller.
 
-<!-- TODO: Inhalt ergänzen -->
+- **QEMU** emuliert u. a. ARM-Cortex-M-Ziele — Firmware läuft als Prozess, Tests
+  werten die (emulierte) UART-Ausgabe aus.
+- **Renode** (von Antmicro) ist auf eingebettete Multi-Node-Systeme spezialisiert:
+  emuliert ganze Boards inklusive Peripherie und sogar *mehrere* vernetzte Knoten
+  — nützlich für Integrationstests ohne Laborhardware.
 
-### OTA-Firmware-Updates: Versionierung und Rollback
-
-Over-the-Air (OTA) Updates erfordern eine durchdachte Versionierungsstrategie und Rollback-Mechanismen, um die Zuverlässigkeit im Feld sicherzustellen.
-
-<!-- TODO: Inhalt ergänzen -->
+> **Einordnung:** Emulation schließt die Lücke zwischen Host- und On-Target-Test,
+> ersetzt aber **kein** echtes Timing und keine echte Analogperipherie. Sie ist
+> ein Kompromiss: realistischer als der Host-Test, billiger automatisierbar als
+> HIL — aber eben *simuliert*. Für den finalen Nachweis am realen System bleibt
+> der self-hosted Runner mit angeschlossener Hardware nötig.
 
 ### Praxisbeispiel: Push → Build → Test → Flash
 
-Ein vollständiges Beispiel einer CI/CD-Pipeline für eingebettete Systeme, die vom Code-Push bis zum Firmware-Flash alle Schritte automatisiert.
+Alle Bausteine zusammengeführt — die Pipeline bildet die Test-Pyramide von unten
+nach oben ab: erst die billigen, hardwarefreien Schritte (Cloud), dann die
+teuren am realen Gerät (self-hosted Runner):
 
-<!-- TODO: Inhalt ergänzen -->
+```ascii
+   git push
+      │
+      ▼
+  ┌─────────────┐   ┌──────────────┐   ┌────────────────┐   ┌──────────────────┐
+  │  BUILD      │──▶│  TEST (Host) │──▶│  TEST (Target) │──▶│  FLASH / DEPLOY  │
+  │ cross-      │   │ pio test     │   │ self-hosted    │   │ OTA oder JTAG/   │
+  │ compile     │   │ -e native    │   │ Runner + µC/HIL│   │ SWD auf Zielgerät│
+  └─────────────┘   └──────────────┘   └────────────────┘   └──────────────────┘
+   GitHub-hosted     GitHub-hosted      self-hosted (HW!)    self-hosted (HW!)
+   (Cloud)           (Cloud)            findet HW-/Timing-    nur wenn alle
+   schnell           schnell, viele     Fehler               Tests grün
+```
+
+```yaml
+# Fortsetzung von ci.yml — der Hardware-Teil auf einem self-hosted Runner
+  target-test-and-flash:
+    needs: host-tests            # nur wenn Host-Tests grün sind
+    runs-on: [self-hosted, avr]  # Runner mit physisch angeschlossenem µC
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install platformio
+      - run: pio test -e uno      # On-Target-Test: flasht, liest Ergebnis per UART
+      - run: pio run -e uno -t upload   # Flash der finalen Firmware (via UPDI/SWD/…)
+```
+
+> **Der rote Faden des Kapitels:** Debugging-Interfaces (JTAG/SWD/UPDI/debugWire),
+> Testmethodik (Host → On-Target → HIL) und CI/CD sind **kein** Nebeneinander,
+> sondern greifen ineinander: *Dieselben* Debug-Schnittstellen, mit denen man in
+> der ersten Kapitelhälfte manuell debuggt hat, sind es, über die der
+> self-hosted CI-Runner am Ende automatisiert flasht und Testergebnisse vom Chip
+> zurückliest. Automatisiertes Testen eingebetteter Systeme ist damit die
+> *Industrialisierung* genau der Werkzeuge, die wir zuvor von Hand bedient haben.
