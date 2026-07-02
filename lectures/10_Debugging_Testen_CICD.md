@@ -511,6 +511,10 @@ Variante 2: Debugging mit gdb und OpenOCD
 
 ### STM32 Unit-Testing
 
+>[!IMPORTANT]
+> Und wenn ich kein Debug-Interface habe? Dann kann ich immer noch Unit Tests auf dem Host ausführen, um die Logik meines Codes zu testen. Dies ist besonders nützlich, wenn ich Funktionen habe, die keine Hardware-Abhängigkeiten haben.
+
+
 + Unity: Unity ist eine leichtgewichtige Unit-Testing-Bibliothek für C. Sie bietet grundlegende Assertions und Testorganisation, ohne dabei viel Overhead zu verursachen. https://github.com/ThrowTheSwitch/Unity
 + CMock: CMock ist ein Mock-Generator, der häufig mit Unity verwendet wird, um das Testen von Funktionen zu erleichtern, die von Hardware-Abhängigkeiten oder externen APIs abhängen. Es erzeugt automatisch Mocks für Funktionen, die dann in Unit Tests eingesetzt werden können.  https://github.com/ThrowTheSwitch/CMock
 + CppUTest: Obwohl der Name auf C++ hinweist, kann CppUTest auch für C-Code verwendet werden. Es bietet umfangreiche Funktionen für Unit Testing, Mocking und Test-Reporting. https://github.com/cpputest/cpputest
@@ -581,17 +585,6 @@ void loop()
   }
 }
 ```
-
-
-| Testart                   | Ziel / Beschreibung                                            |
-| ------------------------- | -------------------------------------------------------------- |
-| **Funktionale Tests**     | Prüfen, ob Funktionen korrekt arbeiten (z. B. Steuerungslogik) |
-| **Grenzwert-Tests**       | Eingaben an den Rändern (z. B. Min/Max Sensorwerte)            |
-| **Robustheitstests**      | Verhalten bei ungültigen Eingaben oder Störungen               |
-| **Timing-Tests**          | Echtzeitanforderungen prüfen (Reaktionszeiten, Deadlines)      |
-| **Hardware-nahe Tests**   | Peripheriegeräte (ADC, UART, GPIO) und deren Verhalten         |
-| **Stress-/Langzeittests** | Dauerbetrieb, Speicherverbrauch, Ressourcenverbrauch           |
-| **Integrationstests**     | Zusammenspiel verschiedener Module (z. B. Sensoren, Aktoren)   |
 
 ## Testmethodik
 
