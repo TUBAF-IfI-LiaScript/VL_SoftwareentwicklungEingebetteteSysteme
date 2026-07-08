@@ -2,7 +2,7 @@
 author:   Sebastian Zug, Karl Fessel & Andrè Dietrich
 email:    sebastian.zug@informatik.tu-freiberg.de
 
-version:  1.0.1
+version:  1.2.1
 language: de
 narrator: Deutsch Female
 
@@ -13,7 +13,7 @@ import: https://raw.githubusercontent.com/liascript-templates/plantUML/master/RE
 -->
 
 
-[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/12_Fehlertoleranz.md#1)
+[![LiaScript](https://raw.githubusercontent.com/LiaScript/LiaScript/master/badges/course.svg)](https://liascript.github.io/course/?https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/main/lectures/11_Fehlertoleranz.md#1)
 
 
 # Fehlertoleranz & Zuverlässigkeit
@@ -24,7 +24,7 @@ import: https://raw.githubusercontent.com/liascript-templates/plantUML/master/RE
 | **Semester**             | `Sommersemester 2026`                                                                                                                                                                |
 | **Hochschule:**          | `Technische Universität Freiberg`                                                                                                                                                    |
 | **Inhalte:**             | `Fehlertoleranz und Zuverlässigkeit in eingebetteten Systemen`                                                                                            |
-| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/12_Fehlertoleranz.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/12_Fehlertoleranz.md) |
+| **Link auf den GitHub:** | [https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/11_Fehlertoleranz.md](https://github.com/TUBAF-IfI-LiaScript/VL_SoftwareentwicklungEingebetteteSysteme/blob/main/lectures/11_Fehlertoleranz.md) |
 | **Autoren**              | @author                                                                                                                                                                              |
 
 ![](https://media.giphy.com/media/26gR2qGRnxxXAvhBu/giphy.gif)
@@ -41,13 +41,13 @@ Eingebettete Systeme interagieren unmittelbar mit der Umgebung. In sicherheitskr
 ### Beispiele
 
 ![](../images/12_Fehlertoleranz/US_Airways_Flight_1549.jpg "Außerhalb der Spezifikation, By Greg L - originally posted to Flickr as Plane crash into Hudson River, CC BY 2.0, https://commons.wikimedia.org/w/index.php?curid=5723340")
-![](../images/12_Fehlertoleranz/12_Fehlertoleranz_1.jpg "Verschleiß http://feuerwehr-konstanz.schutzbach.com")
+![](../images/12_Fehlertoleranz/12_Fehlertoleranz_0.jpg "Verschleiß http://feuerwehr-konstanz.schutzbach.com")
 ![](../images/12_Fehlertoleranz/Ariane_6_on_pad.jpg "Inhärente Fehler Autor: ESA - European Space Agency, https://commons.wikimedia.org/wiki/File:Ariane_6_on_pad.jpg")
 
 ### Quantifizierung des Risikos
 
 <!-- data-type="none" -->
-| Paramter                          | Flugzeug                    | Auto      |
+| Parameter                         | Flugzeug                    | Auto      |
 | --------------------------------- | --------------------------- | --------- |
 | Einheiten                         | 10 k                        | 100 Mio   |
 | Betriebsstunden/Jahr              | 55 Mio                      | 30000 Mio |
@@ -79,9 +79,9 @@ Anforderungen im Automotive Sektor
 
 ## Definitionen
 
-Zuverlässlichkeit (Dependability): _"Doing the right thing at the right time!"_
+Zuverlässigkeit (Dependability): _"Doing the right thing at the right time!"_
 
-> Die Zuverlässlichkeit eines Systems ist die Qualität einer vom System erbrachten Funktion (Service), in die begründbar und berechtigter-weise Vertrauen (reliance) gesetzt werden kann.
+> Die Zuverlässigkeit eines Systems ist die Qualität einer vom System erbrachten Funktion (Service), in die begründbar und berechtigterweise Vertrauen (reliance) gesetzt werden kann.
 
 Die Funktion ist das an der Schnittstelle zu anderen Systemen, die mit dem betrachteten System interagieren, beobachtbare Systemverhalten.  __Die Qualität bezieht sich auf die Übereinstimmung der erbrachten mit der spezifizierten Systemfunktion.__
 
@@ -99,7 +99,6 @@ Maße: 	Wie lässt sich die Verlässlichkeit quantitativ erfassen?
 | **Verfügbarkeit**  (Availability)      | Zuverlässigkeit im Hinblick auf momentane Bereitschaft des Systems, d.h. die Wahrscheinlichkeit ein in einem beliebigen Zeitpunkt fehlerfrei anzutreffen. | Automobilindustrie           |
 | Prozesssicherheit (Safety)             | Zuverlässigkeit im Hinblick auf die Verhinderung katastrophaler Auswirkungen auf die Umgebung                                                             | industrielle Automatisierung |
 | **Sicherheit** (Security)              | Zuverlässigkeit im Hinblick auf Vertraulichkeit und Integrität                                                                                            |                              |
-|                                        |                                                                                                                                                           |                              |
 
 > Für die Anwendbarkeit müssen wir die Zuverlässigkeit mathematisch modellieren.
 
@@ -238,6 +237,20 @@ Modelliert wird dieses Verhalten mit der Ausfallrate $\lambda(t)$. Sie stellt di
 
 $\lambda(t) = \frac{f(t)}{R(t)} = -\frac{dR}{dt} \cdot \frac{1}{R}$
 
+> **Was bedeutet λ anschaulich?** Der entscheidende Punkt ist das *Teilen durch
+> $R(t)$*: λ misst nicht, wie viele Teile insgesamt ausfallen, sondern **welcher
+> Anteil der noch lebenden Teile** pro Zeiteinheit ausfällt. Beispiel:
+> λ = 0,001/h heißt „von den aktuell noch funktionierenden Komponenten fällt
+> pro Stunde ein Promille aus" — unabhängig davon, wie viele es noch sind.
+> Deshalb ist λ eine *bedingte* Rate: bezogen auf „hat bis jetzt überlebt".
+>
+> Damit erklärt sich auch die **Badewannenform** der Kurve: In der *Anlaufphase*
+> sterben die Montags-Exemplare (Frühausfälle → λ hoch), in der *Nutzungsphase*
+> fallen Teile nur noch zufällig aus (λ ≈ const, das ist der Bereich, für den
+> wir gleich rechnen), in der *Abnutzungsphase* schlägt Verschleiß zu (λ steigt
+> wieder). Die drei Phasen sind also drei *verschiedene physikalische Ursachen*
+> von Ausfällen — nicht dieselbe Ursache zu verschiedenen Zeiten.
+
 ![](../images/12_Fehlertoleranz/Ausfallrate.jpg "Von Hubert Kirrmann - Eigenes Werk (Originaltext: selbst erstellt), Gemeinfrei, https://commons.wikimedia.org/w/index.php?curid=40403865")
 
 Für die Periode Konstanter Ausfallraten gilt dabei
@@ -268,6 +281,15 @@ R(20000)&= 25000 - 6667 = 18333\text{ Teile}
 \end{aligned}
 $$
 
+> **Warum ist der Dreisatz falsch?** Er unterstellt, dass die Ausfälle *linear*
+> mit der Zeit weiterlaufen — als würde immer derselbe absolute Anteil pro
+> Stunde ausfallen. Real fallen aber Teile aus dem **schrumpfenden Bestand**
+> aus: Nach 20000 h leben viel weniger Teile als am Anfang, also können auch
+> weniger *neue* Ausfälle passieren. Die lineare Rechnung überschätzt deshalb
+> die Ausfälle (6667 statt 5850) und unterschätzt die Überlebenden. Genau das
+> korrigiert das Exponentialgesetz: λ wirkt immer nur auf die *noch lebenden*
+> Teile.
+
 + Richtig !!!
 
 $$
@@ -293,6 +315,9 @@ $$
 
 In der Grafik ist das Ganze übersteigert dargestellt :-)
 
+> [!IMPORTANT]
+> Ggf. erreichen wir aber nie wieder die ursprüngliche Überlebenswahrscheinlichkeit, da die Wartung nicht perfekt ist. In diesem Fall wird die Überlebenswahrscheinlichkeit nach der Wartung auf einen Wert $R_0'$ zurückgesetzt, der kleiner als der ursprüngliche Wert $R_0$ ist.
+
 ### MTTF (Mean Time To Failure)
 
 IEC 60050
@@ -313,6 +338,15 @@ MTTF = E\{x\} &= \int_0^\infty t \cdot f(t) dt \\
 \end{aligned}
 $$  
 
+> **Das Ergebnis ist bemerkenswert einfach:** Bei konstanter Ausfallrate ist die
+> mittlere Lebensdauer schlicht der **Kehrwert der Ausfallrate**,
+> $MTTF = 1/\lambda_0$. Ein Standard-Mikrocontroller mit
+> $\lambda = 10^{-6}/\text{h}$ hat also eine MTTF von $10^6$ Stunden ≈ **114 Jahre**.
+> *Achtung, häufiges Missverständnis:* Das heißt **nicht**, dass der Chip 114
+> Jahre hält — es ist ein *statistischer Mittelwert* über sehr viele Exemplare.
+> Wegen der Exponentialverteilung sind nach 114 Jahren bereits ~63 % ausgefallen
+> ($1 - e^{-1}$); die MTTF ist der Erwartungswert, nicht die „Garantiezeit".
+
 ![](../images/12_Fehlertoleranz/12_Fehlertoleranz_7.jpg)
 
 $MTTF = \frac{\sum(t_{down}-t_{up})}{n}$
@@ -320,7 +354,7 @@ $MTTF = \frac{\sum(t_{down}-t_{up})}{n}$
 ### Definition Verfügbarkeit 
 
 + MTTR (Mean Time To Repair) definiert die mittlere Dauer bis zur Wiederherstellung des Systems   
-+ MTBF (Mean Time Between Failures) definiert die mittlere Zeit zwischen zwei Ausfällen des Systems
++ MTBF (Mean Time Between Failures) definiert die mittlere Zeit zwischen zwei Ausfällen des Systems. Es gilt $MTBF = MTTF + MTTR$ — die Zeit zwischen zwei Ausfällen umfasst also sowohl die Betriebs- (MTTF) als auch die Reparaturphase (MTTR).
 
 ![](../images/12_Fehlertoleranz/12_Fehlertoleranz_8.jpg)
 
@@ -362,7 +396,7 @@ Strukturbasierte Modellierung:
 + jede Komponente besitzt eine bestimmte Zuverlässigkeit
 + die Konstruktion des Modells basiert auf der Verbindungsstruktur zwischen den Komponenten
 
-![](../images/12_Fehlertoleranz/12_Fehlertoleranz_9.png)<!-- style="width: 30%;" -->
+![](../images/12_Fehlertoleranz/12_Fehlertoleranz_9.png)<!-- style="width: 50%;" -->
 
 
 ```ascii 
@@ -382,7 +416,7 @@ Strukturbasierte Modellierung:
 | Komponente B |   :    +-->| Komponente E |---:------>| Komponente G |---:----+ 
 |              |---:------->|              |   :       |              |   :                                      
 +--------------+   :        +--------------+   :       +--------------+   :                                        
-                   :                                                                                                            :                                                                                                                 .
+                   :                                                                                                            .
 ``` 
 
 ### Zuverlässigkeits-Schaltbilder
@@ -416,7 +450,7 @@ Zuverlässigkeits-Schaltbilder dürfen nicht mit elektrischen Schaltbildern verw
 
 ```ascii        
       +--------------+      +--------------+      +--------------+ 
------>| Komponente 1 |----->| Komponente 2 |----->| Komponente 2 |----->
+----->| Komponente 1 |----->| Komponente 2 |----->| Komponente 3 |----->
       | 99 %         |      | 95 %         |      | 93 %         | 
       +--------------+      +--------------+      +--------------+               
                                             
@@ -424,6 +458,14 @@ Zuverlässigkeits-Schaltbilder dürfen nicht mit elektrischen Schaltbildern verw
 ```
 
 Das System funktioniert nur, wenn alle Komponenten intakt sind.
+
+> **Die Intuition — „und" heißt multiplizieren, und das wird immer schlechter:**
+> Ein Seriensystem hält nur, wenn Komponente 1 **und** 2 **und** 3 halten. In der
+> Wahrscheinlichkeitsrechnung wird „und" (bei Unabhängigkeit) zum **Produkt** —
+> und da man lauter Zahlen < 1 multipliziert, sinkt das Ergebnis mit *jeder*
+> weiteren Komponente. Anschaulich: Die Kette ist so stark wie ihr schwächstes
+> Glied, aber sogar noch etwas schwächer, weil sich alle Schwächen *aufmultiplizieren*.
+> Merke: **Mehr Komponenten in Reihe → geringere Zuverlässigkeit.**
 
 $R_{serie} = P (K_1 \text{ intakt}) \text{ und } P(K_2 \text{ intakt}) \text{ und } ...  \text{ und } P(K_3 \text{ intakt})$   
 
@@ -470,6 +512,15 @@ Parallelsysteme kommen überall dort zum Einsatz, wo ein Ausfall einzelner Kompo
                                                                                                                                     .
 ```
 
+> **Die Intuition — „oder" heißt: nur der Totalausfall zählt:** Ein Parallelsystem
+> fällt nur aus, wenn Komponente 1 **und** 2 **und** 3 *alle* ausfallen. Es
+> funktioniert also, wenn *mindestens eine* hält („oder"). Deshalb rechnet man
+> hier nicht mit den Intakt-, sondern mit den **Defekt**wahrscheinlichkeiten: Die
+> multipliziert man (alle müssen defekt sein) — und weil man wieder Zahlen < 1
+> multipliziert, wird die *Ausfall*wahrscheinlichkeit mit jeder Komponente
+> *kleiner*. Merke: **Mehr Komponenten parallel → höhere Zuverlässigkeit.** Genau
+> das ist Redundanz.
+>
 > Hier drehen wir die Frage nach der Intaktwahrscheinlichkeit um ... Wie wahrscheinlich ist es, dass alle Komponenten ausfallen?
 
 Defektwahrscheinlichkeit = 1 - Intaktwahrscheinlichkeit 
@@ -487,10 +538,18 @@ R_{parallel} &=  1- ((1-R_1(t)) \cdot (1-R_2(t)) \cdot ... \cdot (1-R_n(t)))
 \end{aligned}
 $$
 
+Für eine angenommene Intaktwahrscheinlichkeit *jeder* Komponente $R_i(t)$ = 0,9
+ergibt sich — analog zur Serienrechnung, aber mit umgekehrter Tendenz — die
+Intaktwahrscheinlichkeit des Parallelsystems $R_{parallel}$ zu:
+
 <!-- data-type="none" -->
 | Anzahl der Komponenten   | 1   | 2    | 3     | 4     |
 | ------------------------ | --- | ---- | ----- | ----- |
 | Intaktwahrscheinlichkeit | 0.9 | 0.99 | 0.999 | 0.9999|
+
+> **Vergleich:** Dieselben R=0,9-Komponenten führen in **Serie** zu *sinkender*
+> (0,9 → 0,66) und **parallel** zu *steigender* (0,9 → 0,9999) Systemzuverlässigkeit
+> — genau das ist der Kern von Redundanz.
 
 ### Beispiel
 
@@ -502,7 +561,7 @@ Wie ändert sich diese wenn auf Bauteil C verzichtet wird?
                       +-->| Komponente B |----+
                       |   | 97 %         |    |
    +--------------+   |   +--------------+    |
--->| Komponente B |---+                       +-->
+-->| Komponente A |---+                       +-->
    | 96 %         |   |                       |
    +--------------+   |   +--------------+    |
                       +-->| Komponente C |----+
@@ -573,8 +632,8 @@ Fehlertoleranzniveaus
 | ------------- | ------------------------------------------------- |
 | _go_          | System- und Anwendungsprogramm sicher und korrekt |
 | _fail-soft_   | Systembetrieb sicher, aber Leistung vermindert    |
-| _fail-save_   | Nur Systemsicherheit gewährleistet                |
-| _fail-unsave_ | unverhersehbares Systemverhalten                  |
+| _fail-safe_   | Nur Systemsicherheit gewährleistet                |
+| _fail-unsafe_ | unvorhersehbares Systemverhalten                  |
 | _fail-stop_   | Abbruch (kein Fehlertoleranzmodus)                |
 
 ### Redundanzen
@@ -637,11 +696,82 @@ $$
 $$
 \begin{aligned}
 R(t) &= (P(intakt)^3 + 3 \cdot P(intakt)^2 \cdot P(ausgefallen)) \cdot P(Voter \text{ intakt})\\
-R(t) &= (0,93 + 3\cdot 0,92 \cdot (1 -0,9)) \cdot 0,99 = 0,96228
+R(t) &= (0{,}9^3 + 3\cdot 0{,}9^2 \cdot (1 -0{,}9)) \cdot 0{,}99 = 0{,}96228
 \end{aligned}
 $$
 
 > Das mehrfache Erscheinen der Komponenten $K_1, K_2, K_3$ illustriert die Besonderheiten des Zuverlässigkeitsschaubildes.
+
+### Fehlertoleranz in der Software — vom Modell zum Code
+
+Die bisherigen Mechanismen waren *abstrakt* (Voter, fail-safe, Redundanz). Da
+diese Veranstaltung **Softwareentwicklung** für eingebettete Systeme ist, hier
+die konkrete Übersetzung in Code — genau die Muster, die z. B. im A320
+(nächster Abschnitt) stecken.
+
+**1. Mehrheitsentscheid (Voter) — statische Redundanz in C.**
+Drei redundante Sensoren, der Voter maskiert einen Einzelausfall:
+
+```c
+// Median-Voter für drei Sensorwerte: verwirft einen Ausreißer/Ausfall.
+// Der Median ist bei 3 Werten robust — ein einzelner Fehler kann das
+// Ergebnis nicht dominieren (n-aus-m-Prinzip, hier 2-aus-3).
+int16_t voter_median3(int16_t a, int16_t b, int16_t c) {
+    if ((a >= b && a <= c) || (a <= b && a >= c)) return a;
+    if ((b >= a && b <= c) || (b <= a && b >= c)) return b;
+    return c;
+}
+```
+
+**2. Watchdog — die fail-safe-Absicherung in Hardware.**
+Ein Watchdog erzwingt einen definierten Zustand, wenn die Software „hängt"
+(Endlosschleife, Deadlock). Das ist der Übergang in den Zustand *fail-safe*
+aus der Tabelle oben — und derselbe Watchdog, der in
+[Kapitel 10](10_Debugging_Testen_CICD.md#verschiedene-methoden-für-das-debuggen-von-eingebetteten-systemen)
+als *Debugging*-Hilfe auftauchte, ist hier ein *Fehlertoleranz*-Mechanismus:
+
+```c
+#include <avr/wdt.h>
+
+int main(void) {
+    wdt_enable(WDTO_250MS);      // Reset, falls 250 ms nicht "gefüttert"
+    for (;;) {
+        regler_schritt();         // Nutzarbeit
+        if (system_plausibel())   // nur bei gesundem Zustand ...
+            wdt_reset();          // ... den Watchdog zurücksetzen
+        // hängt/irrt das Programm, bleibt wdt_reset() aus -> HW-Reset
+    }
+}
+```
+
+> **Merke:** Der Watchdog schützt *nicht* vor dem Fehler — er begrenzt seine
+> *Auswirkung*, indem er das System aus einem undefinierten (`fail-unsafe`) in
+> einen definierten Zustand (`fail-safe`, hier: Reset) zwingt.
+
+**3. Command/Monitor — Selbstüberwachung durch Verdopplung.**
+Das Muster aus dem A320 (unten): Eine *Command*-Einheit rechnet, eine
+*Monitor*-Einheit prüft dasselbe unabhängig. Weichen sie ab, wird abgeschaltet
+statt falsch zu handeln:
+
+```c
+uint8_t command_monitor(int16_t eingabe) {
+    int16_t cmd = regler_command(eingabe);   // primäre Berechnung
+    int16_t mon = regler_monitor(eingabe);   // unabhängige Zweitberechnung
+    if (abs(cmd - mon) > TOLERANZ) {
+        gehe_in_failsafe();                   // Diskrepanz erkannt -> abschalten
+        return 0;
+    }
+    stelle_aktor(cmd);                        // nur bei Übereinstimmung handeln
+    return 1;
+}
+```
+
+> Bewusst wird bei Uneinigkeit **nicht** einer der beiden Werte „geraten" —
+> ohne dritte Instanz (Voter) lässt sich nicht entscheiden, *wer* recht hat.
+> Zwei Kanäle können einen Fehler nur **erkennen**, drei ihn **maskieren**.
+> Genau das ist der Unterschied zwischen Command/Monitor (fail-safe) und dem
+> 2-aus-3-Voter (fail-operational) — und der Grund, warum flugkritische
+> Systeme drei- oder vierfach ausgelegt sind.
 
 ## Diversität
 
@@ -673,7 +803,7 @@ Annahme: Verschiedene Entwickler begehen eher unwahrscheinlich die gleichen Fehl
 
 ![](../images/12_Fehlertoleranz/12_Fehlertoleranz_13.png)<!-- style="width: 50%;" -->
 
-Das System wird durch verschieben Steuerelemente (Elevator, Aileron) und durch die Trimmung des horizontalen Stabilisators (THS) stabilisiert. Diese sind jeweils redundant ausgelegt, um die Fehlertoleranz zu erhöhen. 
+Das System wird durch verschiedene Steuerelemente (Elevator, Aileron) und durch die Trimmung des horizontalen Stabilisators (THS) stabilisiert. Diese sind jeweils redundant ausgelegt, um die Fehlertoleranz zu erhöhen. 
 
 ![](../images/12_Fehlertoleranz/12_Fehlertoleranz_14.png)
 

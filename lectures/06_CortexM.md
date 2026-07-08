@@ -912,7 +912,7 @@ Entscheidend ist die Frage, *wo* diese Struktur im Speicher liegt. Anders als ei
 
 Das `volatile` (in CMSIS über `__IO` bzw. `__I`/`__O`) ist dabei orthogonal zur Pointer-Frage, aber genauso wichtig: Es verhindert, dass der Compiler Registerzugriffe wegoptimiert oder umordnet — die Hardware kann sich schließlich "von außen" ändern.
 
-### Vergleich mit dem ATmega4809
+## Vergleich mit dem ATmega4809
 
 Interessanterweise verwendet der aus den vorigen Vorlesungen bekannte ATmega4809 (megaAVR-0-Familie) **dasselbe Idiom**: Auch hier wird die Peripherie als `struct`-Layout über einer festen Adresse beschrieben. Die Microchip-Header (`<avr/io.h>`) definieren z.B.:
 
