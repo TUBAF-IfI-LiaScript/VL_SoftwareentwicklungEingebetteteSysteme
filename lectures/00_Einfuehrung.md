@@ -270,7 +270,7 @@ Eine Reihe von Einführungsvideos findet sich unter [Youtube](https://www.youtub
 
 ## Wie können Sie zum Gelingen der Veranstaltung beitragen?
 
-* Stellen Sie Fragen, seinen Sie kommunikativ!
+* Stellen Sie Fragen, seien Sie kommunikativ!
 
 > Hinweis auf OPAL Forum!
 
